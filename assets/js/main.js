@@ -12,7 +12,7 @@ const SIZES = {
 
 const WHATSAPP_PHONE = '584143572462'; // 0414-3572462 internacional
 
-// Catálogo de Sabores DIP LF
+// Catálogo de Sabores DIP LF Oficiales
 const FLAVORS_DATA = [
   {
     id: 'tocineta',
@@ -21,7 +21,8 @@ const FLAVORS_DATA = [
     badge: '★ MÁS VENDIDA',
     desc: 'Cremosa base artesanal con trocitos de tocineta ahumada crujiente seleccionada.',
     image: 'assets/images/Tocineta foto vieja.jfif',
-    defaultSize: '16oz'
+    defaultSize: '16oz',
+    isDarkBg: false
   },
   {
     id: 'tartara',
@@ -30,7 +31,8 @@ const FLAVORS_DATA = [
     badge: 'CLÁSICA GOURMET',
     desc: 'Nuestra receta secreta con pepinillos finos, hierbas aromáticas y toque cítrico.',
     image: 'assets/images/Tartara foto vieja.jfif',
-    defaultSize: '16oz'
+    defaultSize: '16oz',
+    isDarkBg: false
   },
   {
     id: 'antipasto',
@@ -39,7 +41,8 @@ const FLAVORS_DATA = [
     badge: 'TRADICIÓN ITALIANA',
     desc: 'Vegetales frescos macerados en aceite de oliva y especias premium de la casa.',
     image: 'assets/images/Antipasto Foto vieja.jfif',
-    defaultSize: '16oz'
+    defaultSize: '16oz',
+    isDarkBg: false
   },
   {
     id: 'ajo_perejil',
@@ -48,7 +51,8 @@ const FLAVORS_DATA = [
     badge: 'SABOR INTENSO',
     desc: 'Equilibrio perfecto de ajo suave asado con perejil fresco del campo.',
     image: 'assets/images/Ajo con Perejil.jpeg',
-    defaultSize: '16oz'
+    defaultSize: '16oz',
+    isDarkBg: true
   },
   {
     id: 'guasacaca',
@@ -57,7 +61,58 @@ const FLAVORS_DATA = [
     badge: '100% CRIOLLA',
     desc: 'Aguacate cremoso, pimentón verde, cilantro y condimentos tradicionales frescos.',
     image: 'assets/images/Guasacaca.jpeg',
-    defaultSize: '16oz'
+    defaultSize: '16oz',
+    isDarkBg: true
+  },
+  {
+    id: 'atun',
+    name: 'Atún Especial',
+    category: 'especial',
+    badge: 'DEL MAR',
+    desc: 'Lomos de atún seleccionados mezclados con crema suave y toque de cebollín.',
+    image: 'assets/images/Atun Foto vieja.jfif',
+    defaultSize: '16oz',
+    isDarkBg: false
+  },
+  {
+    id: 'cebolla_dulce',
+    name: 'Cebolla Dulce',
+    category: 'cremosa',
+    badge: 'CARAMELIZADA',
+    desc: 'Cebollas suavemente caramelizadas a fuego lento con notas agridulces.',
+    image: 'assets/images/Cebola dulce foto vieja.jfif',
+    defaultSize: '16oz',
+    isDarkBg: false
+  },
+  {
+    id: 'pimenton',
+    name: 'Pimentón Ahumado',
+    category: 'especial',
+    badge: 'DULCE & AHUMADO',
+    desc: 'Pimentones rojos asados combinados en una salsa sutil y deliciosa.',
+    image: 'assets/images/Pimenton foto vieja.jfif',
+    defaultSize: '16oz',
+    isDarkBg: false
+  },
+  {
+    id: 'pepinillo',
+    name: 'Pepinillo Deli',
+    category: 'cremosa',
+    badge: 'AGRIDULCE',
+    desc: 'Deliciosa salsa con toque de pepinillos dulces tipo gourmet neoyorquino.',
+    image: 'assets/images/Pepinillo foto Vieja.jfif',
+    defaultSize: '16oz',
+    isDarkBg: false
+  },
+  {
+    id: 'mcdonalds',
+    name: 'Estilo McDonald\'s',
+    category: 'cremosa',
+    badge: 'SECRETO CASERO',
+    desc: 'Inspirada en la salsa especial de hamburguesa más famosa del mundo.',
+    image: 'assets/images/McDonals Foto vieja.jfif',
+    defaultSize: '16oz',
+    isDarkBg: false
   },
   {
     id: 'taki',
@@ -67,61 +122,8 @@ const FLAVORS_DATA = [
     desc: 'Explosión picante y crujiente con auténticos Takis Fuego. (Próximamente disponible).',
     image: '',
     isComingSoon: true,
-    defaultSize: '16oz'
-  },
-  {
-    id: 'doritos',
-    name: 'Doritos Cheddar',
-    category: 'crujiente',
-    badge: 'NUEVO • CHEESY',
-    desc: 'Textura cremosa infusionada con el inconfundible sabor a queso Doritos.',
-    image: 'assets/images/7 onzas.jfif',
-    defaultSize: '16oz'
-  },
-  {
-    id: 'atun',
-    name: 'Atún Especial',
-    category: 'especial',
-    badge: 'DEL MAR',
-    desc: 'Lomos de atún seleccionados mezclados con crema suave y toque de cebollín.',
-    image: 'assets/images/Atun Foto vieja.jfif',
-    defaultSize: '16oz'
-  },
-  {
-    id: 'cebolla_dulce',
-    name: 'Cebolla Dulce',
-    category: 'cremosa',
-    badge: 'CARAMELIZADA',
-    desc: 'Cebollas suavemente caramelizadas a fuego lento con notas agridulces.',
-    image: 'assets/images/Cebola dulce foto vieja.jfif',
-    defaultSize: '16oz'
-  },
-  {
-    id: 'pimenton',
-    name: 'Pimentón Ahumado',
-    category: 'especial',
-    badge: 'DULCE & AHUMADO',
-    desc: 'Pimentones rojos asados combinados en una salsa sutil y deliciosa.',
-    image: 'assets/images/Pimenton foto vieja.jfif',
-    defaultSize: '16oz'
-  },
-  {
-    id: 'pepinillo',
-    name: 'Pepinillo Deli',
-    category: 'cremosa',
-    badge: 'AGRIDULCE',
-    desc: 'Deliciosa salsa con toque de pepinillos dulces tipo gourmet neoyorquino.',
-    image: 'assets/images/Pepinillo foto Vieja.jfif',
-    defaultSize: '16oz'
-  },
-  {
-    id: 'mcdonalds',
-    name: 'Estilo McDonald\'s',
-    category: 'cremosa',
-    badge: 'SECRETO CASERO',
-    desc: 'Inspirada en la salsa especial de hamburguesa más famosa del mundo.',
-    image: 'assets/images/McDonals Foto vieja.jfif',
-    defaultSize: '16oz'
+    defaultSize: '16oz',
+    isDarkBg: false
   }
 ];
 
@@ -383,9 +385,10 @@ function renderFlavorsGrid(categoryFilter = 'todos') {
   let html = '';
   filtered.forEach(flavor => {
     const defaultSize = SIZES[flavor.defaultSize];
+    const bgClass = flavor.isDarkBg ? 'dark-bg' : 'light-bg';
     html += `
       <div class="flavor-card" data-flavor-id="${flavor.id}">
-        <div class="flavor-img-wrapper ${!flavor.image ? 'coming-soon-img' : ''}">
+        <div class="flavor-img-wrapper ${bgClass} ${!flavor.image ? 'coming-soon-img' : ''}">
           <span class="flavor-badge-type">${flavor.badge}</span>
           ${flavor.image 
             ? `<img src="${flavor.image}" alt="${flavor.name}" loading="lazy">` 
@@ -421,8 +424,8 @@ function renderFlavorsGrid(categoryFilter = 'todos') {
               <span class="price-label-small">Precio:</span>
               <span class="price-amount" id="price_${flavor.id}">$4</span>
             </div>
-            <button class="btn-add-consult" onclick="handleAddFromCard('${flavor.id}')">
-              <span>+ Añadir</span>
+            <button class="btn-add-consult" onclick="handleAddFromCard('${flavor.id}')" ${flavor.isComingSoon ? 'disabled style="opacity: 0.55; cursor: not-allowed;"' : ''}>
+              <span>${flavor.isComingSoon ? 'Próximamente' : '+ Añadir'}</span>
             </button>
           </div>
         </div>

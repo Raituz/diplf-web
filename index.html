@@ -5,12 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DIP LF | Salsas Artesanales Gourmet • 100% Frescas</title>
   <meta name="description" content="Salsas artesanales y gourmet DIP LF. Hechas a mano con ingredientes frescos. Pide tus sabores favoritos por WhatsApp.">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   
   <!-- Favicon con Logo Oficial -->
   <link rel="icon" type="image/jpeg" href="assets/images/Logo.jpeg">
   
-  <!-- Estilos CSS -->
-  <link rel="stylesheet" href="assets/css/styles.css">
+  <!-- Estilos CSS con Cache Buster -->
+  <link rel="stylesheet" href="assets/css/styles.css?v=5.0">
 </head>
 <body>
 
@@ -241,7 +244,405 @@
 
     <!-- Cuadrícula Dinámica de Productos -->
     <div id="flavorsGrid" class="flavors-grid">
-      <!-- Se inyecta dinámicamente desde main.js con soporte offline -->
+      <!-- 1. Tocineta -->
+      <div class="flavor-card" data-flavor-id="tocineta">
+        <div class="flavor-img-wrapper light-bg">
+          <span class="flavor-badge-type">★ MÁS VENDIDA</span>
+          <img src="assets/images/Tocineta foto vieja.jfif" alt="Tocineta DIP LF" loading="lazy">
+        </div>
+        <div class="flavor-body">
+          <h3 class="flavor-title">Tocineta</h3>
+          <p class="flavor-desc">Cremosa base artesanal con trocitos de tocineta ahumada crujiente seleccionada.</p>
+          <div class="size-selector-label">Selecciona el tamaño:</div>
+          <div class="size-options">
+            <div class="size-pill" data-size="7oz" onclick="selectCardSize('tocineta', '7oz')">
+              <span class="size-name">7 oz</span>
+              <span class="size-price-tag">$2</span>
+            </div>
+            <div class="size-pill active" data-size="16oz" onclick="selectCardSize('tocineta', '16oz')">
+              <span class="size-name">16 oz</span>
+              <span class="size-price-tag">$4</span>
+            </div>
+            <div class="size-pill" data-size="22oz" onclick="selectCardSize('tocineta', '22oz')">
+              <span class="size-name">22 oz</span>
+              <span class="size-price-tag">$6</span>
+            </div>
+          </div>
+          <div class="flavor-card-footer">
+            <div class="price-display-block">
+              <span class="price-label-small">Precio:</span>
+              <span class="price-amount" id="price_tocineta">$4</span>
+            </div>
+            <button class="btn-add-consult" onclick="handleAddFromCard('tocineta')">
+              <span>+ Añadir</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Tártara -->
+      <div class="flavor-card" data-flavor-id="tartara">
+        <div class="flavor-img-wrapper light-bg">
+          <span class="flavor-badge-type">CLÁSICA GOURMET</span>
+          <img src="assets/images/Tartara foto vieja.jfif" alt="Tártara DIP LF" loading="lazy">
+        </div>
+        <div class="flavor-body">
+          <h3 class="flavor-title">Tártara</h3>
+          <p class="flavor-desc">Nuestra receta secreta con pepinillos finos, hierbas aromáticas y toque cítrico.</p>
+          <div class="size-selector-label">Selecciona el tamaño:</div>
+          <div class="size-options">
+            <div class="size-pill" data-size="7oz" onclick="selectCardSize('tartara', '7oz')">
+              <span class="size-name">7 oz</span>
+              <span class="size-price-tag">$2</span>
+            </div>
+            <div class="size-pill active" data-size="16oz" onclick="selectCardSize('tartara', '16oz')">
+              <span class="size-name">16 oz</span>
+              <span class="size-price-tag">$4</span>
+            </div>
+            <div class="size-pill" data-size="22oz" onclick="selectCardSize('tartara', '22oz')">
+              <span class="size-name">22 oz</span>
+              <span class="size-price-tag">$6</span>
+            </div>
+          </div>
+          <div class="flavor-card-footer">
+            <div class="price-display-block">
+              <span class="price-label-small">Precio:</span>
+              <span class="price-amount" id="price_tartara">$4</span>
+            </div>
+            <button class="btn-add-consult" onclick="handleAddFromCard('tartara')">
+              <span>+ Añadir</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Antipasto -->
+      <div class="flavor-card" data-flavor-id="antipasto">
+        <div class="flavor-img-wrapper light-bg">
+          <span class="flavor-badge-type">TRADICIÓN ITALIANA</span>
+          <img src="assets/images/Antipasto Foto vieja.jfif" alt="Antipasto DIP LF" loading="lazy">
+        </div>
+        <div class="flavor-body">
+          <h3 class="flavor-title">Antipasto</h3>
+          <p class="flavor-desc">Vegetales frescos macerados en aceite de oliva y especias premium de la casa.</p>
+          <div class="size-selector-label">Selecciona el tamaño:</div>
+          <div class="size-options">
+            <div class="size-pill" data-size="7oz" onclick="selectCardSize('antipasto', '7oz')">
+              <span class="size-name">7 oz</span>
+              <span class="size-price-tag">$2</span>
+            </div>
+            <div class="size-pill active" data-size="16oz" onclick="selectCardSize('antipasto', '16oz')">
+              <span class="size-name">16 oz</span>
+              <span class="size-price-tag">$4</span>
+            </div>
+            <div class="size-pill" data-size="22oz" onclick="selectCardSize('antipasto', '22oz')">
+              <span class="size-name">22 oz</span>
+              <span class="size-price-tag">$6</span>
+            </div>
+          </div>
+          <div class="flavor-card-footer">
+            <div class="price-display-block">
+              <span class="price-label-small">Precio:</span>
+              <span class="price-amount" id="price_antipasto">$4</span>
+            </div>
+            <button class="btn-add-consult" onclick="handleAddFromCard('antipasto')">
+              <span>+ Añadir</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Ajo con Perejil -->
+      <div class="flavor-card" data-flavor-id="ajo_perejil">
+        <div class="flavor-img-wrapper dark-bg">
+          <span class="flavor-badge-type">SABOR INTENSO</span>
+          <img src="assets/images/Ajo con Perejil.jpeg" alt="Ajo con Perejil DIP LF" loading="lazy">
+        </div>
+        <div class="flavor-body">
+          <h3 class="flavor-title">Ajo con Perejil</h3>
+          <p class="flavor-desc">Equilibrio perfecto de ajo suave asado con perejil fresco del campo.</p>
+          <div class="size-selector-label">Selecciona el tamaño:</div>
+          <div class="size-options">
+            <div class="size-pill" data-size="7oz" onclick="selectCardSize('ajo_perejil', '7oz')">
+              <span class="size-name">7 oz</span>
+              <span class="size-price-tag">$2</span>
+            </div>
+            <div class="size-pill active" data-size="16oz" onclick="selectCardSize('ajo_perejil', '16oz')">
+              <span class="size-name">16 oz</span>
+              <span class="size-price-tag">$4</span>
+            </div>
+            <div class="size-pill" data-size="22oz" onclick="selectCardSize('ajo_perejil', '22oz')">
+              <span class="size-name">22 oz</span>
+              <span class="size-price-tag">$6</span>
+            </div>
+          </div>
+          <div class="flavor-card-footer">
+            <div class="price-display-block">
+              <span class="price-label-small">Precio:</span>
+              <span class="price-amount" id="price_ajo_perejil">$4</span>
+            </div>
+            <button class="btn-add-consult" onclick="handleAddFromCard('ajo_perejil')">
+              <span>+ Añadir</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Guasacaca -->
+      <div class="flavor-card" data-flavor-id="guasacaca">
+        <div class="flavor-img-wrapper dark-bg">
+          <span class="flavor-badge-type">100% CRIOLLA</span>
+          <img src="assets/images/Guasacaca.jpeg" alt="Guasacaca DIP LF" loading="lazy">
+        </div>
+        <div class="flavor-body">
+          <h3 class="flavor-title">Guasacaca</h3>
+          <p class="flavor-desc">Aguacate cremoso, pimentón verde, cilantro y condimentos tradicionales frescos.</p>
+          <div class="size-selector-label">Selecciona el tamaño:</div>
+          <div class="size-options">
+            <div class="size-pill" data-size="7oz" onclick="selectCardSize('guasacaca', '7oz')">
+              <span class="size-name">7 oz</span>
+              <span class="size-price-tag">$2</span>
+            </div>
+            <div class="size-pill active" data-size="16oz" onclick="selectCardSize('guasacaca', '16oz')">
+              <span class="size-name">16 oz</span>
+              <span class="size-price-tag">$4</span>
+            </div>
+            <div class="size-pill" data-size="22oz" onclick="selectCardSize('guasacaca', '22oz')">
+              <span class="size-name">22 oz</span>
+              <span class="size-price-tag">$6</span>
+            </div>
+          </div>
+          <div class="flavor-card-footer">
+            <div class="price-display-block">
+              <span class="price-label-small">Precio:</span>
+              <span class="price-amount" id="price_guasacaca">$4</span>
+            </div>
+            <button class="btn-add-consult" onclick="handleAddFromCard('guasacaca')">
+              <span>+ Añadir</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Atún Especial -->
+      <div class="flavor-card" data-flavor-id="atun">
+        <div class="flavor-img-wrapper light-bg">
+          <span class="flavor-badge-type">DEL MAR</span>
+          <img src="assets/images/Atun Foto vieja.jfif" alt="Atún Especial DIP LF" loading="lazy">
+        </div>
+        <div class="flavor-body">
+          <h3 class="flavor-title">Atún Especial</h3>
+          <p class="flavor-desc">Lomos de atún seleccionados mezclados con crema suave y toque de cebollín.</p>
+          <div class="size-selector-label">Selecciona el tamaño:</div>
+          <div class="size-options">
+            <div class="size-pill" data-size="7oz" onclick="selectCardSize('atun', '7oz')">
+              <span class="size-name">7 oz</span>
+              <span class="size-price-tag">$2</span>
+            </div>
+            <div class="size-pill active" data-size="16oz" onclick="selectCardSize('atun', '16oz')">
+              <span class="size-name">16 oz</span>
+              <span class="size-price-tag">$4</span>
+            </div>
+            <div class="size-pill" data-size="22oz" onclick="selectCardSize('atun', '22oz')">
+              <span class="size-name">22 oz</span>
+              <span class="size-price-tag">$6</span>
+            </div>
+          </div>
+          <div class="flavor-card-footer">
+            <div class="price-display-block">
+              <span class="price-label-small">Precio:</span>
+              <span class="price-amount" id="price_atun">$4</span>
+            </div>
+            <button class="btn-add-consult" onclick="handleAddFromCard('atun')">
+              <span>+ Añadir</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Cebolla Dulce -->
+      <div class="flavor-card" data-flavor-id="cebolla_dulce">
+        <div class="flavor-img-wrapper light-bg">
+          <span class="flavor-badge-type">CARAMELIZADA</span>
+          <img src="assets/images/Cebola dulce foto vieja.jfif" alt="Cebolla Dulce DIP LF" loading="lazy">
+        </div>
+        <div class="flavor-body">
+          <h3 class="flavor-title">Cebolla Dulce</h3>
+          <p class="flavor-desc">Cebollas suavemente caramelizadas a fuego lento con notas agridulces.</p>
+          <div class="size-selector-label">Selecciona el tamaño:</div>
+          <div class="size-options">
+            <div class="size-pill" data-size="7oz" onclick="selectCardSize('cebolla_dulce', '7oz')">
+              <span class="size-name">7 oz</span>
+              <span class="size-price-tag">$2</span>
+            </div>
+            <div class="size-pill active" data-size="16oz" onclick="selectCardSize('cebolla_dulce', '16oz')">
+              <span class="size-name">16 oz</span>
+              <span class="size-price-tag">$4</span>
+            </div>
+            <div class="size-pill" data-size="22oz" onclick="selectCardSize('cebolla_dulce', '22oz')">
+              <span class="size-name">22 oz</span>
+              <span class="size-price-tag">$6</span>
+            </div>
+          </div>
+          <div class="flavor-card-footer">
+            <div class="price-display-block">
+              <span class="price-label-small">Precio:</span>
+              <span class="price-amount" id="price_cebolla_dulce">$4</span>
+            </div>
+            <button class="btn-add-consult" onclick="handleAddFromCard('cebolla_dulce')">
+              <span>+ Añadir</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. Pimentón Ahumado -->
+      <div class="flavor-card" data-flavor-id="pimenton">
+        <div class="flavor-img-wrapper light-bg">
+          <span class="flavor-badge-type">DULCE & AHUMADO</span>
+          <img src="assets/images/Pimenton foto vieja.jfif" alt="Pimentón Ahumado DIP LF" loading="lazy">
+        </div>
+        <div class="flavor-body">
+          <h3 class="flavor-title">Pimentón Ahumado</h3>
+          <p class="flavor-desc">Pimentones rojos asados combinados en una salsa sutil y deliciosa.</p>
+          <div class="size-selector-label">Selecciona el tamaño:</div>
+          <div class="size-options">
+            <div class="size-pill" data-size="7oz" onclick="selectCardSize('pimenton', '7oz')">
+              <span class="size-name">7 oz</span>
+              <span class="size-price-tag">$2</span>
+            </div>
+            <div class="size-pill active" data-size="16oz" onclick="selectCardSize('pimenton', '16oz')">
+              <span class="size-name">16 oz</span>
+              <span class="size-price-tag">$4</span>
+            </div>
+            <div class="size-pill" data-size="22oz" onclick="selectCardSize('pimenton', '22oz')">
+              <span class="size-name">22 oz</span>
+              <span class="size-price-tag">$6</span>
+            </div>
+          </div>
+          <div class="flavor-card-footer">
+            <div class="price-display-block">
+              <span class="price-label-small">Precio:</span>
+              <span class="price-amount" id="price_pimenton">$4</span>
+            </div>
+            <button class="btn-add-consult" onclick="handleAddFromCard('pimenton')">
+              <span>+ Añadir</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 9. Pepinillo Deli -->
+      <div class="flavor-card" data-flavor-id="pepinillo">
+        <div class="flavor-img-wrapper light-bg">
+          <span class="flavor-badge-type">AGRIDULCE</span>
+          <img src="assets/images/Pepinillo foto Vieja.jfif" alt="Pepinillo Deli DIP LF" loading="lazy">
+        </div>
+        <div class="flavor-body">
+          <h3 class="flavor-title">Pepinillo Deli</h3>
+          <p class="flavor-desc">Deliciosa salsa con toque de pepinillos dulces tipo gourmet neoyorquino.</p>
+          <div class="size-selector-label">Selecciona el tamaño:</div>
+          <div class="size-options">
+            <div class="size-pill" data-size="7oz" onclick="selectCardSize('pepinillo', '7oz')">
+              <span class="size-name">7 oz</span>
+              <span class="size-price-tag">$2</span>
+            </div>
+            <div class="size-pill active" data-size="16oz" onclick="selectCardSize('pepinillo', '16oz')">
+              <span class="size-name">16 oz</span>
+              <span class="size-price-tag">$4</span>
+            </div>
+            <div class="size-pill" data-size="22oz" onclick="selectCardSize('pepinillo', '22oz')">
+              <span class="size-name">22 oz</span>
+              <span class="size-price-tag">$6</span>
+            </div>
+          </div>
+          <div class="flavor-card-footer">
+            <div class="price-display-block">
+              <span class="price-label-small">Precio:</span>
+              <span class="price-amount" id="price_pepinillo">$4</span>
+            </div>
+            <button class="btn-add-consult" onclick="handleAddFromCard('pepinillo')">
+              <span>+ Añadir</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 10. Estilo McDonald's -->
+      <div class="flavor-card" data-flavor-id="mcdonalds">
+        <div class="flavor-img-wrapper light-bg">
+          <span class="flavor-badge-type">SECRETO CASERO</span>
+          <img src="assets/images/McDonals Foto vieja.jfif" alt="Estilo McDonald's DIP LF" loading="lazy">
+        </div>
+        <div class="flavor-body">
+          <h3 class="flavor-title">Estilo McDonald's</h3>
+          <p class="flavor-desc">Inspirada en la salsa especial de hamburguesa más famosa del mundo.</p>
+          <div class="size-selector-label">Selecciona el tamaño:</div>
+          <div class="size-options">
+            <div class="size-pill" data-size="7oz" onclick="selectCardSize('mcdonalds', '7oz')">
+              <span class="size-name">7 oz</span>
+              <span class="size-price-tag">$2</span>
+            </div>
+            <div class="size-pill active" data-size="16oz" onclick="selectCardSize('mcdonalds', '16oz')">
+              <span class="size-name">16 oz</span>
+              <span class="size-price-tag">$4</span>
+            </div>
+            <div class="size-pill" data-size="22oz" onclick="selectCardSize('mcdonalds', '22oz')">
+              <span class="size-name">22 oz</span>
+              <span class="size-price-tag">$6</span>
+            </div>
+          </div>
+          <div class="flavor-card-footer">
+            <div class="price-display-block">
+              <span class="price-label-small">Precio:</span>
+              <span class="price-amount" id="price_mcdonalds">$4</span>
+            </div>
+            <button class="btn-add-consult" onclick="handleAddFromCard('mcdonalds')">
+              <span>+ Añadir</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 11. Taki Crunch (Próximamente disponible) -->
+      <div class="flavor-card" data-flavor-id="taki">
+        <div class="flavor-img-wrapper coming-soon-img">
+          <span class="flavor-badge-type">★ PRONTO DISPONIBLE</span>
+          <div class="coming-soon-placeholder">
+            <span class="coming-soon-icon">🌶️</span>
+            <span class="coming-soon-text">¡MUY PRONTO!</span>
+            <span class="coming-soon-sub">Receta & foto en camino</span>
+          </div>
+        </div>
+        <div class="flavor-body">
+          <h3 class="flavor-title">Taki Crunch</h3>
+          <p class="flavor-desc">Explosión picante y crujiente con auténticos Takis Fuego. (Próximamente disponible).</p>
+          <div class="size-selector-label">Selecciona el tamaño:</div>
+          <div class="size-options">
+            <div class="size-pill" data-size="7oz" onclick="selectCardSize('taki', '7oz')">
+              <span class="size-name">7 oz</span>
+              <span class="size-price-tag">$2</span>
+            </div>
+            <div class="size-pill active" data-size="16oz" onclick="selectCardSize('taki', '16oz')">
+              <span class="size-name">16 oz</span>
+              <span class="size-price-tag">$4</span>
+            </div>
+            <div class="size-pill" data-size="22oz" onclick="selectCardSize('taki', '22oz')">
+              <span class="size-name">22 oz</span>
+              <span class="size-price-tag">$6</span>
+            </div>
+          </div>
+          <div class="flavor-card-footer">
+            <div class="price-display-block">
+              <span class="price-label-small">Precio:</span>
+              <span class="price-amount" id="price_taki">$4</span>
+            </div>
+            <button class="btn-add-consult" disabled style="opacity: 0.55; cursor: not-allowed;">
+              <span>Próximamente</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -258,6 +659,9 @@
     <div class="sizes-grid-3">
       <!-- 7 Onzas -->
       <div class="size-card-box">
+        <div class="size-img-wrap">
+          <img src="assets/images/7 onzas.jfif" alt="Presentación 7 Onzas DIP LF">
+        </div>
         <h3>7 ONZAS</h3>
         <div class="size-price-large">$2.00</div>
         <p>Práctica porción individual. Ideal para acompañar tus tequeños, empanadas o snacks del día a día.</p>
@@ -265,6 +669,9 @@
 
       <!-- 16 Onzas (Destacado) -->
       <div class="size-card-box highlight">
+        <div class="size-img-wrap">
+          <img src="assets/images/16 Onzas.jfif" alt="Presentación 16 Onzas DIP LF">
+        </div>
         <span class="section-tag" style="margin-bottom: 6px;">★ TAMAÑO FAMILIAR</span>
         <h3>16 ONZAS</h3>
         <div class="size-price-large">$4.00</div>
@@ -273,6 +680,9 @@
 
       <!-- 22 Onzas -->
       <div class="size-card-box">
+        <div class="size-img-wrap">
+          <img src="assets/images/22 Onzas.jfif" alt="Presentación 22 Onzas DIP LF">
+        </div>
         <h3>22 ONZAS</h3>
         <div class="size-price-large">$6.00</div>
         <p>Presentación gigante. Para los amantes de nuestras salsas que no quieren quedarse con las ganas.</p>
@@ -496,7 +906,7 @@
     </div>
   </footer>
 
-  <!-- Scripts JavaScript -->
-  <script src="assets/js/main.js"></script>
+  <!-- Scripts JavaScript con Cache Buster -->
+  <script src="assets/js/main.js?v=5.0"></script>
 </body>
 </html>
