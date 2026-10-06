@@ -50,9 +50,9 @@ const FLAVORS_DATA = [
     category: 'cremosa',
     badge: 'SABOR INTENSO',
     desc: 'Equilibrio perfecto de ajo suave asado con perejil fresco del campo.',
-    image: 'assets/images/Ajo con Perejil.jpeg',
+    image: '',
     defaultSize: '16oz',
-    isDarkBg: true
+    isDarkBg: false
   },
   {
     id: 'guasacaca',
@@ -60,9 +60,9 @@ const FLAVORS_DATA = [
     category: 'vegetal',
     badge: '100% CRIOLLA',
     desc: 'Aguacate cremoso, pimentón verde, cilantro y condimentos tradicionales frescos.',
-    image: 'assets/images/Guasacaca.jpeg',
+    image: '',
     defaultSize: '16oz',
-    isDarkBg: true
+    isDarkBg: false
   },
   {
     id: 'atun',
