@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIP LF | Salsas Artesanales Gourmet • 100% Frescas</title>
+  <meta name="description" content="Salsas artesanales y gourmet DIP LF. Hechas a mano con ingredientes frescos. Pide tus sabores favoritos por WhatsApp.">
+  
+  <!-- Favicon con Logo Oficial -->
+  <link rel="icon" type="image/jpeg" href="assets/images/Logo.jpeg">
+  
+  <!-- Estilos CSS -->
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+  <!-- =========================================================================
+       1. HEADER FIJO
+       ========================================================================= -->
+  <header class="site-header">
+    <div class="header-container">
+      
+      <!-- Logo Marca a la izquierda -->
+      <a href="#inicio" class="brand-logo-wrap">
+        <div class="brand-badge">
+          <img src="assets/images/Logo.jpeg" alt="Logo DIP LF Salsas">
+        </div>
+        <div class="brand-text-block">
+          <span class="brand-title">DIP LF</span>
+          <span class="brand-subtitle">Salsas Artesanales</span>
+        </div>
+      </a>
+
+      <!-- Menú de Navegación Centrado -->
+      <nav class="nav-menu-wrapper">
+        <ul class="nav-menu">
+          <li><a href="#inicio" class="nav-link">Inicio</a></li>
+          <li><a href="#sabores" class="nav-link">Sabores</a></li>
+          <li><a href="#nosotros" class="nav-link">Nosotros</a></li>
+          <li><a href="#comocomprar" class="nav-link">Cómo Comprar</a></li>
+        </ul>
+      </nav>
+
+      <!-- Acciones a la derecha: WhatsApp y Mi Pedido -->
+      <div class="header-actions">
+        <a href="https://wa.me/584143572462?text=Hola%20DIP%20LF,%20quisiera%20hacer%20un%20pedido%20de%20salsas." 
+           target="_blank" rel="noopener noreferrer" class="btn-whatsapp-header">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+          </svg>
+          <span>WhatsApp</span>
+        </a>
+
+        <button id="btnOpenCart" class="btn-cart-header" aria-label="Ver mi pedido">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          <span>Mi Pedido</span>
+          <span id="headerCartCount" class="cart-count-badge">0</span>
+        </button>
+
+        <button id="btnMobileMenu" class="menu-toggle" aria-label="Abrir menú de navegación">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       2. HERO SECTION INTERACTIVA (Modelo visual de image_0.png)
+       ========================================================================= -->
+  <section id="inicio" class="hero-section">
+    
+    <!-- Texto de agua gigante en el fondo (como el outline de zapatillas) -->
+    <div class="hero-watermark">
+      <span>DIP LF SALSAS</span>
+      <span>ARTESANAL Y FRESCO</span>
+    </div>
+
+    <div class="hero-container">
+      
+      <!-- Columna Izquierda: Título Grande y Botones CTA -->
+      <div class="hero-content">
+        <div class="hero-badge-pill">
+          <span>✨ 100% ARTESANAL Y FRESCO</span>
+        </div>
+
+        <h1 class="hero-title-main">
+          <span class="title-white">¿CUÁL ES TU</span>
+          <span class="title-highlight">DIP LF HOY?</span>
+        </h1>
+
+        <p class="hero-subtitle">
+          ...¡Pruébalos todos! Salsas artesanales hechas a mano con ingredientes seleccionados y frescos del día. Elige tu sabor favorito, escoge tu tamaño y coordina tu pedido directo por WhatsApp sin enredos.
+        </p>
+
+        <div class="hero-cta-group">
+          <a href="#sabores" class="btn-primary-hero">
+            <span>VER TODOS LOS SABORES</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+
+          <a href="#comocomprar" class="btn-secondary-hero">
+            <span>CÓMO COMPRAR</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Columna Derecha: Stack de Tarjetas de Productos (Reemplazo de zapatillas) -->
+      <div class="hero-visual-stack-wrapper">
+        <div class="card-stack">
+          
+          <!-- Tarjeta trasera 1: Antipasto -->
+          <div class="stack-card card-back-left">
+            <div class="card-img-box">
+              <span class="card-tag">TRADICIONAL</span>
+              <img src="assets/images/Antipasto.jpeg" alt="Antipasto DIP LF">
+            </div>
+            <div class="card-details">
+              <h4 class="card-flavor-name">Antipasto</h4>
+              <p class="card-desc-short">Vegetales macerados en oliva y hierbas</p>
+            </div>
+          </div>
+
+          <!-- Tarjeta trasera 2: Tártara -->
+          <div class="stack-card card-back-right">
+            <div class="card-img-box">
+              <span class="card-tag">GOURMET</span>
+              <img src="assets/images/Tartara.jpeg" alt="Tártara DIP LF">
+            </div>
+            <div class="card-details">
+              <h4 class="card-flavor-name">Tártara</h4>
+              <p class="card-desc-short">Cremosa con pepinillos dulces</p>
+            </div>
+          </div>
+
+          <!-- Tarjeta Frontal Destacada Interactiva: Tocineta -->
+          <div class="stack-card card-front">
+            <div class="card-img-box">
+              <span class="card-tag">★ DESTACADA</span>
+              <img src="assets/images/Tocineta.jpeg" alt="Tocineta DIP LF">
+            </div>
+
+            <div class="card-details">
+              <h4 class="card-flavor-name">TOCINETA AHUMADA</h4>
+              <p class="card-desc-short">Cremosa con auténticos trozos de tocineta crujiente</p>
+
+              <!-- Selector de tamaño interactivo dentro de la tarjeta Hero -->
+              <div class="hero-size-selector">
+                <button class="hero-size-btn" data-size="7oz" onclick="selectHeroSize('7oz')">7 oz</button>
+                <button class="hero-size-btn active" data-size="16oz" onclick="selectHeroSize('16oz')">16 oz</button>
+                <button class="hero-size-btn" data-size="22oz" onclick="selectHeroSize('22oz')">22 oz</button>
+              </div>
+
+              <div class="card-footer-row">
+                <span id="heroCardPrice" class="hero-card-price">$4</span>
+                <button class="hero-quick-add" onclick="addHeroCardToCart()">
+                  <span>+ Añadir</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Sello Circular Giratorio (Como el logo rotativo abajo a la derecha de image_0.png) -->
+        <div class="rotating-stamp">
+          <svg viewBox="0 0 100 100">
+            <path id="circlePath" fill="none" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0"/>
+            <text font-size="8.8" font-family="'Montserrat', sans-serif" font-weight="900" fill="#f59e0b" letter-spacing="2.2px">
+              <textPath href="#circlePath">
+                ★ 100% ARTESANAL ★ SABOR CASERO ★ HECHO CON AMOR
+              </textPath>
+            </text>
+            <circle cx="50" cy="50" r="16" fill="#f59e0b"/>
+            <text x="50" y="53" font-size="7" font-weight="900" fill="#000" text-anchor="middle" font-family="'Montserrat', sans-serif">
+              DIP LF
+            </text>
+          </svg>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       3. CINTA MARQUEE / TICKER TAPE (Como la barra amarilla de image_0.png)
+       ========================================================================= -->
+  <div class="marquee-ribbon">
+    <div class="marquee-content">
+      <div class="marquee-item">
+        <span>ENVÍOS A DOMICILIO</span><span class="star-icon">★</span>
+        <span>PEDIDOS DIRECTOS POR WHATSAPP: 0414-3572462</span><span class="star-icon">★</span>
+        <span>SALSAS 100% ARTESANALES</span><span class="star-icon">★</span>
+        <span>7 OZ EN $2 · 16 OZ EN $4 · 22 OZ EN $6</span><span class="star-icon">★</span>
+        <span>INSTAGRAM: @Diplf2025</span><span class="star-icon">★</span>
+        <span>INGREDIENTES FRESCOS</span><span class="star-icon">★</span>
+      </div>
+      <div class="marquee-item">
+        <span>ENVÍOS A DOMICILIO</span><span class="star-icon">★</span>
+        <span>PEDIDOS DIRECTOS POR WHATSAPP: 0414-3572462</span><span class="star-icon">★</span>
+        <span>SALSAS 100% ARTESANALES</span><span class="star-icon">★</span>
+        <span>7 OZ EN $2 · 16 OZ EN $4 · 22 OZ EN $6</span><span class="star-icon">★</span>
+        <span>INSTAGRAM: @Diplf2025</span><span class="star-icon">★</span>
+        <span>INGREDIENTES FRESCOS</span><span class="star-icon">★</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       4. SECCIÓN DE SABORES (Cuadrícula limpia de productos con selección de tamaño)
+       ========================================================================= -->
+  <section id="sabores" class="section-flavors">
+    <div class="section-header">
+      <span class="section-tag">NUESTRA CARTA DE SALSAS</span>
+      <h2 class="section-title">EXPLORA NUESTROS <span>SABORES</span></h2>
+      <p class="section-subtitle">
+        Elige tu salsa favorita, selecciona el tamaño que deseas y añádela a tu consulta de pedido. Todo se prepara con recetas exclusivas de DIP LF.
+      </p>
+    </div>
+
+    <!-- Filtros de categoría -->
+    <div class="flavor-filters">
+      <button class="filter-btn active" data-category="todos">Todos los Sabores</button>
+      <button class="filter-btn" data-category="cremosa">Cremosas</button>
+      <button class="filter-btn" data-category="crujiente">Crunch & Snacks</button>
+      <button class="filter-btn" data-category="especial">Gourmet Especiales</button>
+      <button class="filter-btn" data-category="vegetal">Frescas Criollas</button>
+    </div>
+
+    <!-- Cuadrícula Dinámica de Productos -->
+    <div id="flavorsGrid" class="flavors-grid">
+      <!-- Se inyecta dinámicamente desde main.js con soporte offline -->
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       5. GUÍA VISUAL DE TAMAÑOS Y PRECIOS
+       ========================================================================= -->
+  <section class="sizes-showcase-bar" style="max-width: 1360px; margin: 0 auto 90px; padding: 0 24px;">
+    <div class="section-header" style="margin-bottom: 30px;">
+      <span class="section-tag">PORCIONES PERFECTAS</span>
+      <h2 class="section-title">ELIGE TU <span>TAMAÑO</span></h2>
+      <p class="section-subtitle">Mismo sabor inigualable, en tres prácticas presentaciones:</p>
+    </div>
+
+    <div class="sizes-grid-3">
+      <!-- 7 Onzas -->
+      <div class="size-card-box">
+        <h3>7 ONZAS</h3>
+        <div class="size-price-large">$2.00</div>
+        <p>Práctica porción individual. Ideal para acompañar tus tequeños, empanadas o snacks del día a día.</p>
+      </div>
+
+      <!-- 16 Onzas (Destacado) -->
+      <div class="size-card-box highlight">
+        <span class="section-tag" style="margin-bottom: 6px;">★ TAMAÑO FAMILIAR</span>
+        <h3>16 ONZAS</h3>
+        <div class="size-price-large">$4.00</div>
+        <p>El tamaño favorito de nuestros clientes. Perfecto para compartir con amigos, hamburguesas y parrilladas.</p>
+      </div>
+
+      <!-- 22 Onzas -->
+      <div class="size-card-box">
+        <h3>22 ONZAS</h3>
+        <div class="size-price-large">$6.00</div>
+        <p>Presentación gigante. Para los amantes de nuestras salsas que no quieren quedarse con las ganas.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       6. SECCIÓN CÓMO COMPRAR (Siguiendo estructura visual de la referencia)
+       ========================================================================= -->
+  <section id="comocomprar" class="section-how-to-buy">
+    <div class="section-header">
+      <span class="section-tag">PASO A PASO</span>
+      <h2 class="section-title">CÓMO REALIZAR TU <span>PEDIDO</span></h2>
+      <p class="section-subtitle">
+        Comprar en DIP LF es rápido, humano y sin complicaciones de pasarelas de pago. Todo se coordina directo por WhatsApp.
+      </p>
+    </div>
+
+    <div class="steps-grid">
+      <!-- Paso 1 -->
+      <div class="step-card">
+        <div class="step-number">01</div>
+        <h3 class="step-title">Elige tus Sabores</h3>
+        <p class="step-desc">Explora nuestro menú, revisa las fotos reales y selecciona tus tamaños preferidos (7 oz, 16 oz o 22 oz).</p>
+      </div>
+
+      <!-- Paso 2 -->
+      <div class="step-card">
+        <div class="step-number">02</div>
+        <h3 class="step-title">Arma tu Consulta</h3>
+        <p class="step-desc">Añade cada salsa a tu lista con el botón "+ Añadir". Puedes revisar la cantidad y total estimado en tiempo real.</p>
+      </div>
+
+      <!-- Paso 3 -->
+      <div class="step-card">
+        <div class="step-number">03</div>
+        <h3 class="step-title">Envía por WhatsApp</h3>
+        <p class="step-desc">Haz clic en "Enviar Pedido por WhatsApp". Se creará un mensaje automático con tu lista detallada listo para enviar al 0414-3572462.</p>
+      </div>
+
+      <!-- Paso 4 -->
+      <div class="step-card">
+        <div class="step-number">04</div>
+        <h3 class="step-title">Coordinamos Entrega</h3>
+        <p class="step-desc">Te confirmamos disponibilidad al instante, acordamos tu método de pago favorito y programamos el delivery hasta tu puerta.</p>
+      </div>
+    </div>
+
+    <!-- Banner Destacado WhatsApp -->
+    <div class="whatsapp-notice-banner">
+      <div class="notice-text">
+        <h4>¿Tienes alguna duda o quieres un pedido personalizado?</h4>
+        <p>Escríbenos directamente a nuestro WhatsApp oficial: <strong>0414-3572462</strong></p>
+      </div>
+      <a href="https://wa.me/584143572462?text=Hola%20DIP%20LF,%20quisiera%20más%20información%20sobre%20sus%20salsas." 
+         target="_blank" rel="noopener noreferrer" class="btn-whatsapp-large">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+        </svg>
+        <span>Escríbenos al WhatsApp</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       7. SECCIÓN NOSOTROS (Historia y Calidad Artesanal)
+       ========================================================================= -->
+  <section id="nosotros" class="section-about">
+    <div class="about-grid">
+      
+      <!-- Imagen Destacada de las Salsas -->
+      <div class="about-image-showcase">
+        <img src="assets/images/22 Onzas.jfif" alt="Presentaciones de envases DIP LF">
+      </div>
+
+      <!-- Contenido de Texto -->
+      <div class="about-content">
+        <span class="section-tag">CALIDAD GOURMET</span>
+        <h2 class="section-title">SALSAS HECHAS CON <span>PASIÓN</span></h2>
+        
+        <p class="hero-subtitle">
+          En <strong>DIP LF</strong> creemos que una salsa no es solo un aderezo: es el corazón de cada comida. Nacimos en 2025 con el compromiso de crear recetas auténticas, cremosas y llenas de sabor, elaboradas 100% a mano sin conservantes artificiales invasivos.
+        </p>
+
+        <div class="about-features">
+          <div class="feature-item">
+            <h5>🌿 Ingredientes Frescos</h5>
+            <p>Seleccionamos vegetales, hierbas y tocineta de primera calidad diariamente.</p>
+          </div>
+          <div class="feature-item">
+            <h5>🥣 Recetas Propias</h5>
+            <p>Cada sabor fue perfeccionado para lograr textura y balance ideales.</p>
+          </div>
+          <div class="feature-item">
+            <h5>🛵 Delivery Rápido</h5>
+            <p>Llevamos tus salsas frías y listas para servir directo a tu evento o reunión.</p>
+          </div>
+          <div class="feature-item">
+            <h5>📸 Síguenos en Instagram</h5>
+            <p><a href="https://instagram.com/Diplf2025" target="_blank" style="color: var(--primary-gold); font-weight: 700;">@Diplf2025</a> para fotos, promos y novedades.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       8. ELEMENTOS FLOTANTES (Como en la referencia image_0.png)
+       ========================================================================= -->
+
+  <!-- Barra flotante a la izquierda (Tu consulta de pedido) -->
+  <div id="floatingOrderBar" class="floating-order-bar" onclick="toggleDrawer(true)">
+    <span id="floatingBarText" class="order-bar-text">Tu consulta: 0 salsas · $0</span>
+    <span class="order-bar-btn">
+      <span>Ver pedido</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+    </span>
+  </div>
+
+  <!-- Botón flotante de WhatsApp a la derecha con globo de saludo -->
+  <div class="floating-whatsapp-wrap">
+    <a href="https://wa.me/584143572462?text=Hola%20DIP%20LF,%20quisiera%20hacer%20una%20consulta." 
+       target="_blank" rel="noopener noreferrer" class="whatsapp-chat-bubble">
+      <span>Hola, ¿podemos ayudarte?</span>
+    </a>
+
+    <a href="https://wa.me/584143572462?text=Hola%20DIP%20LF,%20quisiera%20hacer%20una%20consulta." 
+       target="_blank" rel="noopener noreferrer" class="btn-floating-whatsapp" aria-label="Abrir WhatsApp">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+      </svg>
+    </a>
+  </div>
+
+  <!-- =========================================================================
+       9. DRAWER / PANEL LATERAL DE MI CONSULTA DE PEDIDO
+       ========================================================================= -->
+  <div id="drawerOverlay" class="drawer-overlay" onclick="toggleDrawer(false)"></div>
+
+  <aside id="consultDrawer" class="consult-drawer" aria-label="Panel de Pedido">
+    <div class="drawer-header">
+      <h3 class="drawer-title">🛒 Mi Consulta de Pedido</h3>
+      <button id="drawerCloseBtn" class="drawer-close" aria-label="Cerrar panel">✕</button>
+    </div>
+
+    <div class="drawer-body">
+      <!-- Estado vacío -->
+      <div id="drawerEmptyState" class="drawer-empty-state">
+        <span class="drawer-empty-icon">🥣</span>
+        <h4>Tu consulta está vacía</h4>
+        <p>Añade salsas desde el menú para armar tu pedido.</p>
+      </div>
+
+      <!-- Lista de Productos en el Carrito -->
+      <div id="drawerCartList" class="cart-items-list"></div>
+    </div>
+
+    <div class="drawer-footer">
+      <div class="drawer-total-row">
+        <span class="total-title">Total Estimado:</span>
+        <span id="drawerTotalAmount" class="total-sum">$0.00</span>
+      </div>
+
+      <button id="btnSubmitOrder" class="btn-send-whatsapp-order">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+        </svg>
+        <span>Enviar Pedido por WhatsApp</span>
+      </button>
+
+      <p class="drawer-note">
+        Sin pagos por adelantado en la web. Coordinamos todo contigo vía WhatsApp.
+      </p>
+    </div>
+  </aside>
+
+  <!-- =========================================================================
+       10. FOOTER
+       ========================================================================= -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      
+      <!-- Columna 1 -->
+      <div class="footer-brand">
+        <h3>DIP LF</h3>
+        <p>Salsas artesanales gourmet preparadas a mano con ingredientes 100% frescos. El toque perfecto para tus reuniones, parrilladas y comidas del día a día.</p>
+      </div>
+
+      <!-- Columna 2 -->
+      <div class="footer-col">
+        <h5>Enlaces Rápidos</h5>
+        <ul class="footer-links">
+          <li><a href="#inicio">Inicio</a></li>
+          <li><a href="#sabores">Todos los Sabores</a></li>
+          <li><a href="#nosotros">Sobre DIP LF</a></li>
+          <li><a href="#comocomprar">Cómo Comprar</a></li>
+        </ul>
+      </div>
+
+      <!-- Columna 3 -->
+      <div class="footer-col">
+        <h5>Contacto & Pedidos</h5>
+        <ul class="footer-links">
+          <li>📱 WhatsApp: <a href="https://wa.me/584143572462" target="_blank" style="color: #25d366; font-weight: bold;">0414-3572462</a></li>
+          <li>📸 Instagram: <a href="https://instagram.com/Diplf2025" target="_blank" style="color: var(--primary-gold); font-weight: bold;">@Diplf2025</a></li>
+          <li>📍 Envíos a Domicilio</li>
+          <li>✨ Hecho a mano en Venezuela</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      <span>&copy; 2025 - 2026 DIP LF. Todos los derechos reservados.</span>
+      <span>Salsas Artesanales Gourmet • Hand Made</span>
+    </div>
+  </footer>
+
+  <!-- Scripts JavaScript -->
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
