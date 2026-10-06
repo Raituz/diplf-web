@@ -20,7 +20,7 @@ const FLAVORS_DATA = [
     category: 'cremosa',
     badge: '★ MÁS VENDIDA',
     desc: 'Cremosa base artesanal con trocitos de tocineta ahumada crujiente seleccionada.',
-    image: 'assets/images/Tocineta.jpeg',
+    image: 'assets/images/Tocineta foto vieja.jfif',
     defaultSize: '16oz'
   },
   {
@@ -29,7 +29,7 @@ const FLAVORS_DATA = [
     category: 'cremosa',
     badge: 'CLÁSICA GOURMET',
     desc: 'Nuestra receta secreta con pepinillos finos, hierbas aromáticas y toque cítrico.',
-    image: 'assets/images/Tartara.jpeg',
+    image: 'assets/images/Tartara foto vieja.jfif',
     defaultSize: '16oz'
   },
   {
@@ -38,7 +38,7 @@ const FLAVORS_DATA = [
     category: 'especial',
     badge: 'TRADICIÓN ITALIANA',
     desc: 'Vegetales frescos macerados en aceite de oliva y especias premium de la casa.',
-    image: 'assets/images/Antipasto.jpeg',
+    image: 'assets/images/Antipasto Foto vieja.jfif',
     defaultSize: '16oz'
   },
   {
@@ -63,9 +63,10 @@ const FLAVORS_DATA = [
     id: 'taki',
     name: 'Taki Crunch',
     category: 'crujiente',
-    badge: 'NUEVO • SPICY',
-    desc: 'Explosión picante y ácida con auténtico polvo crujiente de Takis Fuego.',
-    image: 'assets/images/Salsas.jpeg',
+    badge: '★ PRONTO DISPONIBLE',
+    desc: 'Explosión picante y crujiente con auténticos Takis Fuego. (Próximamente disponible).',
+    image: '',
+    isComingSoon: true,
     defaultSize: '16oz'
   },
   {
@@ -110,7 +111,7 @@ const FLAVORS_DATA = [
     category: 'cremosa',
     badge: 'AGRIDULCE',
     desc: 'Deliciosa salsa con toque de pepinillos dulces tipo gourmet neoyorquino.',
-    image: 'assets/images/16 Onzas.jfif',
+    image: 'assets/images/Pepinillo foto Vieja.jfif',
     defaultSize: '16oz'
   },
   {
@@ -384,9 +385,16 @@ function renderFlavorsGrid(categoryFilter = 'todos') {
     const defaultSize = SIZES[flavor.defaultSize];
     html += `
       <div class="flavor-card" data-flavor-id="${flavor.id}">
-        <div class="flavor-img-wrapper">
+        <div class="flavor-img-wrapper ${!flavor.image ? 'coming-soon-img' : ''}">
           <span class="flavor-badge-type">${flavor.badge}</span>
-          <img src="${flavor.image}" alt="${flavor.name}" loading="lazy">
+          ${flavor.image 
+            ? `<img src="${flavor.image}" alt="${flavor.name}" loading="lazy">` 
+            : `<div class="coming-soon-placeholder">
+                 <span class="coming-soon-icon">🌶️</span>
+                 <span class="coming-soon-text">¡MUY PRONTO!</span>
+                 <span class="coming-soon-sub">Receta & foto en camino</span>
+               </div>`
+          }
         </div>
         <div class="flavor-body">
           <h3 class="flavor-title">${flavor.name}</h3>

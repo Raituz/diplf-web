@@ -445,38 +445,83 @@ button {
   height: 100%;
   background: #ffffff;
   border-radius: 18px;
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   padding: 14px;
   display: flex;
   flex-direction: column;
-  transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease;
   user-select: none;
+  opacity: 1 !important;
 }
 
 /* Tarjeta trasera 1 (Inclinada a la izquierda) */
 .stack-card.card-back-left {
-  transform: rotate(-10deg) translate(-30px, -20px) scale(0.92);
+  transform: rotate(-7deg) translate(-28px, -12px) scale(0.95);
   z-index: 1;
-  opacity: 0.7;
 }
 
 /* Tarjeta trasera 2 (Inclinada a la derecha) */
 .stack-card.card-back-right {
-  transform: rotate(8deg) translate(30px, -10px) scale(0.95);
+  transform: rotate(6deg) translate(28px, -8px) scale(0.96);
   z-index: 2;
-  opacity: 0.85;
 }
 
 /* Tarjeta frontal principal */
 .stack-card.card-front {
-  transform: rotate(-2deg) translate(0, 0) scale(1);
+  transform: rotate(-1.5deg) translate(0, 0) scale(1);
   z-index: 5;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75), 0 0 30px rgba(245, 158, 11, 0.2);
+  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.6), 0 0 25px rgba(245, 158, 11, 0.2);
 }
 
-.stack-card:hover {
-  transform: rotate(0deg) scale(1.03) !important;
-  z-index: 10 !important;
+/* Efecto hover suave controlado desde el contenedor padre (sin parpadeo) */
+.card-stack:hover .card-back-left {
+  transform: rotate(-10deg) translate(-38px, -15px) scale(0.95);
+}
+
+.card-stack:hover .card-back-right {
+  transform: rotate(9deg) translate(38px, -10px) scale(0.96);
+}
+
+.card-stack:hover .card-front {
+  transform: rotate(0deg) translateY(-6px) scale(1.02);
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.7), 0 0 32px rgba(245, 158, 11, 0.3);
+}
+
+/* Estilos de Placeholder para productos sin foto aún (Taki) */
+.coming-soon-img {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #161b26 0%, #0d1118 100%) !important;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.coming-soon-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--text-muted);
+}
+
+.coming-soon-icon {
+  font-size: 3rem;
+  filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.4));
+}
+
+.coming-soon-text {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--primary-gold);
+  letter-spacing: 1.5px;
+}
+
+.coming-soon-sub {
+  font-size: 0.75rem;
+  color: var(--text-dim);
 }
 
 .card-img-box {
