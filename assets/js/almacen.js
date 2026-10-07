@@ -1128,6 +1128,10 @@ async function checkServerHealth() {
         badge.className = 'server-status-pill online';
         badge.innerHTML = `🟢 Conectado (${data.ordersStats?.paid || 0} pagados / ${data.ordersStats?.pending || 0} pendientes)`;
       }
+      const urlDisplay = document.getElementById('webhookUrlDisplay');
+      if (urlDisplay && data.publicWebhookUrl) {
+        urlDisplay.textContent = data.publicWebhookUrl;
+      }
       showAdminToast('✅ Servidor Webhook conectado y respondiendo.');
       return;
     }
@@ -1347,7 +1351,7 @@ function clientSideParseBankSms(smsText, sender) {
     bank = 'Mercantil';
   } else if (sender === '1111' || lower.includes('provincial')) {
     bank = 'BBVA Provincial';
-  } else if (lower.includes('bancamiga')) {
+  } else if (sender === '26448' || lower.includes('bancamiga')) {
     bank = 'Bancamiga';
   }
 

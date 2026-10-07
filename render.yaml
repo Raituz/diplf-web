@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: diplf-pago-movil-webhook
+    runtime: node
+    plan: free
+    rootDir: webhook-server
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: WEBHOOK_SECRET
+        value: diplf_secret_2026
+      - key: AUTHORIZED_PHONE
+        value: 04122694517

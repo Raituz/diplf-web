@@ -112,7 +112,7 @@ function parseBankSms(smsText, sender) {
     parsed.bank = 'Mercantil Banco';
   } else if (sender === '1111' || lower.includes('provincial') || lower.includes('bbva')) {
     parsed.bank = 'BBVA Provincial';
-  } else if (lower.includes('bancamiga')) {
+  } else if (sender === '26448' || lower.includes('bancamiga')) {
     parsed.bank = 'Bancamiga';
   } else if (sender === '262' || lower.includes('bnc') || lower.includes('nacional de credito')) {
     parsed.bank = 'Banco Nacional de Crédito (BNC)';
@@ -323,11 +323,13 @@ function handleRoute(req, res, pathname, queryParams, body) {
     const pendingCount = ordersDb.filter(o => o.status === 'pendiente').length;
     const paidCount = ordersDb.filter(o => o.status === 'pagado').length;
 
+    systemConfig = loadJsonFile(CONFIG_FILE, DEFAULT_CONFIG);
     return sendJsonResponse(res, 200, {
       status: 'online',
       service: 'DIP LF - Webhook Pago Móvil SMS',
       version: '1.0.0',
       authorizedPhone: systemConfig.receiverPhone || AUTHORIZED_PHONE,
+      publicWebhookUrl: systemConfig.publicWebhookUrl || null,
       uptimeSeconds: Math.floor(process.uptime()),
       ordersStats: {
         total: ordersDb.length,
