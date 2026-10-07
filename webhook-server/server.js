@@ -386,6 +386,38 @@ function handleRoute(req, res, pathname, queryParams, body) {
       smsMatch: null
     };
 
+    // Si viene con smsId o verifiedBySms, marcar el SMS correspondiente como matched en sms_logs.json
+    if (body.smsId || body.verifiedBySms) {
+      smsLogsDb = loadJsonFile(SMS_LOGS_FILE, []);
+      const smsRef = body.paymentDetails?.reference ? String(body.paymentDetails.reference).trim() : '';
+      const smsEntry = smsLogsDb.find(s => 
+        (body.smsId && s.id === body.smsId) || 
+        (smsRef && s.parsed && s.parsed.reference && String(s.parsed.reference).includes(smsRef))
+      );
+      if (smsEntry) {
+        smsEntry.matched = true;
+        smsEntry.matchedOrderId = newOrder.id;
+        smsEntry.matchedAt = new Date().toISOString();
+        saveJsonFile(SMS_LOGS_FILE, smsLogsDb);
+
+        newOrder.status = 'pagado';
+        newOrder.verifiedBySms = true;
+        newOrder.verifiedAt = newOrder.verifiedAt || new Date().toISOString();
+        if (!newOrder.smsMatch) {
+          newOrder.smsMatch = {
+            smsId: smsEntry.id,
+            sender: smsEntry.sender,
+            bank: smsEntry.parsed?.bank,
+            smsReference: smsEntry.parsed?.reference,
+            smsAmount: smsEntry.parsed?.amount,
+            phone: smsEntry.parsed?.phone,
+            rawText: smsEntry.rawText,
+            matchedAt: smsEntry.matchedAt
+          };
+        }
+      }
+    }
+
     // Prevenir duplicados si ya vino registrado
     const existingIndex = ordersDb.findIndex(o => o.id === newOrder.id);
     if (existingIndex >= 0) {
@@ -395,12 +427,93 @@ function handleRoute(req, res, pathname, queryParams, body) {
     }
 
     saveJsonFile(ORDERS_FILE, ordersDb);
-    console.log(`[NUEVO PEDIDO REGISTRADO] #${newOrder.id} - Estado: ${newOrder.status}`);
+    console.log(`[PEDIDO REGISTRADO] #${newOrder.id} - Estado: ${newOrder.status}`);
 
     return sendJsonResponse(res, 201, { success: true, order: newOrder });
   }
 
-  // 5. PEDIDOS: ACTUALIZAR ESTADO (PATCH /api/orders/:id)
+  // 5. VERIFICACIÓN DIRECTA DE PAGO MÓVIL POR SMS (POST /api/verify-payment)
+  if (req.method === 'POST' && pathname === '/api/verify-payment') {
+    const rawRef = String(body.reference || '').trim();
+    const cleanRef = rawRef.replace(/[^0-9]/g, '');
+    const clientAmount = Number(body.amountBs || 0);
+
+    if (!cleanRef || cleanRef.length < 4) {
+      return sendJsonResponse(res, 400, {
+        verified: false,
+        error: 'El número de referencia debe contener al menos 4 dígitos numéricos.'
+      });
+    }
+
+    smsLogsDb = loadJsonFile(SMS_LOGS_FILE, []);
+    systemConfig = loadJsonFile(CONFIG_FILE, DEFAULT_CONFIG);
+    const tolerance = Number(systemConfig.autoVerifyToleranceBs) || 2.0;
+
+    // Buscar coincidencia en smsLogsDb (desde el más reciente al más antiguo)
+    let matchedSms = null;
+
+    for (const entry of smsLogsDb) {
+      // Ignorar SMS que ya hayan sido emparejados a otra orden previa
+      if (entry.matched) continue;
+      if (!entry.parsed || !entry.parsed.reference) continue;
+
+      const smsRef = String(entry.parsed.reference).trim();
+      const smsCleanRef = smsRef.replace(/[^0-9]/g, '');
+
+      // Coincidencia de referencia:
+      // - Coincidencia exacta
+      // - Coincidencia de sufijo (últimos dígitos)
+      // - Coincidencia de subcadena si longitud >= 4
+      const isExact = (smsRef === rawRef || (cleanRef.length >= 4 && smsCleanRef === cleanRef));
+      const isSuffix = (
+        (cleanRef.length >= 4 && smsCleanRef.endsWith(cleanRef)) ||
+        (smsCleanRef.length >= 4 && cleanRef.endsWith(smsCleanRef))
+      );
+      const isSubstring = (
+        (cleanRef.length >= 4 && smsCleanRef.includes(cleanRef)) ||
+        (smsCleanRef.length >= 4 && cleanRef.includes(smsCleanRef))
+      );
+
+      const refMatches = isExact || isSuffix || isSubstring;
+      if (!refMatches) continue;
+
+      // Verificación de monto si el SMS contiene monto
+      let amountMatches = true;
+      if (entry.parsed.amount !== null && entry.parsed.amount !== undefined && clientAmount > 0) {
+        const diff = Math.abs(Number(entry.parsed.amount) - clientAmount);
+        amountMatches = (diff <= tolerance);
+      }
+
+      if (refMatches && amountMatches) {
+        matchedSms = entry;
+        break;
+      }
+    }
+
+    if (matchedSms) {
+      console.log(`\n======================================================`);
+      console.log(`>>> [VERIFICACIÓN DE PAGO MÓVIL EXITOSA] <<<`);
+      console.log(`Referencia solicitada: ${rawRef} | Coincide con SMS: ${matchedSms.id}`);
+      console.log(`Banco: ${matchedSms.parsed.bank} | Monto: Bs. ${matchedSms.parsed.amount}`);
+      console.log(`======================================================\n`);
+
+      return sendJsonResponse(res, 200, {
+        verified: true,
+        smsId: matchedSms.id,
+        parsed: matchedSms.parsed,
+        receivedAt: matchedSms.receivedAt,
+        message: '¡Pago Móvil verificado y confirmado con el banco!'
+      });
+    }
+
+    console.log(`[VERIFICACIÓN NO ENCONTRADA] Ref: "${rawRef}", Monto: Bs. ${clientAmount} no coincide con ningún SMS disponible.`);
+    return sendJsonResponse(res, 200, {
+      verified: false,
+      reason: `No se encontró ningún Pago Móvil recibido con la referencia ${rawRef} por Bs. ${clientAmount.toFixed(2)}.`
+    });
+  }
+
+  // 6. PEDIDOS: ACTUALIZAR ESTADO (PATCH /api/orders/:id)
   if (req.method === 'PATCH' && pathname.startsWith('/api/orders/')) {
     const orderId = pathname.replace('/api/orders/', '').trim();
     ordersDb = loadJsonFile(ORDERS_FILE, []);
@@ -418,7 +531,7 @@ function handleRoute(req, res, pathname, queryParams, body) {
     return sendJsonResponse(res, 200, { success: true, order: order });
   }
 
-  // 6. WEBHOOK PRINCIPAL: RECEPCIÓN DE SMS BANCARIO (POST /api/webhook/sms)
+  // 7. WEBHOOK PRINCIPAL: RECEPCIÓN DE SMS BANCARIO (POST /api/webhook/sms)
   if (req.method === 'POST' && (pathname === '/api/webhook/sms' || pathname === '/webhook/sms')) {
     // Validar token de seguridad (opcional pero recomendado)
     const incomingSecret = req.headers['x-webhook-secret'] || queryParams.get('token') || body.token || body.secret;
@@ -477,7 +590,7 @@ function handleRoute(req, res, pathname, queryParams, body) {
     });
   }
 
-  // 7. SIMULADOR DE PRUEBA DE SMS (POST /api/test/sms)
+  // 8. SIMULADOR DE PRUEBA DE SMS (POST /api/test/sms)
   if (req.method === 'POST' && pathname === '/api/test/sms') {
     const smsText = body.message || body.text || '';
     const sender = body.sender || '2661';
@@ -497,7 +610,7 @@ function handleRoute(req, res, pathname, queryParams, body) {
     });
   }
 
-  // 8. TASA BCV OFICIAL (GET /api/bcv)
+  // 9. TASA BCV OFICIAL (GET /api/bcv)
   if (req.method === 'GET' && pathname === '/api/bcv') {
     systemConfig = loadJsonFile(CONFIG_FILE, DEFAULT_CONFIG);
     return sendJsonResponse(res, 200, {
@@ -526,6 +639,7 @@ function onServerListening() {
   console.log(`------------------------------------------------------`);
   console.log(`📍 Endpoints disponibles:`);
   console.log(`   - Webhook SMS: POST /api/webhook/sms`);
+  console.log(`   - Verificar:  POST /api/verify-payment`);
   console.log(`   - API Pedidos: GET/POST /api/orders`);
   console.log(`   - Simulador:   POST /api/test/sms`);
   console.log(`   - Estado:      GET  /api/status`);

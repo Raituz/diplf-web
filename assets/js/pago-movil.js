@@ -171,13 +171,13 @@ function initPagoMovilCheckoutUI() {
         <div class="pm-form-grid">
           <div class="pm-input-group">
             <label for="pmSenderPhone">Teléfono Emisor (Tu teléfono)</label>
-            <input type="tel" id="pmSenderPhone" class="pm-input" placeholder="04121234567" required pattern="[0-9]{10,11}" maxlength="11">
+            <input type="tel" id="pmSenderPhone" class="pm-input" placeholder="04121234567" required pattern="[0-9]{10,11}" maxlength="11" oninput="hidePmVerificationAlert()">
             <small class="pm-hint">Número desde donde hiciste el pago móvil.</small>
           </div>
 
           <div class="pm-input-group">
             <label for="pmSenderBank">Banco de Origen</label>
-            <select id="pmSenderBank" class="pm-input select-bank" required>
+            <select id="pmSenderBank" class="pm-input select-bank" required onchange="hidePmVerificationAlert()">
               <option value="" disabled selected>Selecciona tu banco emisor...</option>
               ${VENEZUELA_BANKS.map(b => `<option value="${b.name}">${b.name}</option>`).join('')}
             </select>
@@ -185,10 +185,13 @@ function initPagoMovilCheckoutUI() {
 
           <div class="pm-input-group">
             <label for="pmReference">Número de Referencia</label>
-            <input type="text" id="pmReference" class="pm-input ref-input" placeholder="Ej: 12345678 (o últimos dígitos)" required minlength="4" maxlength="14">
+            <input type="text" id="pmReference" class="pm-input ref-input" placeholder="Ej: 12345678 (o últimos dígitos)" required minlength="4" maxlength="14" oninput="hidePmVerificationAlert()">
             <small class="pm-hint">Código de referencia generado por tu banco.</small>
           </div>
         </div>
+
+        <!-- Alerta interactiva de error si no se encuentra el pago móvil en cuenta -->
+        <div id="pmVerificationAlert" class="pm-verify-alert" style="display: none;"></div>
 
         <button type="submit" id="btnSubmitPagoMovil" class="btn-confirm-pagomovil">
           <span>⚡ Confirmar y Enviar Pago Móvil</span>
@@ -196,38 +199,42 @@ function initPagoMovilCheckoutUI() {
       </form>
 
       <div class="pm-security-note">
-        🛡️ Verificación automática por lectura de SMS en segundos. Tu pedido se registrará como <strong>Pendiente</strong> y pasará a <strong>Pagado</strong> en cuanto nuestro sistema reciba la confirmación bancaria.
+        🛡️ Verificación bancaria instantánea. El sistema comprueba en tiempo real que tu Pago Móvil haya ingresado a nuestra cuenta antes de aprobar tu pedido.
       </div>
     </div>
 
-    <!-- Panel de Éxito / Confirmación Inmediata -->
+    <!-- Panel de Éxito / Confirmación Verificada -->
     <div id="panelPagoMovilSuccess" class="payment-success-card" style="display: none;">
-      <div class="success-icon-pulse">⏳</div>
-      <h4 class="success-title">¡Pago Móvil Registrado con Éxito!</h4>
+      <div class="success-icon-pulse" id="successIcon">✅</div>
+      <h4 class="success-title" id="successTitle">¡Pago Móvil Verificado y Aprobado!</h4>
       <div class="success-order-badge" id="successOrderNumber">ORD-000000</div>
       
       <div class="success-details-list">
         <div class="success-row">
           <span>Estado del Pedido:</span>
-          <span class="badge-status-pending">PENDIENTE DE PAGO</span>
+          <span id="successStatusBadge" class="badge-status-paid">PAGADO (VERIFICADO POR BANCO)</span>
         </div>
         <div class="success-row">
-          <span>Referencia Reportada:</span>
+          <span>Referencia Confirmada:</span>
           <strong id="successRefNumber">------</strong>
         </div>
         <div class="success-row">
-          <span>Monto:</span>
+          <span>Monto Acreditado:</span>
           <strong id="successAmountBs">Bs. 0,00</strong>
+        </div>
+        <div class="success-row" id="successBankRow">
+          <span>Banco:</span>
+          <strong id="successBankName">------</strong>
         </div>
       </div>
 
-      <p class="success-info-text">
-        Estamos esperando la confirmación bancaria por SMS en nuestro teléfono <strong>04122694517</strong>. En cuanto el banco confirme tu referencia, tu pedido se marcará automáticamente como <strong>PAGADO</strong>.
+      <p class="success-info-text" id="successInfoText">
+        Hemos confirmado automáticamente la recepción de tu pago móvil en nuestra cuenta bancaria. ¡Tu orden ya está confirmada y en preparación!
       </p>
 
       <div class="success-actions">
         <button type="button" class="btn-share-whatsapp-order" onclick="sharePendingOrderWhatsapp()">
-          💬 Enviar comprobante por WhatsApp (Opcional)
+          💬 Notificar por WhatsApp (Opcional)
         </button>
         <button type="button" class="btn-new-order-reset" onclick="resetOrderDrawer()">
           🛍️ Realizar otro pedido
@@ -340,7 +347,68 @@ window.copyPagoMovilData = function() {
 };
 
 // =============================================================================
-// SUBMIT DE PAGO MÓVIL (GUARDAR PEDIDO COMO PENDIENTE)
+// ALERTAS DE VERIFICACIÓN DE PAGO MÓVIL
+// =============================================================================
+function escapePmHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+window.hidePmVerificationAlert = function() {
+  const alertEl = document.getElementById('pmVerificationAlert');
+  if (alertEl) {
+    alertEl.style.display = 'none';
+    alertEl.innerHTML = '';
+  }
+};
+
+window.showPmVerificationAlert = function({ reference, amountBs, reason }) {
+  const alertEl = document.getElementById('pmVerificationAlert');
+  if (!alertEl) return;
+
+  const bsFormatted = Number(amountBs || 0).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const cleanRef = String(reference || '').trim();
+
+  alertEl.innerHTML = `
+    <div class="pm-alert-inner">
+      <div class="pm-alert-icon">❌</div>
+      <div class="pm-alert-text">
+        <h5 class="pm-alert-title">Pago Móvil no encontrado en cuenta</h5>
+        <p class="pm-alert-desc">
+          No recibimos confirmación bancaria para la referencia <strong class="pm-alert-highlight">${escapePmHtml(cleanRef)}</strong> por el monto de <strong class="pm-alert-highlight">Bs. ${bsFormatted}</strong>.
+        </p>
+        <ul class="pm-alert-checklist">
+          <li>Verifica que hayas escrito el número exacto de referencia que emitió tu banco.</li>
+          <li>Si acabas de realizar la transferencia, espera 10 segundos a que el banco liquide e intenta nuevamente.</li>
+        </ul>
+        <div class="pm-alert-actions">
+          <button type="button" class="btn-alert-whatsapp" onclick="openWhatsappManualVerification('${escapePmHtml(cleanRef)}', ${amountBs})">
+            💬 ¿Ya te debitaron el dinero? Enviar comprobante por WhatsApp
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  alertEl.style.display = 'block';
+  alertEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+};
+
+window.openWhatsappManualVerification = function(ref, amountBs) {
+  const phone = (typeof WHATSAPP_PHONE !== 'undefined') ? WHATSAPP_PHONE : '584122694517';
+  const bsFormatted = Number(amountBs || 0).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  let msg = `¡Hola DIP LF! 👋 Realicé un Pago Móvil por Bs. ${bsFormatted} (Ref: ${ref}) para mi pedido, pero no fue detectado automáticamente por el banco.\n\n`;
+  msg += `Aquí les comparto mi comprobante para verificarlo y procesar mi orden. ¡Gracias!`;
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+};
+
+// =============================================================================
+// SUBMIT DE PAGO MÓVIL (VERIFICACIÓN EN TIEMPO REAL CON EL BANCO)
 // =============================================================================
 let lastCreatedOrder = null;
 
@@ -382,13 +450,79 @@ window.handlePagoMovilSubmit = async function(event) {
     return;
   }
 
+  hidePmVerificationAlert();
+
   const btnSubmit = document.getElementById('btnSubmitPagoMovil');
   if (btnSubmit) {
     btnSubmit.disabled = true;
-    btnSubmit.innerHTML = '<span>⏳ Registrando Pago Móvil...</span>';
+    btnSubmit.innerHTML = '<span class="pm-spinner">⏳</span> <span>Verificando pago con el banco...</span>';
   }
 
-  // Construir objeto de pedido con estado PENDIENTE
+  // Realizar hasta 3 intentos de verificación espaciados por 2.5s
+  const webhookUrl = getWebhookServerUrl();
+  const maxAttempts = 3;
+  let verifiedResult = null;
+  let lastErrorMessage = '';
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    if (attempt > 1) {
+      if (btnSubmit) {
+        btnSubmit.innerHTML = `<span class="pm-spinner">⏳</span> <span>Esperando confirmación bancaria (${attempt}/${maxAttempts})...</span>`;
+      }
+      await new Promise(r => setTimeout(r, 2500));
+    }
+
+    try {
+      const response = await fetch(`${webhookUrl}/api/verify-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reference: reference,
+          amountBs: totalBs,
+          phone: senderPhone,
+          bank: senderBank
+        }),
+        signal: AbortSignal.timeout(6000)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.verified) {
+          verifiedResult = data;
+          break;
+        } else {
+          lastErrorMessage = data.reason || 'Referencia no encontrada';
+        }
+      } else {
+        lastErrorMessage = 'El servidor no pudo validar la referencia.';
+      }
+    } catch (err) {
+      console.warn(`Intento ${attempt} de verificación falló:`, err.message);
+      lastErrorMessage = 'No se pudo conectar con el servidor de verificación bancaria.';
+    }
+  }
+
+  // SI NO SE VERIFICA: MOSTRAR ERROR, MANTENER CARRITO INTACTO Y NO CREAR ORDEN
+  if (!verifiedResult || !verifiedResult.verified) {
+    if (btnSubmit) {
+      btnSubmit.disabled = false;
+      btnSubmit.innerHTML = '<span>⚡ Confirmar y Enviar Pago Móvil</span>';
+    }
+
+    showPmVerificationAlert({
+      reference: reference,
+      amountBs: totalBs,
+      reason: lastErrorMessage
+    });
+
+    if (refInput) {
+      refInput.focus();
+      refInput.select();
+    }
+    return;
+  }
+
+  // SI SE VERIFICA CON ÉXITO: CONSTRUIR Y REGISTRAR PEDIDO PAGADO
   const orderData = {
     items: cart.map(i => ({
       flavorId: i.flavorId,
@@ -410,11 +544,15 @@ window.handlePagoMovilSubmit = async function(event) {
       rate: rate,
       receiverPhone: getPagoMovilConfig().receiverPhone
     },
-    customerNote: `Pago Móvil Ref: ${reference} (${senderBank})`,
-    status: 'pendiente' // REGLA: Estado inicial PENDIENTE
+    customerNote: `Pago Móvil Ref: ${reference} (${senderBank}) - Verificado por SMS`,
+    status: 'pagado', // ESTADO PAGADO DIRECTO
+    verifiedBySms: true,
+    verifiedAt: new Date().toISOString(),
+    smsId: verifiedResult.smsId,
+    smsMatch: verifiedResult.parsed
   };
 
-  // 1. Guardar en el sistema local (localStorage & CustomEvent para Almacén)
+  // 1. Guardar en local (localStorage & CustomEvent para Almacén)
   let savedOrder = null;
   if (typeof recordNewOrder === 'function') {
     savedOrder = recordNewOrder(orderData);
@@ -430,30 +568,28 @@ window.handlePagoMovilSubmit = async function(event) {
 
   lastCreatedOrder = savedOrder;
 
-  // 2. Intentar sincronizar con el Servidor Webhook de fondo (si está corriendo)
-  const webhookUrl = getWebhookServerUrl();
+  // 2. Registrar en servidor webhook para marcar SMS como usado
   try {
     fetch(`${webhookUrl}/api/orders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(savedOrder)
     }).catch(err => {
-      // Si el servidor local no está activo en este momento, no detiene la experiencia del usuario
-      console.log('Servidor webhook local offline o no alcanzable desde el navegador cliente:', err.message);
+      console.log('Error notificando pedido al servidor:', err.message);
     });
   } catch (_) {}
 
-  // 3. Vaciar el carrito
+  // 3. Vaciar carrito SOLO tras confirmación real
   cart = [];
   if (typeof saveCart === 'function') saveCart();
   if (typeof updateCartUI === 'function') updateCartUI();
 
   // 4. Mostrar panel de confirmación en el Drawer
-  showOrderSuccessState(savedOrder);
+  showOrderSuccessState(savedOrder, verifiedResult);
 };
 
-// Mostrar pantalla de confirmación dentro del Drawer
-function showOrderSuccessState(order) {
+// Mostrar pantalla de confirmación verificada dentro del Drawer
+function showOrderSuccessState(order, verifiedData) {
   const panelForm = document.getElementById('panelPagoMovil');
   const panelSuccess = document.getElementById('panelPagoMovilSuccess');
   const drawerTotalRow = document.querySelector('.drawer-total-row');
@@ -466,22 +602,38 @@ function showOrderSuccessState(order) {
     const elOrderNum = document.getElementById('successOrderNumber');
     const elRef = document.getElementById('successRefNumber');
     const elBs = document.getElementById('successAmountBs');
+    const elBank = document.getElementById('successBankName');
+    const elBadge = document.getElementById('successStatusBadge');
+    const elTitle = document.getElementById('successTitle');
+    const elInfo = document.getElementById('successInfoText');
+    const elIcon = document.getElementById('successIcon');
 
     if (elOrderNum) elOrderNum.textContent = `#${order.id}`;
     if (elRef) elRef.textContent = order.paymentDetails?.reference || 'N/A';
     if (elBs) elBs.textContent = `Bs. ${(order.paymentDetails?.amountBs || 0).toLocaleString('es-VE', { minimumFractionDigits: 2 })}`;
+    if (elBank) elBank.textContent = verifiedData?.parsed?.bank || order.paymentDetails?.originBank || 'Banco Nacional';
+    
+    if (elBadge) {
+      elBadge.className = 'badge-status-paid';
+      elBadge.textContent = 'PAGADO (VERIFICADO POR BANCO)';
+    }
+    if (elTitle) elTitle.textContent = '¡Pago Móvil Verificado y Aprobado!';
+    if (elIcon) elIcon.textContent = '✅';
+    if (elInfo) {
+      elInfo.innerHTML = `Confirmamos con éxito la recepción de tu transferencia bancaria en nuestro teléfono <strong>04122694517</strong>. Tu pedido ya está marcado como <strong>PAGADO</strong> y entra en preparación de inmediato.`;
+    }
   }
 }
 
-// Compartir orden pendiente por WhatsApp con todos los datos
+// Compartir orden confirmada por WhatsApp
 window.sharePendingOrderWhatsapp = function() {
   if (!lastCreatedOrder) return;
 
   const o = lastCreatedOrder;
   const p = o.paymentDetails || {};
-  let msg = `¡Hola DIP LF! 👋 Acabo de registrar mi pedido en la web con Pago Móvil:\n\n`;
+  let msg = `¡Hola DIP LF! 👋 Acabo de realizar mi pedido en la web con Pago Móvil verificado:\n\n`;
   msg += `📦 *ORDEN:* #${o.id}\n`;
-  msg += `⏳ *ESTADO:* Pendiente de verificación\n`;
+  msg += `✅ *ESTADO:* PAGADO (Confirmado por banco)\n`;
   msg += `💳 *BANCO EMISOR:* ${p.originBank}\n`;
   msg += `📱 *TELÉFONO EMISOR:* ${p.senderPhone}\n`;
   msg += `🔢 *REFERENCIA:* ${p.reference}\n`;
@@ -492,7 +644,7 @@ window.sharePendingOrderWhatsapp = function() {
     msg += `• ${it.quantity}x ${it.name} (${it.sizeName})\n`;
   });
 
-  msg += `\nAdjunto les estaré compartiendo la captura del banco. ¡Muchas gracias!`;
+  msg += `\n¡Muchas gracias! Quedo a la espera de la entrega.`;
 
   const phone = (typeof WHATSAPP_PHONE !== 'undefined') ? WHATSAPP_PHONE : '584122694517';
   const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
@@ -505,6 +657,8 @@ window.resetOrderDrawer = function() {
   const panelSuccess = document.getElementById('panelPagoMovilSuccess');
   const drawerTotalRow = document.querySelector('.drawer-total-row');
   const btnSubmit = document.getElementById('btnSubmitPagoMovil');
+
+  hidePmVerificationAlert();
 
   if (panelForm) panelForm.style.display = 'block';
   if (panelSuccess) panelSuccess.style.display = 'none';
