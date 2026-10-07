@@ -800,6 +800,40 @@ function handleRoute(req, res, pathname, queryParams, body) {
     });
   }
 
+  // 13. SERVICIO DE ARCHIVOS ESTÁTICOS PARA EL FRONTEND (index.html, ordenes.html, etc.)
+  if (req.method === 'GET') {
+    try {
+      const staticBase = path.resolve(__dirname, '..');
+      let sanitizedPath = path.normalize(pathname).replace(/^(\.\.[\/\\])+/, '');
+      if (sanitizedPath === '/' || sanitizedPath === '\\') sanitizedPath = '/index.html';
+      const targetFilePath = path.join(staticBase, sanitizedPath);
+
+      // Proteger que no se salga de la raíz del proyecto ni acceda a .git
+      if (targetFilePath.startsWith(staticBase) && !targetFilePath.includes('.git') && fs.existsSync(targetFilePath) && fs.statSync(targetFilePath).isFile()) {
+        const ext = path.extname(targetFilePath).toLowerCase();
+        const mimeMap = {
+          '.html': 'text/html; charset=utf-8',
+          '.css': 'text/css; charset=utf-8',
+          '.js': 'application/javascript; charset=utf-8',
+          '.json': 'application/json',
+          '.png': 'image/png',
+          '.jpg': 'image/jpeg',
+          '.jpeg': 'image/jpeg',
+          '.jfif': 'image/jpeg',
+          '.svg': 'image/svg+xml',
+          '.ico': 'image/x-icon'
+        };
+        const mimeType = mimeMap[ext] || 'application/octet-stream';
+        res.writeHead(200, {
+          'Content-Type': mimeType,
+          'Access-Control-Allow-Origin': '*'
+        });
+        fs.createReadStream(targetFilePath).pipe(res);
+        return;
+      }
+    } catch (_) {}
+  }
+
   // 404 No encontrado
   sendJsonResponse(res, 404, { error: `Ruta no encontrada: ${req.method} ${pathname}` });
 }
