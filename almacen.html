@@ -431,6 +431,16 @@
                 <span id="webhookUrlDisplay">http://localhost:3000/api/webhook/sms</span>
                 <button type="button" class="btn-copy-code" onclick="copyWebhookUrl()">📋 Copiar</button>
               </div>
+
+              <div style="margin-top: 10px;">
+                <label style="font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 4px;">
+                  Cambiar Servidor (Tu enlace de Render.com):
+                </label>
+                <div style="display: flex; gap: 6px;">
+                  <input type="text" id="inputCustomServerUrl" class="form-control" style="font-size: 0.8rem; font-family: monospace;" placeholder="https://diplf-pago-movil-webhook.onrender.com">
+                  <button type="button" id="btnSaveCustomServerUrl" class="btn-tool" style="white-space: nowrap; font-size: 0.76rem; padding: 6px 10px;">💾 Conectar</button>
+                </div>
+              </div>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.8rem;">

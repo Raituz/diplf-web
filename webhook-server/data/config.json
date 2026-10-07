@@ -6,6 +6,6 @@
   "bcvRate": 395,
   "webhookSecret": "diplf_secret_2026",
   "autoVerifyToleranceBs": 2,
-  "publicWebhookUrl": "https://fence-become-roberts-can.trycloudflare.com/api/webhook/sms",
-  "lastTunnelUrl": "https://fence-become-roberts-can.trycloudflare.com"
+  "publicWebhookUrl": "https://phys-floating-five-gmbh.trycloudflare.com/api/webhook/sms",
+  "lastTunnelUrl": "https://phys-floating-five-gmbh.trycloudflare.com"
 }

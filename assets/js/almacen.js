@@ -1046,6 +1046,25 @@ function initPagoMovilView() {
     });
   }
 
+  // Guardar URL personalizada del Servidor (Render.com)
+  const btnSaveServerUrl = document.getElementById('btnSaveCustomServerUrl');
+  if (btnSaveServerUrl) {
+    btnSaveServerUrl.addEventListener('click', () => {
+      let val = (document.getElementById('inputCustomServerUrl')?.value || '').trim();
+      if (!val) {
+        alert('Por favor introduce la URL de tu servidor (ej: https://tu-servicio.onrender.com)');
+        return;
+      }
+      val = val.replace(/\/+$/, '').replace(/\/api\/webhook\/sms$/, '');
+      if (typeof setWebhookServerUrl === 'function') {
+        setWebhookServerUrl(val);
+      }
+      showAdminToast(`URL del servidor conectada: ${val}`);
+      renderPagoMovilDashboard();
+      checkServerHealth();
+    });
+  }
+
   // Ejecutar simulador de SMS
   const btnExecute = document.getElementById('btnExecuteSmsSim');
   if (btnExecute) {
@@ -1067,12 +1086,14 @@ function renderPagoMovilDashboard() {
   const inputPhone = document.getElementById('cfgReceiverPhone');
   const inputId = document.getElementById('cfgReceiverId');
   const urlDisplay = document.getElementById('webhookUrlDisplay');
+  const inputCustom = document.getElementById('inputCustomServerUrl');
 
   if (inputRate) inputRate.value = rate.toFixed(2);
   if (inputBank && cfg.receiverBank) inputBank.value = cfg.receiverBank;
   if (inputPhone && cfg.receiverPhone) inputPhone.value = cfg.receiverPhone;
   if (inputId && cfg.receiverId) inputId.value = cfg.receiverId;
   if (urlDisplay) urlDisplay.textContent = `${webhookUrl}/api/webhook/sms`;
+  if (inputCustom) inputCustom.value = webhookUrl;
 }
 
 // Guardar configuración desde el formulario
