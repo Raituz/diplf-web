@@ -16,6 +16,7 @@ const os = require('os');
 
 // Configuración general
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.IP || '0.0.0.0';
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || 'diplf_secret_2026';
 const AUTHORIZED_PHONE = process.env.AUTHORIZED_PHONE || '04122694517';
 
@@ -512,7 +513,7 @@ function handleRoute(req, res, pathname, queryParams, body) {
 }
 
 // Iniciar servidor
-server.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, HOST, () => {
   console.log(`\n======================================================`);
   console.log(`🚀 [DIP LF] Servidor Webhook Pago Móvil SMS Activo`);
   console.log(`📡 Puerto: ${PORT}`);
