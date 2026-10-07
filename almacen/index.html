@@ -15,7 +15,7 @@
   <link rel="icon" type="image/jpeg" href="assets/images/Logo.jpeg">
 
   <!-- Estilos del Almacén -->
-  <link rel="stylesheet" href="assets/css/almacen.css?v=9.1">
+  <link rel="stylesheet" href="assets/css/almacen.css?v=9.2">
 </head>
 <body>
 
@@ -118,6 +118,9 @@
         </button>
         <button class="tab-btn" data-tab="tabUsuarios">
           <span>👥 Usuarios y Roles</span>
+        </button>
+        <button class="tab-btn" data-tab="tabPagoMovil">
+          <span>📱 Pago Móvil & SMS</span>
         </button>
       </div>
     </nav>
@@ -305,10 +308,12 @@
             </button>
             <select id="filterOrderStatus" class="order-status-select">
               <option value="todos">Todos los Estados</option>
-              <option value="nuevo">Nuevos</option>
-              <option value="en_preparacion">En Preparación</option>
-              <option value="entregado">Entregados</option>
-              <option value="cancelado">Cancelados</option>
+              <option value="pendiente">⏳ Pendientes (Pago Móvil)</option>
+              <option value="pagado">✅ Pagados (SMS Verificado)</option>
+              <option value="nuevo">🟡 Nuevos (WhatsApp)</option>
+              <option value="en_preparacion">🔵 En Preparación</option>
+              <option value="entregado">🟢 Entregados</option>
+              <option value="cancelado">🔴 Cancelados</option>
             </select>
             <button type="button" id="btnClearOrders" class="btn-tool" style="color: var(--color-red);" title="Vaciar historial">
               <span>🗑️ Limpiar</span>
@@ -396,13 +401,169 @@
         </div>
       </section>
 
+      <!-- ===================================================================
+           PESTAÑA 5: PAGO MÓVIL Y WEBHOOK SMS AUTOMÁTICO
+           =================================================================== -->
+      <section id="tabPagoMovil" class="tab-section">
+        <div class="section-header-title">
+          <div>
+            <h2>📱 Sistema de Pago Móvil & Webhook SMS</h2>
+            <p>Configuración de verificación bancaria automática desde tu teléfono Android (04122694517), tasa BCV y simulador de pruebas en vivo.</p>
+          </div>
+        </div>
+
+        <div class="pm-dashboard-grid">
+          
+          <!-- Tarjeta 1: Estado del Servidor Webhook -->
+          <div class="pm-card">
+            <div class="pm-card-title">
+              <h3>📡 Servidor Webhook de Lectura SMS</h3>
+              <span id="serverStatusBadge" class="server-status-pill offline">🔴 Servidor Desconectado</span>
+            </div>
+
+            <p style="font-size: 0.84rem; color: var(--text-muted); margin: 0;">
+              El microservidor Webhook recibe los SMS de los bancos enviados desde tu teléfono Android con la app de reenvío y concilia automáticamente los pagos.
+            </p>
+
+            <div>
+              <label style="font-size: 0.74rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 4px;">
+                URL del Webhook (Configurar en la App Android):
+              </label>
+              <div class="server-url-display">
+                <span id="webhookUrlDisplay">http://localhost:3000/api/webhook/sms</span>
+                <button type="button" class="btn-copy-code" onclick="copyWebhookUrl()">📋 Copiar</button>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.8rem;">
+              <div style="background: rgba(255,255,255,0.03); padding: 8px 10px; border-radius: 6px;">
+                <span style="color: var(--text-dim); font-size: 0.7rem; display: block;">Teléfono Emisor SMS:</span>
+                <strong style="color: #fff;">04122694517</strong>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); padding: 8px 10px; border-radius: 6px;">
+                <span style="color: var(--text-dim); font-size: 0.7rem; display: block;">Token Secreto:</span>
+                <strong style="color: var(--gold-primary); font-family: monospace;">diplf_secret_2026</strong>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: auto;">
+              <button type="button" id="btnCheckServerHealth" class="btn-tool" style="width: 100%; justify-content: center;">
+                <span>🔄 Comprobar Conexión con el Servidor</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tarjeta 2: Configuración de Cuenta y Tasa BCV -->
+          <div class="pm-card">
+            <div class="pm-card-title">
+              <h3>💵 Datos Receptores y Tasa Oficial</h3>
+              <span style="font-size: 0.75rem; color: var(--gold-primary); font-weight: 700;">TASA ACTIVA</span>
+            </div>
+
+            <form id="formConfigPagoMovil">
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label for="cfgBcvRate" style="font-weight: 800; color: #38bdf8;">Tasa de Cambio Oficial (Bs por 1 USD) *</label>
+                <div style="display: flex; gap: 8px;">
+                  <input type="number" step="0.01" id="cfgBcvRate" class="form-control" style="font-weight: 800; font-size: 1.1rem; color: var(--gold-primary);" value="395.00" required>
+                  <button type="button" id="btnUpdateBcvRate" class="btn-save-prod" style="flex: 0 0 110px;">
+                    <span>💾 Guardar</span>
+                  </button>
+                </div>
+                <small style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; display: block;">
+                  Esta tasa convierte automáticamente el precio de las salsas a Bolívares en el checkout del cliente.
+                </small>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label for="cfgReceiverBank">Banco Receptor DIP LF</label>
+                <input type="text" id="cfgReceiverBank" class="form-control" value="0102 - Banco de Venezuela" required>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="form-group">
+                  <label for="cfgReceiverPhone">Teléfono Receptor</label>
+                  <input type="text" id="cfgReceiverPhone" class="form-control" value="04122694517" required>
+                </div>
+                <div class="form-group">
+                  <label for="cfgReceiverId">Cédula / RIF</label>
+                  <input type="text" id="cfgReceiverId" class="form-control" value="V-27123456" required>
+                </div>
+              </div>
+
+              <button type="submit" class="btn-save-prod" style="width: 100%; margin-top: 14px;">
+                <span>✨ Actualizar Datos de Pago Móvil</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Tarjeta 3: Simulador y Probador de SMS en Vivo -->
+          <div class="pm-card" style="grid-column: 1 / -1;">
+            <div class="pm-card-title">
+              <h3>🧪 Simulador de Verificación Automática por SMS</h3>
+              <span style="font-size: 0.75rem; color: var(--text-dim);">Prueba el motor de parseo bancario</span>
+            </div>
+
+            <p style="font-size: 0.84rem; color: var(--text-muted); margin: 0;">
+              Usa este simulador para probar cómo reacciona el sistema cuando llega un SMS de cualquier banco venezolano. Si el SMS contiene una referencia y monto de un pedido actualmente <strong>Pendiente</strong>, ¡se marcará automáticamente como <strong>Pagado</strong> y sonará la alerta sonora!
+            </p>
+
+            <div>
+              <span style="font-size: 0.74rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 6px;">
+                Plantillas Rápidas de Bancos:
+              </span>
+              <div class="simulator-quick-templates">
+                <button type="button" class="btn-template-sms" onclick="loadSmsTemplate('bdv')">🏛️ Banco de Venezuela (2661)</button>
+                <button type="button" class="btn-template-sms" onclick="loadSmsTemplate('banesco')">🟢 Banesco (2846)</button>
+                <button type="button" class="btn-template-sms" onclick="loadSmsTemplate('mercantil')">🔵 Mercantil (24024)</button>
+                <button type="button" class="btn-template-sms" onclick="loadSmsTemplate('provincial')">🟦 BBVA Provincial (1111)</button>
+                <button type="button" class="btn-template-sms" onclick="loadSmsTemplate('bancamiga')">🟠 Bancamiga</button>
+                <button type="button" class="btn-template-sms" onclick="fillTemplateWithPendingOrder()">🎯 Llenar con Pedido Pendiente</button>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 180px 1fr; gap: 12px;">
+              <div>
+                <label for="simSenderNumber" style="font-size: 0.74rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 4px;">
+                  Remitente (Código SMS)
+                </label>
+                <input type="text" id="simSenderNumber" class="form-control" value="2661" placeholder="Ej: 2661">
+              </div>
+
+              <div>
+                <label for="simSmsText" style="font-size: 0.74rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 4px;">
+                  Cuerpo del Mensaje de Texto (SMS)
+                </label>
+                <input type="text" id="simSmsText" class="form-control" placeholder="BDV: PagoMovil recibido por Bs. 790,00 de 04121234567. Ref: 849201. Fecha: 06/10/2026." value="BDV: PagoMovil recibido por Bs. 790,00 de 04121234567. Ref: 849201. Fecha: 06/10/2026.">
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <button type="button" id="btnExecuteSmsSim" class="btn-create-submit" style="margin: 0; padding: 12px 24px; font-size: 0.9rem;">
+                <span>⚡ Procesar SMS y Verificar Pago</span>
+              </button>
+              <span style="font-size: 0.75rem; color: var(--text-dim);">
+                Ejecuta el parseo de regex y la conciliación con pedidos pendientes.
+              </span>
+            </div>
+
+            <!-- Resultado del Simulador -->
+            <div id="simResultBox" class="simulator-result-box" style="display: none;">
+              <!-- Salida dinámica -->
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
     </main>
 
   </div>
 
   <!-- Scripts -->
-  <script src="assets/js/auth.js?v=9.1"></script>
-  <script src="assets/js/catalog.js?v=9.1"></script>
-  <script src="assets/js/almacen.js?v=9.1"></script>
+  <script src="assets/js/auth.js?v=9.2"></script>
+  <script src="assets/js/catalog.js?v=9.2"></script>
+  <script src="assets/js/pago-movil.js?v=9.2"></script>
+  <script src="assets/js/almacen.js?v=9.2"></script>
 </body>
 </html>

@@ -167,6 +167,7 @@ function initDashboard() {
   initCreateProductForm();
   initOrdersView();
   initUsersView();
+  initPagoMovilView();
   startOrdersPoller();
 }
 
@@ -200,6 +201,7 @@ function switchTab(tabId) {
   if (tabId === 'tabModificar') renderProductsGrid();
   if (tabId === 'tabPedidos') renderOrdersList();
   if (tabId === 'tabUsuarios') renderUsersList();
+  if (tabId === 'tabPagoMovil') renderPagoMovilDashboard();
 }
 
 // ==========================================
@@ -580,7 +582,7 @@ function initOrdersView() {
 function renderOrdersStats() {
   const orders = getOrders();
   const total = orders.length;
-  const pending = orders.filter(o => o.status === 'nuevo' || o.status === 'en_preparacion').length;
+  const pending = orders.filter(o => o.status === 'nuevo' || o.status === 'en_preparacion' || o.status === 'pendiente').length;
   const totalMoney = orders
     .filter(o => o.status !== 'cancelado')
     .reduce((sum, o) => sum + (o.totalPrice || 0), 0);
@@ -595,7 +597,7 @@ function renderOrdersStats() {
   if (elSales) elSales.textContent = `$${totalMoney.toFixed(2)}`;
 
   if (badgeCount) {
-    const newCount = orders.filter(o => o.status === 'nuevo').length;
+    const newCount = orders.filter(o => o.status === 'nuevo' || o.status === 'pendiente').length;
     if (newCount > 0) {
       badgeCount.textContent = newCount;
       badgeCount.style.display = 'inline-block';
@@ -627,7 +629,7 @@ function renderOrdersList(filterStatus = 'todos') {
   }
 
   container.innerHTML = filtered.map(order => `
-    <div class="order-item-card ${order.status === 'nuevo' ? 'is-new' : ''}" data-order-id="${order.id}">
+    <div class="order-item-card ${order.status === 'nuevo' || order.status === 'pendiente' ? 'is-new' : ''}" data-order-id="${order.id}">
       <div class="order-item-header">
         <div class="order-id-title">
           <span>${order.id}</span>
@@ -659,6 +661,40 @@ function renderOrdersList(filterStatus = 'todos') {
         </tbody>
       </table>
 
+      ${order.paymentMethod === 'pago_movil' ? `
+        <div class="order-payment-box">
+          <div class="order-payment-header">
+            <span class="payment-method-tag">📱 Pago Móvil (Venezuela)</span>
+            ${order.status === 'pendiente' ? `
+              <button type="button" class="btn-mark-paid-manual" onclick="quickMarkAsPaid('${order.id}')">✔ Marcar como Pagado Manualmente</button>
+            ` : ''}
+          </div>
+          <div class="payment-grid-details">
+            <div class="pm-detail-item">
+              <span>Banco Emisor:</span>
+              <strong>${escapeHtml(order.paymentDetails?.originBank || 'No especificado')}</strong>
+            </div>
+            <div class="pm-detail-item">
+              <span>Teléfono Emisor:</span>
+              <strong>${escapeHtml(order.paymentDetails?.senderPhone || 'N/A')}</strong>
+            </div>
+            <div class="pm-detail-item">
+              <span>Referencia:</span>
+              <strong style="color: var(--gold-primary); font-size: 0.95rem;">${escapeHtml(order.paymentDetails?.reference || 'N/A')}</strong>
+            </div>
+            <div class="pm-detail-item">
+              <span>Monto en Bs:</span>
+              <strong style="color: #38bdf8;">Bs. ${(order.paymentDetails?.amountBs || 0).toLocaleString('es-VE', { minimumFractionDigits: 2 })}</strong>
+            </div>
+          </div>
+          ${order.smsMatch ? `
+            <div class="payment-sms-matched-alert">
+              <span>🤖 Conciliado automáticamente con SMS bancario de <strong>${escapeHtml(order.smsMatch.bank || order.smsMatch.sender)}</strong> (Ref SMS: ${escapeHtml(order.smsMatch.smsReference || '')})</span>
+            </div>
+          ` : ''}
+        </div>
+      ` : ''}
+
       <div class="order-bottom-actions">
         <div class="order-total-highlight">
           Total: $${(order.totalPrice || 0).toFixed(2)} USD
@@ -667,7 +703,9 @@ function renderOrdersList(filterStatus = 'todos') {
         <div style="display: flex; gap: 8px; align-items: center;">
           <span style="font-size: 0.8rem; color: var(--text-dim);">Estado:</span>
           <select class="order-status-select" onchange="handleOrderStatusChange('${order.id}', this.value)">
-            <option value="nuevo" ${order.status === 'nuevo' ? 'selected' : ''}>🟡 Nuevo</option>
+            <option value="pendiente" ${order.status === 'pendiente' ? 'selected' : ''}>⏳ Pendiente (Pago Móvil)</option>
+            <option value="pagado" ${order.status === 'pagado' ? 'selected' : ''}>✅ Pagado (Confirmado)</option>
+            <option value="nuevo" ${order.status === 'nuevo' ? 'selected' : ''}>🟡 Nuevo (WhatsApp)</option>
             <option value="en_preparacion" ${order.status === 'en_preparacion' ? 'selected' : ''}>🔵 En Preparación</option>
             <option value="entregado" ${order.status === 'entregado' ? 'selected' : ''}>🟢 Entregado</option>
             <option value="cancelado" ${order.status === 'cancelado' ? 'selected' : ''}>🔴 Cancelado</option>
@@ -685,9 +723,22 @@ window.handleOrderStatusChange = function(orderId, newStatus) {
   showAdminToast(`Estado del pedido ${orderId} actualizado.`);
 };
 
+window.quickMarkAsPaid = function(orderId) {
+  updateOrderStatus(orderId, 'pagado', {
+    verifiedAt: new Date().toISOString(),
+    verifiedByManual: true
+  });
+  playNotificationChime();
+  renderOrdersStats();
+  renderOrdersList(document.getElementById('filterOrderStatus')?.value || 'todos');
+  showAdminToast(`¡Pedido ${orderId} verificado y marcado como PAGADO!`);
+};
+
 function formatStatusLabel(st) {
   switch (st) {
-    case 'nuevo': return 'Nuevo Pedido';
+    case 'pendiente': return '⏳ Pendiente (Pago Móvil)';
+    case 'pagado': return '✅ Pagado (Confirmado)';
+    case 'nuevo': return '🟡 Nuevo (WhatsApp)';
     case 'en_preparacion': return 'En Preparación';
     case 'entregado': return 'Entregado';
     case 'cancelado': return 'Cancelado';
@@ -768,9 +819,10 @@ function showOrderArrivalToast(order) {
   }, 4500);
 }
 
-// Poller periódico para verificar si entraron pedidos
+// Poller periódico para verificar si entraron pedidos y sincronizar con Webhook
 function startOrdersPoller() {
-  setInterval(() => {
+  setInterval(async () => {
+    // 1. Verificar cambios en localStorage
     const orders = getOrders();
     if (orders.length > lastKnownOrdersCount) {
       const newestOrder = orders[0];
@@ -779,7 +831,78 @@ function startOrdersPoller() {
       renderOrdersStats();
     }
     lastKnownOrdersCount = orders.length;
-  }, 3000);
+
+    // 2. Si el servidor webhook está activo, sincronizar pedidos actualizados por SMS
+    try {
+      const webhookUrl = typeof getWebhookServerUrl === 'function' ? getWebhookServerUrl() : 'http://localhost:3000';
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1800);
+
+      const res = await fetch(`${webhookUrl}/api/orders`, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.orders)) {
+          let hasUpdates = false;
+          let currentLocal = getOrders();
+
+          data.orders.forEach(remoteOrder => {
+            const localIndex = currentLocal.findIndex(o => o.id === remoteOrder.id);
+            if (localIndex >= 0) {
+              const localOrder = currentLocal[localIndex];
+              // Si pasó de pendiente a pagado remotamente por SMS
+              if (localOrder.status === 'pendiente' && remoteOrder.status === 'pagado') {
+                currentLocal[localIndex] = { ...localOrder, ...remoteOrder };
+                hasUpdates = true;
+                playNotificationChime();
+                showOrderPaidToast(remoteOrder);
+              }
+            } else {
+              // Pedido nuevo en servidor
+              currentLocal.unshift(remoteOrder);
+              hasUpdates = true;
+              onNewOrderDetected(remoteOrder);
+            }
+          });
+
+          if (hasUpdates) {
+            localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(currentLocal));
+            renderOrdersList();
+            renderOrdersStats();
+          }
+        }
+      }
+    } catch (_) {
+      // Servidor local offline, continuar en modo local
+    }
+  }, 3500);
+}
+
+function showOrderPaidToast(order) {
+  let toast = document.getElementById('orderArrivalToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'orderArrivalToast';
+    toast.className = 'toast-notif-box';
+    document.body.appendChild(toast);
+  }
+
+  const orderId = order ? order.id : '';
+  const ref = order.paymentDetails?.reference || 'SMS';
+
+  toast.innerHTML = `
+    <div class="toast-notif-icon" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">💳</div>
+    <div class="toast-notif-info">
+      <h4 style="color: #34d399;">¡Pago Móvil Confirmado #${orderId}!</h4>
+      <p>Ref: ${ref} • Pedido marcado como PAGADO automáticamente</p>
+    </div>
+  `;
+
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 5000);
 }
 
 // ==========================================
@@ -884,4 +1007,408 @@ function escapeHtml(text) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+// ==========================================
+// 8. TAB 5: PANEL PAGO MÓVIL Y WEBHOOK SMS
+// ==========================================
+
+function initPagoMovilView() {
+  // Comprobar salud del servidor
+  const btnCheck = document.getElementById('btnCheckServerHealth');
+  if (btnCheck) {
+    btnCheck.addEventListener('click', checkServerHealth);
+  }
+
+  // Guardar configuración completa de cuenta
+  const formCfg = document.getElementById('formConfigPagoMovil');
+  if (formCfg) {
+    formCfg.addEventListener('submit', (e) => {
+      e.preventDefault();
+      savePagoMovilConfigFromForm();
+    });
+  }
+
+  // Guardar Tasa BCV
+  const btnBcv = document.getElementById('btnUpdateBcvRate');
+  if (btnBcv) {
+    btnBcv.addEventListener('click', () => {
+      const input = document.getElementById('cfgBcvRate');
+      const val = parseFloat(input?.value);
+      if (!isNaN(val) && val > 0) {
+        if (typeof setBcvRate === 'function') setBcvRate(val);
+        showAdminToast(`Tasa BCV guardada: Bs. ${val.toFixed(2)} por 1 USD.`);
+        syncConfigWithServer({ bcvRate: val });
+        renderPagoMovilDashboard();
+      } else {
+        alert('Por favor introduce un valor válido de tasa.');
+      }
+    });
+  }
+
+  // Ejecutar simulador de SMS
+  const btnExecute = document.getElementById('btnExecuteSmsSim');
+  if (btnExecute) {
+    btnExecute.addEventListener('click', executeSmsSimulation);
+  }
+
+  renderPagoMovilDashboard();
+  checkServerHealth();
+}
+
+// Renderizar valores en el formulario del panel
+function renderPagoMovilDashboard() {
+  const cfg = (typeof getPagoMovilConfig === 'function') ? getPagoMovilConfig() : {};
+  const rate = (typeof getBcvRate === 'function') ? getBcvRate() : 395.00;
+  const webhookUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'http://localhost:3000';
+
+  const inputRate = document.getElementById('cfgBcvRate');
+  const inputBank = document.getElementById('cfgReceiverBank');
+  const inputPhone = document.getElementById('cfgReceiverPhone');
+  const inputId = document.getElementById('cfgReceiverId');
+  const urlDisplay = document.getElementById('webhookUrlDisplay');
+
+  if (inputRate) inputRate.value = rate.toFixed(2);
+  if (inputBank && cfg.receiverBank) inputBank.value = cfg.receiverBank;
+  if (inputPhone && cfg.receiverPhone) inputPhone.value = cfg.receiverPhone;
+  if (inputId && cfg.receiverId) inputId.value = cfg.receiverId;
+  if (urlDisplay) urlDisplay.textContent = `${webhookUrl}/api/webhook/sms`;
+}
+
+// Guardar configuración desde el formulario
+function savePagoMovilConfigFromForm() {
+  const rateVal = parseFloat(document.getElementById('cfgBcvRate')?.value) || 395.00;
+  const bankVal = (document.getElementById('cfgReceiverBank')?.value || '').trim();
+  const phoneVal = (document.getElementById('cfgReceiverPhone')?.value || '').trim();
+  const idVal = (document.getElementById('cfgReceiverId')?.value || '').trim();
+
+  const newConfig = {
+    receiverBank: bankVal || '0102 - Banco de Venezuela',
+    receiverPhone: phoneVal || '04122694517',
+    receiverId: idVal || 'V-27123456',
+    receiverName: 'DIP LF Salsas Artesanales',
+    defaultRate: rateVal
+  };
+
+  if (typeof savePagoMovilConfig === 'function') savePagoMovilConfig(newConfig);
+  if (typeof setBcvRate === 'function') setBcvRate(rateVal);
+
+  showAdminToast('¡Configuración de Pago Móvil guardada con éxito!');
+  syncConfigWithServer(newConfig);
+  renderPagoMovilDashboard();
+}
+
+// Sincronizar configuración con el servidor Webhook
+async function syncConfigWithServer(partial) {
+  try {
+    const webhookUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'http://localhost:3000';
+    await fetch(`${webhookUrl}/api/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(partial)
+    });
+  } catch (_) {}
+}
+
+// Verificar conexión del servidor Webhook
+async function checkServerHealth() {
+  const badge = document.getElementById('serverStatusBadge');
+  const webhookUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'http://localhost:3000';
+
+  if (badge) {
+    badge.className = 'server-status-pill offline';
+    badge.innerHTML = '⏳ Verificando conexión...';
+  }
+
+  try {
+    const res = await fetch(`${webhookUrl}/api/status`, { signal: AbortSignal.timeout(2500) });
+    if (res.ok) {
+      const data = await res.json();
+      if (badge) {
+        badge.className = 'server-status-pill online';
+        badge.innerHTML = `🟢 Conectado (${data.ordersStats?.paid || 0} pagados / ${data.ordersStats?.pending || 0} pendientes)`;
+      }
+      showAdminToast('✅ Servidor Webhook conectado y respondiendo.');
+      return;
+    }
+  } catch (_) {}
+
+  if (badge) {
+    badge.className = 'server-status-pill offline';
+    badge.innerHTML = '🔴 Servidor Local Desconectado';
+  }
+}
+
+// Copiar URL del Webhook
+window.copyWebhookUrl = function() {
+  const urlDisplay = document.getElementById('webhookUrlDisplay');
+  const text = urlDisplay ? urlDisplay.textContent : 'http://localhost:3000/api/webhook/sms';
+  navigator.clipboard.writeText(text).then(() => {
+    showAdminToast('📋 URL del Webhook copiada al portapapeles.');
+  }).catch(() => {
+    prompt('Copia esta URL en tu app de Android:', text);
+  });
+};
+
+// Cargar plantillas de SMS según el banco
+window.loadSmsTemplate = function(bankKey) {
+  const inputSender = document.getElementById('simSenderNumber');
+  const inputText = document.getElementById('simSmsText');
+  const rate = (typeof getBcvRate === 'function') ? getBcvRate() : 395.00;
+  const sampleBs = (4 * rate).toFixed(2); // Salsa de $4 en Bs
+
+  switch (bankKey) {
+    case 'bdv':
+      if (inputSender) inputSender.value = '2661';
+      if (inputText) inputText.value = `BDV: PagoMovil recibido por Bs. ${sampleBs} de 04121234567 en cta *1234. Ref: 894102. Fecha: ${new Date().toLocaleDateString('es-VE')}.`;
+      break;
+    case 'banesco':
+      if (inputSender) inputSender.value = '2846';
+      if (inputText) inputText.value = `Banesco: Recibiste Pago Movil por Bs. ${sampleBs} de JUAN PEREZ. Ref: 554109. Saldo disponible: Bs. ${sampleBs}.`;
+      break;
+    case 'mercantil':
+      if (inputSender) inputSender.value = '24024';
+      if (inputText) inputText.value = `Mercantil: Ha recibido Pago Movil por Bs. ${sampleBs} de 04241234567. Ref. 778912. Fecha ${new Date().toLocaleDateString('es-VE')}.`;
+      break;
+    case 'provincial':
+      if (inputSender) inputSender.value = '1111';
+      if (inputText) inputText.value = `BBVA Provincial informa: Abono de Dinero Rapido recibido por Bs. ${sampleBs} de 04149876543. Ref: 334190.`;
+      break;
+    case 'bancamiga':
+      if (inputSender) inputSender.value = 'Bancamiga';
+      if (inputText) inputText.value = `Bancamiga: Pago Movil recibido por Bs. ${sampleBs} de 04122694517. Ref: 991204.`;
+      break;
+  }
+  showAdminToast(`Plantilla de ${bankKey.toUpperCase()} cargada.`);
+};
+
+// Llenar el simulador con datos del primer pedido pendiente
+window.fillTemplateWithPendingOrder = function() {
+  const orders = getOrders();
+  const pending = orders.find(o => o.status === 'pendiente' && o.paymentMethod === 'pago_movil');
+
+  if (!pending) {
+    alert('No hay pedidos actualmente con estado "Pendiente" y método Pago Móvil. Haz un pedido de prueba desde la tienda pública primero.');
+    return;
+  }
+
+  const p = pending.paymentDetails || {};
+  const ref = p.reference || '123456';
+  const bs = p.amountBs || (pending.totalPrice * 395).toFixed(2);
+  const phone = p.senderPhone || '04121234567';
+
+  const inputSender = document.getElementById('simSenderNumber');
+  const inputText = document.getElementById('simSmsText');
+
+  if (inputSender) inputSender.value = '2661';
+  if (inputText) {
+    inputText.value = `BDV: PagoMovil recibido por Bs. ${bs} de ${phone} en cta *1234. Ref: ${ref}. Fecha: ${new Date().toLocaleDateString('es-VE')}.`;
+  }
+
+  showAdminToast(`🎯 Simulador cargado con Pedido #${pending.id} (Ref: ${ref})`);
+};
+
+// Ejecutar la simulación de recepción de SMS
+async function executeSmsSimulation() {
+  const sender = (document.getElementById('simSenderNumber')?.value || '2661').trim();
+  const text = (document.getElementById('simSmsText')?.value || '').trim();
+  const resultBox = document.getElementById('simResultBox');
+
+  if (!text) {
+    alert('Ingresa el texto del SMS bancario a simular.');
+    return;
+  }
+
+  if (resultBox) {
+    resultBox.style.display = 'block';
+    resultBox.innerHTML = '<span style="color: var(--gold-primary);">⏳ Analizando mensaje de banco...</span>';
+  }
+
+  const webhookUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'http://localhost:3000';
+  let serverHandled = false;
+
+  // 1. Intentar enviar al servidor webhook si está corriendo
+  try {
+    const res = await fetch(`${webhookUrl}/api/test/sms`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sender: sender, message: text }),
+      signal: AbortSignal.timeout(2500)
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      serverHandled = true;
+      displaySimulationResult(data.parsed, data.matchResult);
+      if (data.matchResult?.matched) {
+        // Actualizar también en local
+        updateOrderStatus(data.matchResult.orderId, 'pagado', {
+          verifiedAt: new Date().toISOString(),
+          verifiedBySms: true,
+          smsMatch: {
+            sender: sender,
+            smsReference: data.parsed.reference,
+            smsAmount: data.parsed.amount,
+            rawText: text
+          }
+        });
+        playNotificationChime();
+        renderOrdersList();
+        renderOrdersStats();
+      }
+      return;
+    }
+  } catch (_) {}
+
+  // 2. Si el servidor local está apagado, ejecutar motor de parseo local en el navegador
+  const parsed = clientSideParseBankSms(text, sender);
+  const matchResult = clientSideMatchOrderWithSms(parsed);
+  displaySimulationResult(parsed, matchResult);
+
+  if (matchResult.matched) {
+    updateOrderStatus(matchResult.orderId, 'pagado', {
+      verifiedAt: new Date().toISOString(),
+      verifiedBySms: true,
+      smsMatch: {
+        sender: sender,
+        bank: parsed.bank,
+        smsReference: parsed.reference,
+        smsAmount: parsed.amount,
+        rawText: text
+      }
+    });
+    playNotificationChime();
+    renderOrdersList();
+    renderOrdersStats();
+  }
+}
+
+// Mostrar tarjeta de resultados de la simulación
+function displaySimulationResult(parsed, matchResult) {
+  const resultBox = document.getElementById('simResultBox');
+  if (!resultBox) return;
+
+  resultBox.style.display = 'block';
+
+  let html = `
+    <div style="margin-bottom: 8px; font-weight: 800; color: #fff; font-size: 0.9rem;">
+      📋 Resultado del Análisis de Expresiones Regulares:
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 12px;">
+      <div style="background: rgba(255,255,255,0.03); padding: 6px 10px; border-radius: 4px;">
+        <span style="font-size: 0.68rem; color: var(--text-dim); display: block;">BANCO DETECTADO:</span>
+        <strong style="color: var(--gold-primary); font-size: 0.8rem;">${escapeHtml(parsed?.bank || 'Desconocido')}</strong>
+      </div>
+      <div style="background: rgba(255,255,255,0.03); padding: 6px 10px; border-radius: 4px;">
+        <span style="font-size: 0.68rem; color: var(--text-dim); display: block;">MONTO EXTRAÍDO:</span>
+        <strong style="color: #38bdf8; font-size: 0.85rem;">${parsed?.amount !== null ? 'Bs. ' + Number(parsed.amount).toFixed(2) : 'No detectado'}</strong>
+      </div>
+      <div style="background: rgba(255,255,255,0.03); padding: 6px 10px; border-radius: 4px;">
+        <span style="font-size: 0.68rem; color: var(--text-dim); display: block;">REFERENCIA EXTRAÍDA:</span>
+        <strong style="color: #fff; font-size: 0.85rem; font-family: monospace;">${escapeHtml(parsed?.reference || 'No detectada')}</strong>
+      </div>
+    </div>
+  `;
+
+  if (matchResult?.matched) {
+    html += `
+      <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; border-radius: 6px; padding: 12px; color: #34d399;">
+        <div style="font-weight: 800; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+          <span>✅ ¡MATCH EXITOSO! ORDEN #${escapeHtml(matchResult.orderId)} PAGADA</span>
+        </div>
+        <p style="margin: 6px 0 0; font-size: 0.82rem; color: #d1fae5;">
+          El monto y la referencia coinciden con un pedido pendiente. El pedido se actualizó automáticamente al estado <strong>PAGADO</strong> y se activó la alerta sonora.
+        </p>
+      </div>
+    `;
+  } else {
+    html += `
+      <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 6px; padding: 10px; color: #fca5a5;">
+        <div style="font-weight: 700; font-size: 0.85rem;">⚠️ SMS Procesado pero sin coincidencia con pedidos pendientes:</div>
+        <div style="font-size: 0.78rem; margin-top: 4px;">${escapeHtml(matchResult?.reason || 'No se encontró ninguna orden pendiente con esta referencia.')}</div>
+      </div>
+    `;
+  }
+
+  resultBox.innerHTML = html;
+}
+
+// Motor de parseo cliente cuando el servidor local esté apagado
+function clientSideParseBankSms(smsText, sender) {
+  const clean = smsText.trim();
+  const lower = clean.toLowerCase();
+
+  let bank = 'Desconocido';
+  if (sender === '2661' || sender === '2662' || lower.includes('bdv') || lower.includes('banco de venezuela')) {
+    bank = 'Banco de Venezuela (BDV)';
+  } else if (sender === '2846' || lower.includes('banesco')) {
+    bank = 'Banesco';
+  } else if (sender === '24024' || lower.includes('mercantil')) {
+    bank = 'Mercantil';
+  } else if (sender === '1111' || lower.includes('provincial')) {
+    bank = 'BBVA Provincial';
+  } else if (lower.includes('bancamiga')) {
+    bank = 'Bancamiga';
+  }
+
+  let amount = null;
+  const amtMatch = clean.match(/(?:por\s+)?(?:bs\.?|bss|bol[ií]vares|monto:?)\s*([0-9]{1,3}(?:\.[0-9]{3})*(?:,[0-9]{1,2})|[0-9]+(?:[.,][0-9]{1,2})?)/i) ||
+                   clean.match(/([0-9]{1,3}(?:\.[0-9]{3})*(?:,[0-9]{1,2})|[0-9]+(?:[.,][0-9]{1,2})?)\s*(?:bs\.?|bss)/i);
+  if (amtMatch && amtMatch[1]) {
+    let numStr = amtMatch[1].replace(/\s+/g, '');
+    if (numStr.includes('.') && numStr.includes(',')) numStr = numStr.replace(/\./g, '').replace(',', '.');
+    else if (numStr.includes(',')) numStr = numStr.replace(',', '.');
+    amount = parseFloat(numStr);
+  }
+
+  let reference = null;
+  const refMatch = clean.match(/(?:ref(?:erencia)?\.?|operaci[oó]n|op\.?|recibo|comprobante|nro\.?)\s*:?\s*([0-9]{4,14})/i);
+  if (refMatch && refMatch[1]) {
+    reference = refMatch[1].trim();
+  }
+
+  return { bank, amount, reference, raw: clean };
+}
+
+function clientSideMatchOrderWithSms(parsed) {
+  if (!parsed || !parsed.reference) {
+    return { matched: false, reason: 'El SMS no contiene una referencia numérica válida (mínimo 4 dígitos).' };
+  }
+
+  const orders = getOrders();
+  const pendingOrders = orders.filter(o => o.status === 'pendiente' || o.status === 'nuevo');
+
+  if (pendingOrders.length === 0) {
+    return { matched: false, reason: 'No hay pedidos actualmente con estado Pendiente.' };
+  }
+
+  const smsRef = String(parsed.reference).trim();
+  const smsAmount = parsed.amount;
+
+  for (let o of pendingOrders) {
+    const orderRef = String(o.paymentDetails?.reference || '').trim();
+    const orderBs = Number(o.paymentDetails?.amountBs || 0);
+
+    if (!orderRef) continue;
+
+    const refMatches = (
+      orderRef === smsRef ||
+      smsRef.endsWith(orderRef) ||
+      orderRef.endsWith(smsRef) ||
+      (orderRef.length >= 4 && smsRef.includes(orderRef))
+    );
+
+    if (refMatches) {
+      let amountMatches = true;
+      if (smsAmount !== null && orderBs > 0) {
+        amountMatches = (Math.abs(smsAmount - orderBs) <= 3.0); // 3 Bs tolerancia
+      }
+
+      if (amountMatches) {
+        return { matched: true, orderId: o.id };
+      }
+    }
+  }
+
+  return { matched: false, reason: `La referencia ${smsRef} no coincide con ningún pedido pendiente de pago móvil.` };
 }

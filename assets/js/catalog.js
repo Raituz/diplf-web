@@ -307,21 +307,25 @@ function getOrders() {
 function recordNewOrder(orderData) {
   try {
     const orders = getOrders();
-    const orderId = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
+    const orderId = orderData.id || ('ORD-' + Math.floor(100000 + Math.random() * 900000));
     const now = new Date();
     
     const newOrder = {
       id: orderId,
-      date: now.toISOString(),
-      dateFormatted: now.toLocaleString('es-VE', { 
+      date: orderData.date || now.toISOString(),
+      dateFormatted: orderData.dateFormatted || now.toLocaleString('es-VE', { 
         year: 'numeric', month: 'short', day: 'numeric',
         hour: '2-digit', minute: '2-digit' 
       }),
       items: orderData.items || [],
       totalCount: orderData.totalCount || 0,
       totalPrice: Number(orderData.totalPrice || 0),
-      customerNote: orderData.note || 'Pedido web para WhatsApp',
-      status: 'nuevo' // 'nuevo', 'en_preparacion', 'entregado', 'cancelado'
+      paymentMethod: orderData.paymentMethod || 'whatsapp',
+      paymentDetails: orderData.paymentDetails || null,
+      customerNote: orderData.note || orderData.customerNote || 'Pedido web para WhatsApp',
+      status: orderData.status || 'nuevo', // 'pendiente', 'pagado', 'nuevo', 'en_preparacion', 'entregado', 'cancelado'
+      verifiedAt: orderData.verifiedAt || null,
+      smsMatch: orderData.smsMatch || null
     };
 
     orders.unshift(newOrder); // Más reciente primero
@@ -337,12 +341,16 @@ function recordNewOrder(orderData) {
 }
 
 // Cambiar estado de un pedido
-function updateOrderStatus(orderId, newStatus) {
+function updateOrderStatus(orderId, newStatus, additionalData = {}) {
   const orders = getOrders();
   const target = orders.find(o => o.id === orderId);
   if (!target) return false;
 
   target.status = newStatus;
+  if (additionalData && typeof additionalData === 'object') {
+    Object.assign(target, additionalData);
+  }
+
   localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
   window.dispatchEvent(new CustomEvent('diplf_orders_updated', { detail: orders }));
   return true;

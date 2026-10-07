@@ -2183,3 +2183,370 @@ button {
     padding: 6px 9px;
   }
 }
+
+/* ==========================================================================
+   MÓDULO CHECKOUT PAGO MÓVIL (VENEZUELA)
+   ========================================================================== */
+.pago-movil-checkout-module {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.checkout-method-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+}
+
+.method-tab-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 8px;
+  border-radius: 6px;
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.method-tab-btn .tab-icon {
+  font-size: 1.1rem;
+}
+
+.method-tab-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.method-tab-btn.active {
+  background: var(--gradient-gold);
+  color: #000000;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.35);
+}
+
+.payment-method-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Caja de datos de Pago Móvil DIP LF */
+.pm-receiver-box {
+  background: linear-gradient(145deg, #161b26, #0e121a);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.pm-receiver-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.pm-badge {
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--primary-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-copy-pm {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--primary-gold);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-copy-pm:hover {
+  background: var(--primary-gold);
+  color: #000;
+}
+
+.pm-receiver-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+}
+
+.pm-data-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.pm-label {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.pm-val {
+  font-size: 0.82rem;
+  color: #ffffff;
+  font-family: monospace;
+}
+
+.pm-val.rate-gold {
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+/* Resumen del monto en Bolívares */
+.pm-amount-summary {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px dashed var(--primary-gold);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pm-summary-label {
+  font-size: 0.78rem;
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.pm-calculated-bs {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--primary-gold);
+  text-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
+}
+
+/* Formulario de Pago Móvil */
+.pm-form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.pm-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pm-input-group label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.pm-input {
+  width: 100%;
+  background: #090c12;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  color: #ffffff;
+  padding: 9px 12px;
+  font-size: 0.86rem;
+  transition: border-color 0.2s;
+  outline: none;
+}
+
+.pm-input:focus {
+  border-color: var(--primary-gold);
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+.select-bank {
+  background-color: #090c12;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.ref-input {
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+.pm-hint {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+}
+
+.btn-confirm-pagomovil {
+  width: 100%;
+  margin-top: 8px;
+  background: var(--gradient-gold);
+  color: #000000;
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 0.92rem;
+  letter-spacing: 0.6px;
+  padding: 15px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-confirm-pagomovil:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(245, 158, 11, 0.6);
+}
+
+.btn-confirm-pagomovil:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pm-security-note {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+  text-align: center;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 6px;
+  border-left: 2px solid var(--primary-gold);
+}
+
+/* Pantalla de Éxito en Drawer */
+.payment-success-card {
+  text-align: center;
+  padding: 24px 16px;
+  background: linear-gradient(180deg, #111622 0%, #090d15 100%);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-sm);
+  animation: fadeIn 0.3s ease;
+}
+
+.success-icon-pulse {
+  font-size: 3rem;
+  margin-bottom: 8px;
+  animation: bounce 1.8s infinite;
+}
+
+.success-title {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--primary-gold);
+  margin-bottom: 6px;
+}
+
+.success-order-badge {
+  display: inline-block;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid var(--primary-gold);
+  color: var(--primary-gold);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-family: monospace;
+  font-weight: 800;
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+}
+
+.success-details-list {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  text-align: left;
+  font-size: 0.82rem;
+}
+
+.success-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.badge-status-pending {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid #f59e0b;
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: 800;
+}
+
+.success-info-text {
+  font-size: 0.78rem;
+  color: var(--text-light);
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.success-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-share-whatsapp-order {
+  width: 100%;
+  background: var(--whatsapp);
+  color: #ffffff;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.88rem;
+  padding: 12px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-share-whatsapp-order:hover {
+  background: var(--whatsapp-hover);
+  transform: translateY(-2px);
+}
+
+.btn-new-order-reset {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-light);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 10px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-new-order-reset:hover {
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}

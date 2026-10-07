@@ -1,0 +1,17 @@
+{
+  "name": "diplf-pago-movil-webhook",
+  "version": "1.0.0",
+  "description": "Microservidor Webhook para verificación automática de Pago Móvil por SMS para DIP LF",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "pago-movil",
+    "venezuela",
+    "sms-webhook",
+    "diplf"
+  ],
+  "author": "DIP LF",
+  "license": "ISC"
+}
