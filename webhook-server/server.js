@@ -301,15 +301,24 @@ const server = http.createServer((req, res) => {
   req.on('end', () => {
     let body = {};
     if (bodyChunks.length > 0) {
+      const rawStr = Buffer.concat(bodyChunks).toString('utf8');
       try {
-        body = JSON.parse(Buffer.concat(bodyChunks).toString('utf8'));
+        body = JSON.parse(rawStr);
       } catch (e) {
-        // Podría ser formulario URL encoded
-        const rawStr = Buffer.concat(bodyChunks).toString('utf8');
+        // Fallback: si no es JSON válido (ej: texto plano de MacroDroid o URL-encoded)
+        let handled = false;
         try {
-          const params = new URLSearchParams(rawStr);
-          for (const [k, v] of params.entries()) body[k] = v;
+          if (rawStr.includes('=') && !rawStr.startsWith('{')) {
+            const params = new URLSearchParams(rawStr);
+            for (const [k, v] of params.entries()) body[k] = v;
+            handled = true;
+          }
         } catch (_) {}
+
+        if (!handled || !body.message) {
+          body.rawText = rawStr;
+          body.message = rawStr;
+        }
       }
     }
 
@@ -545,7 +554,11 @@ function handleRoute(req, res, pathname, queryParams, body) {
 
     // Extraer texto del SMS o Notificación Push de la app bancaria
     // Varias apps de Android usan diferentes claves en su JSON
-    let smsText = body.message || body.text || body.body || body.content || body.sms || body.notification || body.notification_text || body.not_text || '';
+    let smsText = body.message || body.text || body.body || body.content || body.sms || body.notification || body.notification_text || body.not_text || body.rawText || '';
+    if (typeof smsText === 'string' && smsText.startsWith('{') && smsText.includes('"message"')) {
+      const match = smsText.match(/"message"\s*:\s*"([^"]+)"/);
+      if (match && match[1]) smsText = match[1];
+    }
     if (body.title && typeof body.title === 'string' && !smsText.includes(body.title)) {
       smsText = `${body.title} - ${smsText}`;
     }
