@@ -354,6 +354,24 @@ function handleRoute(req, res, pathname, queryParams, body) {
     });
   }
 
+  // 1.1 REINICIO ADMINISTRATIVO DEL PROCESO NODE (POST / GET /api/admin/restart)
+  if (pathname === '/api/admin/restart') {
+    systemConfig = loadJsonFile(CONFIG_FILE, DEFAULT_CONFIG);
+    const incomingSecret = req.headers['x-webhook-secret'] || queryParams.get('token') || body.token || body.secret;
+    const requiredSecret = systemConfig.webhookSecret || WEBHOOK_SECRET;
+
+    if (!incomingSecret || incomingSecret !== requiredSecret) {
+      return sendJsonResponse(res, 401, { error: 'Token de autorización incorrecto.' });
+    }
+
+    sendJsonResponse(res, 200, { success: true, message: 'Reiniciando proceso Node.js...' });
+    setTimeout(() => {
+      console.log('Reiniciando proceso por solicitud administrativa...');
+      process.exit(0);
+    }, 400);
+    return;
+  }
+
   // 2. CONFIGURACIÓN (GET / POST)
   if (pathname === '/api/config') {
     if (req.method === 'GET') {
