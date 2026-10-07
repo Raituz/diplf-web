@@ -33,8 +33,8 @@ if (!fs.existsSync(DATA_DIR)) {
 // Configuración por defecto de Pago Móvil
 const DEFAULT_CONFIG = {
   receiverPhone: '04122694517',
-  receiverBank: '0102 - Banco de Venezuela',
-  receiverId: 'V-27123456',
+  receiverBank: 'Banco de Venezuela (0102) / Bancamiga (0172)',
+  receiverId: 'V-21726495',
   receiverName: 'DIP LF Salsas Artesanales',
   bcvRate: 395.00,
   webhookSecret: WEBHOOK_SECRET,

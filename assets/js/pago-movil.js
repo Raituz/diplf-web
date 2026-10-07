@@ -37,9 +37,9 @@ const WEBHOOK_SERVER_URL_KEY = 'diplf_webhook_url';
 
 const DEFAULT_PM_CONFIG = {
   receiverPhone: '04122694517',
-  receiverBank: '0102 - Banco de Venezuela',
-  receiverBankCode: '0102',
-  receiverId: 'V-27123456',
+  receiverBank: 'Banco de Venezuela (0102) / Bancamiga (0172)',
+  receiverBankCode: '0102 / 0172',
+  receiverId: 'V-21726495',
   receiverName: 'DIP LF Salsas Artesanales',
   defaultRate: 395.00
 };
@@ -48,7 +48,16 @@ const DEFAULT_PM_CONFIG = {
 function getPagoMovilConfig() {
   try {
     const saved = localStorage.getItem(PAGO_MOVIL_CONFIG_KEY);
-    if (saved) return { ...DEFAULT_PM_CONFIG, ...JSON.parse(saved) };
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Actualizar automáticamente si tenía valores de prueba anteriores
+      if (parsed.receiverId === 'V-27123456' || !parsed.receiverId) {
+        parsed.receiverId = 'V-21726495';
+        parsed.receiverBank = 'Banco de Venezuela (0102) / Bancamiga (0172)';
+        savePagoMovilConfig(parsed);
+      }
+      return { ...DEFAULT_PM_CONFIG, ...parsed };
+    }
   } catch (e) {}
   return DEFAULT_PM_CONFIG;
 }
@@ -134,7 +143,7 @@ function initPagoMovilCheckoutUI() {
         <div class="pm-receiver-grid">
           <div class="pm-data-item">
             <span class="pm-label">Banco:</span>
-            <strong id="pmViewBank" class="pm-val">0102 - BDV</strong>
+            <strong id="pmViewBank" class="pm-val">0102 - BDV / 0172 - Bancamiga</strong>
           </div>
           <div class="pm-data-item">
             <span class="pm-label">Teléfono:</span>
@@ -142,7 +151,7 @@ function initPagoMovilCheckoutUI() {
           </div>
           <div class="pm-data-item">
             <span class="pm-label">Cédula / RIF:</span>
-            <strong id="pmViewId" class="pm-val">V-27123456</strong>
+            <strong id="pmViewId" class="pm-val">V-21726495</strong>
           </div>
           <div class="pm-data-item">
             <span class="pm-label">Tasa de Cambio:</span>

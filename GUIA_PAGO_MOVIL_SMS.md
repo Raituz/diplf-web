@@ -10,7 +10,7 @@ Esta guía explica en detalle cómo funciona el módulo de **Pago Móvil (Venezu
 ```
 [1. Cliente en la Web] 
        │ Añade salsas al carrito, abre el Drawer de pedido y elige "📱 Pago Móvil".
-       │ Ve los datos de DIP LF (Banco BDV, Cédula, Teléfono 04122694517, Tasa BCV).
+       │ Ve los datos de DIP LF (Banco de Venezuela / Bancamiga, Cédula V-21726495, Teléfono 0412-2694517, Tasa BCV).
        │ Realiza el pago en su banco e ingresa: Teléfono emisor, Banco de origen y Referencia.
        ▼
 [2. Pedido Registrado como "PENDIENTE"]
