@@ -392,13 +392,17 @@ function handleRoute(req, res, pathname, queryParams, body) {
     if (search) {
       const q = String(search).trim().toLowerCase();
       const cleanDigits = q.replace(/[^0-9]/g, '');
-      const filtered = ordersDb.filter(o => 
-        (o.id && o.id.toLowerCase().includes(q)) ||
-        (cleanDigits.length >= 4 && o.customerPhone && o.customerPhone.replace(/[^0-9]/g, '').includes(cleanDigits)) ||
-        (cleanDigits.length >= 4 && o.customerId && o.customerId.replace(/[^0-9]/g, '').includes(cleanDigits)) ||
-        (o.customerName && o.customerName.toLowerCase().includes(q)) ||
-        (cleanDigits.length >= 4 && o.paymentDetails?.reference && String(o.paymentDetails.reference).includes(cleanDigits))
-      );
+      const filtered = ordersDb.filter(o => {
+        const phone = o.customerPhone || o.paymentDetails?.senderPhone || '';
+        const cleanPhone = phone.replace(/[^0-9]/g, '');
+        return (
+          (o.id && o.id.toLowerCase().includes(q)) ||
+          (cleanDigits.length >= 4 && cleanPhone && cleanPhone.includes(cleanDigits)) ||
+          (cleanDigits.length >= 4 && o.customerId && o.customerId.replace(/[^0-9]/g, '').includes(cleanDigits)) ||
+          (o.customerName && o.customerName.toLowerCase().includes(q)) ||
+          (cleanDigits.length >= 4 && o.paymentDetails?.reference && String(o.paymentDetails.reference).includes(cleanDigits))
+        );
+      });
       return sendJsonResponse(res, 200, { success: true, count: filtered.length, orders: filtered });
     }
     return sendJsonResponse(res, 200, { success: true, count: ordersDb.length, orders: ordersDb });
@@ -411,12 +415,16 @@ function handleRoute(req, res, pathname, queryParams, body) {
     const qLower = rawParam.toLowerCase();
     const qDigits = rawParam.replace(/[^0-9]/g, '');
 
-    const order = ordersDb.find(o => 
-      o.id.toLowerCase() === qLower ||
-      (qDigits.length >= 5 && o.id.replace(/[^0-9]/g, '') === qDigits) ||
-      (qDigits.length >= 7 && o.customerPhone && o.customerPhone.replace(/[^0-9]/g, '').endsWith(qDigits.slice(-7))) ||
-      (qDigits.length >= 6 && o.customerId && o.customerId.replace(/[^0-9]/g, '') === qDigits)
-    );
+    const order = ordersDb.find(o => {
+      const phone = o.customerPhone || o.paymentDetails?.senderPhone || '';
+      const cleanPhone = phone.replace(/[^0-9]/g, '');
+      return (
+        o.id.toLowerCase() === qLower ||
+        (qDigits.length >= 5 && o.id.replace(/[^0-9]/g, '') === qDigits) ||
+        (qDigits.length >= 7 && cleanPhone && cleanPhone.endsWith(qDigits.slice(-7))) ||
+        (qDigits.length >= 6 && o.customerId && o.customerId.replace(/[^0-9]/g, '') === qDigits)
+      );
+    });
 
     if (!order) {
       return sendJsonResponse(res, 404, { success: false, error: 'Pedido no encontrado' });
