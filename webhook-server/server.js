@@ -168,9 +168,9 @@ function parseBankSms(smsText, sender) {
     }
   }
 
-  // 4. Extraer Teléfono Emisor (si está presente en el SMS)
-  // 0412, 0414, 0424, 0416, 0426 seguido de 7 dígitos
-  const phoneMatch = cleanText.match(/(?:de\s+)?(0412|0414|0424|0416|0426)[-\s]?([0-9]{7})/i);
+  // 4. Extraer Teléfono Emisor (si está presente en el SMS o notificación)
+  // Ejemplos: "de 04122694517", "desde el 04122694517", "del 0412-2694517", o número celular venezolano
+  const phoneMatch = cleanText.match(/(?:desde\s+el\s+|desde\s+|del?\s+|de\s+)?(0412|0414|0424|0416|0426)[-\s]?([0-9]{7})/i);
   if (phoneMatch) {
     parsed.phone = `${phoneMatch[1]}${phoneMatch[2]}`;
     parsed.confidence += 20;
@@ -461,41 +461,60 @@ function handleRoute(req, res, pathname, queryParams, body) {
 
     // Buscar coincidencia en smsLogsDb (desde el más reciente al más antiguo)
     let matchedSms = null;
+    const clientPhone = String(body.phone || '').trim().replace(/[^0-9]/g, '');
 
     for (const entry of smsLogsDb) {
       // Ignorar SMS que ya hayan sido emparejados a otra orden previa
       if (entry.matched) continue;
-      if (!entry.parsed || !entry.parsed.reference) continue;
-
-      const smsRef = String(entry.parsed.reference).trim();
-      const smsCleanRef = smsRef.replace(/[^0-9]/g, '');
-
-      // Coincidencia de referencia:
-      // - Coincidencia exacta
-      // - Coincidencia de sufijo (últimos dígitos)
-      // - Coincidencia de subcadena si longitud >= 4
-      const isExact = (smsRef === rawRef || (cleanRef.length >= 4 && smsCleanRef === cleanRef));
-      const isSuffix = (
-        (cleanRef.length >= 4 && smsCleanRef.endsWith(cleanRef)) ||
-        (smsCleanRef.length >= 4 && cleanRef.endsWith(smsCleanRef))
-      );
-      const isSubstring = (
-        (cleanRef.length >= 4 && smsCleanRef.includes(cleanRef)) ||
-        (smsCleanRef.length >= 4 && cleanRef.includes(smsCleanRef))
-      );
-
-      const refMatches = isExact || isSuffix || isSubstring;
-      if (!refMatches) continue;
+      if (!entry.parsed) continue;
 
       // Verificación de monto si el SMS contiene monto
       let amountMatches = true;
       if (entry.parsed.amount !== null && entry.parsed.amount !== undefined && clientAmount > 0) {
         const diff = Math.abs(Number(entry.parsed.amount) - clientAmount);
         amountMatches = (diff <= tolerance);
+      } else if (clientAmount > 0 && (entry.parsed.amount === null || entry.parsed.amount === undefined)) {
+        amountMatches = false;
       }
 
-      if (refMatches && amountMatches) {
+      // CASO A: Coincidencia por número de referencia bancaria (BDV, Banesco, etc.)
+      let refMatches = false;
+      if (entry.parsed.reference) {
+        const smsRef = String(entry.parsed.reference).trim();
+        const smsCleanRef = smsRef.replace(/[^0-9]/g, '');
+
+        const isExact = (smsRef === rawRef || (cleanRef.length >= 4 && smsCleanRef === cleanRef));
+        const isSuffix = (
+          (cleanRef.length >= 4 && smsCleanRef.endsWith(cleanRef)) ||
+          (smsCleanRef.length >= 4 && cleanRef.endsWith(smsCleanRef))
+        );
+        const isSubstring = (
+          (cleanRef.length >= 4 && smsCleanRef.includes(cleanRef)) ||
+          (smsCleanRef.length >= 4 && cleanRef.includes(smsCleanRef))
+        );
+
+        refMatches = isExact || isSuffix || isSubstring;
+      }
+
+      // CASO B: Coincidencia por Teléfono Emisor + Monto (para Bancamiga Suite y apps cuyas notificaciones omiten la ref)
+      let phoneAndAmountMatches = false;
+      if (!refMatches && !entry.parsed.reference && entry.parsed.phone && clientPhone && amountMatches) {
+        const smsPhoneClean = String(entry.parsed.phone).replace(/[^0-9]/g, '');
+        if (smsPhoneClean === clientPhone || (smsPhoneClean.length >= 7 && clientPhone.endsWith(smsPhoneClean.slice(-7)))) {
+          // Asegurar que la notificación fue en los últimos 30 minutos
+          const receivedTime = new Date(entry.receivedAt).getTime();
+          const ageMinutes = (Date.now() - receivedTime) / (1000 * 60);
+          if (ageMinutes <= 30) {
+            phoneAndAmountMatches = true;
+          }
+        }
+      }
+
+      if ((refMatches || phoneAndAmountMatches) && amountMatches) {
         matchedSms = entry;
+        if (!matchedSms.parsed.reference) {
+          matchedSms.parsed.reference = rawRef;
+        }
         break;
       }
     }
@@ -554,7 +573,11 @@ function handleRoute(req, res, pathname, queryParams, body) {
 
     // Extraer texto del SMS o Notificación Push de la app bancaria
     // Varias apps de Android usan diferentes claves en su JSON
-    let smsText = body.message || body.text || body.body || body.content || body.sms || body.notification || body.notification_text || body.not_text || body.rawText || '';
+    let smsText = (
+      body.message || body.text || body.body || body.content || body.sms || 
+      body.notification || body.notification_text || body.not_text || body.rawText ||
+      queryParams.get('message') || queryParams.get('text') || queryParams.get('sms') || ''
+    );
     if (typeof smsText === 'string' && smsText.startsWith('{') && smsText.includes('"message"')) {
       const match = smsText.match(/"message"\s*:\s*"([^"]+)"/);
       if (match && match[1]) smsText = match[1];
@@ -562,11 +585,18 @@ function handleRoute(req, res, pathname, queryParams, body) {
     if (body.title && typeof body.title === 'string' && !smsText.includes(body.title)) {
       smsText = `${body.title} - ${smsText}`;
     }
-    const sender = body.sender || body.from || body.origin || body.app || body.application || body.title || 'BANCO';
-    const devicePhone = body.phone || body.device || AUTHORIZED_PHONE;
+    const sender = (
+      body.sender || body.from || body.origin || body.app || body.application || body.title ||
+      queryParams.get('sender') || queryParams.get('from') || 'BANCO'
+    );
+    const devicePhone = body.phone || body.device || queryParams.get('phone') || AUTHORIZED_PHONE;
 
     if (!smsText) {
       return sendJsonResponse(res, 400, { error: 'El campo de mensaje o notificación no puede estar vacío.' });
+    }
+
+    if (smsText.includes('{not_text}') || smsText.includes('[notification_text]') && smsText.length < 30) {
+      console.warn(`\n[MACRODROID ALERTA] Se recibió token sin reemplazar: "${smsText}". Verifica la etiqueta en los [...] de MacroDroid.`);
     }
 
     console.log(`\n--- [SMS RECIBIDO DE ${sender}] ---`);
