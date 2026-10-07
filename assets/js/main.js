@@ -129,6 +129,14 @@ const FLAVORS_DATA = [
   }
 ];
 
+// Helper para obtener catálogo activo (local o por defecto)
+function getStoreCatalog() {
+  if (typeof getCatalog === 'function') {
+    return getCatalog();
+  }
+  return FLAVORS_DATA;
+}
+
 // Estado global de la consulta / carrito
 let cart = [];
 
@@ -154,10 +162,16 @@ function saveCart() {
 
 // Añadir producto al carrito
 function addToCart(flavorId, sizeKey, quantity = 1) {
-  const flavor = FLAVORS_DATA.find(f => f.id === flavorId);
+  const catalog = getStoreCatalog();
+  const flavor = catalog.find(f => f.id === flavorId);
   if (!flavor) return;
 
-  const sizeInfo = SIZES[sizeKey] || SIZES['16oz'];
+  const defaultPrice = SIZES[sizeKey] ? SIZES[sizeKey].price : 4;
+  const itemPrice = (flavor.prices && flavor.prices[sizeKey] !== undefined)
+    ? Number(flavor.prices[sizeKey])
+    : defaultPrice;
+
+  const sizeInfo = SIZES[sizeKey] || { name: sizeKey, ounces: 16, price: itemPrice };
   const cartItemId = `${flavorId}_${sizeKey}`;
 
   const existingIndex = cart.findIndex(item => item.cartItemId === cartItemId);
@@ -171,7 +185,7 @@ function addToCart(flavorId, sizeKey, quantity = 1) {
       name: flavor.name,
       sizeKey: sizeKey,
       sizeName: sizeInfo.name,
-      price: sizeInfo.price,
+      price: itemPrice,
       image: flavor.image,
       quantity: quantity
     });
@@ -323,12 +337,29 @@ function sendWhatsAppOrder() {
     return;
   }
 
+  // Registrar el pedido en el sistema para que aparezca en el Almacén con alerta de sonido
+  if (typeof recordNewOrder === 'function') {
+    recordNewOrder({
+      items: cart.map(i => ({
+        flavorId: i.flavorId,
+        name: i.name,
+        sizeName: i.sizeName,
+        sizeKey: i.sizeKey,
+        price: i.price,
+        quantity: i.quantity
+      })),
+      totalCount: totalCount,
+      totalPrice: totalPrice,
+      note: 'Pedido cliente desde web'
+    });
+  }
+
   let text = `¡Hola DIP LF! 👋 Quiero consultar y coordinar este pedido:\n\n`;
   text += `🛒 *MI PEDIDO DE SALSAS:*\n`;
 
   cart.forEach(item => {
     const subtotal = item.price * item.quantity;
-    text += `• ${item.quantity}x ${item.name} (${item.sizeName}) → $${subtotal}\n`;
+    text += `• ${item.quantity}x ${item.name} (${item.sizeName}) → $${subtotal.toFixed(2)}\n`;
   });
 
   text += `\n💵 *Total estimado:* $${totalPrice.toFixed(2)} USD\n`;
@@ -375,23 +406,35 @@ function showOrderToast(msg) {
   }, 2200);
 }
 
-// Renderizar Cuadrícula de Sabores
+// Renderizar Cuadrícula de Sabores Dinámica
 function renderFlavorsGrid(categoryFilter = 'todos') {
   const grid = document.getElementById('flavorsGrid');
   if (!grid) return;
 
+  const catalog = getStoreCatalog();
   const filtered = categoryFilter === 'todos' 
-    ? FLAVORS_DATA 
-    : FLAVORS_DATA.filter(f => f.category === categoryFilter);
+    ? catalog 
+    : catalog.filter(f => f.category === categoryFilter);
 
   let html = '';
   filtered.forEach(flavor => {
-    const defaultSize = SIZES[flavor.defaultSize];
+    const price7 = (flavor.prices && flavor.prices['7oz'] !== undefined) ? flavor.prices['7oz'] : 2;
+    const price16 = (flavor.prices && flavor.prices['16oz'] !== undefined) ? flavor.prices['16oz'] : 4;
+    const price22 = (flavor.prices && flavor.prices['22oz'] !== undefined) ? flavor.prices['22oz'] : 6;
+
+    const isUnavailable = Boolean(flavor.isComingSoon || flavor.stockStatus === 'proximamente' || flavor.stockStatus === 'agotado');
+    let btnText = '+ Añadir';
+    if (flavor.isComingSoon || flavor.stockStatus === 'proximamente') {
+      btnText = 'Próximamente';
+    } else if (flavor.stockStatus === 'agotado') {
+      btnText = 'Agotado';
+    }
+
     const bgClass = flavor.isDarkBg ? 'dark-bg' : 'light-bg';
     html += `
       <div class="flavor-card" data-flavor-id="${flavor.id}">
         <div class="flavor-img-wrapper ${bgClass} ${!flavor.image ? 'coming-soon-img' : ''}">
-          <span class="flavor-badge-type">${flavor.badge}</span>
+          <span class="flavor-badge-type">${flavor.badge || ''}</span>
           ${flavor.image 
             ? `<img src="${flavor.image}" alt="${flavor.name}" loading="lazy">` 
             : `<div class="coming-soon-placeholder">
@@ -409,25 +452,25 @@ function renderFlavorsGrid(categoryFilter = 'todos') {
           <div class="size-options">
             <div class="size-pill" data-size="7oz" onclick="selectCardSize('${flavor.id}', '7oz')">
               <span class="size-name">7 oz</span>
-              <span class="size-price-tag">$2</span>
+              <span class="size-price-tag">$${price7}</span>
             </div>
             <div class="size-pill active" data-size="16oz" onclick="selectCardSize('${flavor.id}', '16oz')">
               <span class="size-name">16 oz</span>
-              <span class="size-price-tag">$4</span>
+              <span class="size-price-tag">$${price16}</span>
             </div>
             <div class="size-pill" data-size="22oz" onclick="selectCardSize('${flavor.id}', '22oz')">
               <span class="size-name">22 oz</span>
-              <span class="size-price-tag">$6</span>
+              <span class="size-price-tag">$${price22}</span>
             </div>
           </div>
           
           <div class="flavor-card-footer">
             <div class="price-display-block">
               <span class="price-label-small">Precio:</span>
-              <span class="price-amount" id="price_${flavor.id}">$4</span>
+              <span class="price-amount" id="price_${flavor.id}">$${price16}</span>
             </div>
-            <button class="btn-add-consult" onclick="handleAddFromCard('${flavor.id}')" ${flavor.isComingSoon ? 'disabled style="opacity: 0.55; cursor: not-allowed;"' : ''}>
-              <span>${flavor.isComingSoon ? 'Próximamente' : '+ Añadir'}</span>
+            <button class="btn-add-consult" onclick="handleAddFromCard('${flavor.id}')" ${isUnavailable ? 'disabled style="opacity: 0.55; cursor: not-allowed;"' : ''}>
+              <span>${btnText}</span>
             </button>
           </div>
         </div>
@@ -459,8 +502,12 @@ function selectCardSize(flavorId, sizeKey) {
   // Actualizar precio visible
   const priceElem = document.getElementById(`price_${flavorId}`);
   if (priceElem) {
-    const size = SIZES[sizeKey];
-    priceElem.textContent = `$${size.price}`;
+    const catalog = getStoreCatalog();
+    const flavor = catalog.find(f => f.id === flavorId);
+    const itemPrice = (flavor && flavor.prices && flavor.prices[sizeKey] !== undefined)
+      ? flavor.prices[sizeKey]
+      : (SIZES[sizeKey] ? SIZES[sizeKey].price : 4);
+    priceElem.textContent = `$${itemPrice}`;
   }
 }
 
@@ -541,5 +588,27 @@ document.addEventListener('DOMContentLoaded', () => {
     link.addEventListener('click', () => {
       navMenu?.classList.remove('active');
     });
+  });
+
+  // Control de visibilidad del botón Almacén (SOLO para Administrador)
+  function updateAdminHeaderButton() {
+    const adminBtn = document.getElementById('headerAdminBtn');
+    if (adminBtn) {
+      if (typeof isAdmin === 'function' && isAdmin()) {
+        adminBtn.style.display = 'inline-flex';
+      } else {
+        adminBtn.style.display = 'none';
+      }
+    }
+  }
+
+  updateAdminHeaderButton();
+
+  // Escuchar si cambia la sesión o el catálogo
+  window.addEventListener('diplf_auth_changed', updateAdminHeaderButton);
+  window.addEventListener('diplf_catalog_updated', () => renderFlavorsGrid());
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'diplf_auth_user') updateAdminHeaderButton();
+    if (e.key === 'diplf_custom_catalog') renderFlavorsGrid();
   });
 });

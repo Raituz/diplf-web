@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Almacén DIP LF | Gestión de Productos, Pedidos y Roles</title>
+  <meta name="description" content="Panel de administración y control de inventario de salsas artesanales DIP LF.">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/jpeg" href="assets/images/Logo.jpeg">
+
+  <!-- Estilos del Almacén -->
+  <link rel="stylesheet" href="assets/css/almacen.css?v=9.0">
+</head>
+<body>
+
+  <!-- =========================================================================
+       1. PANTALLA DE ACCESO (LOGIN DE ADMINISTRADOR)
+       ========================================================================= -->
+  <div id="loginScreen" class="login-screen-wrap">
+    <div class="login-card">
+      <img src="assets/images/Logo.jpeg" alt="Logo DIP LF" class="login-brand-logo">
+      <h2>Almacén Central DIP LF</h2>
+      <p>Acceso administrativo protegido. Inicia sesión con tus credenciales.</p>
+
+      <div id="loginAlert" class="login-alert"></div>
+
+      <form id="adminLoginForm">
+        <div class="form-group">
+          <label for="loginEmail">Correo Electrónico</label>
+          <input type="email" id="loginEmail" class="form-control" placeholder="charquin50@gmail.com" required autocomplete="email" value="charquin50@gmail.com">
+        </div>
+
+        <div class="form-group">
+          <label for="loginPassword">Contraseña</label>
+          <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn-submit-login">
+          <span>Ingresar al Almacén</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+      </form>
+
+      <div class="login-footer-links">
+        <a href="index.html">← Volver a la Tienda Pública</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       2. PANEL PRINCIPAL DE ADMINISTRADOR (DASHBOARD)
+       ========================================================================= -->
+  <div id="dashboardScreen" style="display: none;">
+    
+    <!-- Barra Superior -->
+    <header class="admin-header">
+      <div class="admin-header-container">
+        
+        <div class="admin-brand">
+          <img src="assets/images/Logo.jpeg" alt="Logo DIP LF">
+          <div class="admin-brand-info">
+            <h1>
+              DIP LF Almacén
+              <span class="admin-badge-tag">ADMINISTRADOR</span>
+            </h1>
+            <span>Control de Inventario y Operaciones</span>
+          </div>
+        </div>
+
+        <div class="admin-actions-group">
+          <div class="admin-user-pill">
+            <span class="user-dot"></span>
+            <span id="adminUserEmail">charquin50@gmail.com</span>
+          </div>
+
+          <a href="index.html" class="btn-header-link" title="Ver la web pública">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <span>Ver Tienda</span>
+          </a>
+
+          <button id="btnLogout" class="btn-header-link btn-header-logout" title="Cerrar Sesión">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span>Salir</span>
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Barra de Pestañas -->
+    <nav class="admin-nav-tabs">
+      <div class="admin-tabs-container">
+        <button class="tab-btn active" data-tab="tabModificar">
+          <span>🏷️ Modificar Productos</span>
+        </button>
+        <button class="tab-btn" data-tab="tabNuevo">
+          <span>➕ Nuevo Producto</span>
+        </button>
+        <button class="tab-btn" data-tab="tabPedidos">
+          <span>📦 Pedidos</span>
+          <span id="orderBadgeCount" class="tab-badge-count" style="display: none;">0</span>
+        </button>
+        <button class="tab-btn" data-tab="tabUsuarios">
+          <span>👥 Usuarios y Roles</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Contenido de las Pestañas -->
+    <main class="admin-main-content">
+
+      <!-- ===================================================================
+           PESTAÑA 1: MODIFICAR PRODUCTOS EXISTENTES
+           =================================================================== -->
+      <section id="tabModificar" class="tab-section active">
+        <div class="section-header-title">
+          <div>
+            <h2>Modificar Productos del Catálogo</h2>
+            <p>Edita nombres, precios, inventario, imágenes y descripción de cada salsa.</p>
+          </div>
+        </div>
+
+        <div class="products-search-bar">
+          <input type="text" id="searchProductsAdmin" class="products-search-input" placeholder="🔍 Buscar salsa por nombre o ingrediente...">
+        </div>
+
+        <!-- Grid interactivo con todas las salsas -->
+        <div id="productsAdminGrid" class="products-grid-admin">
+          <!-- Generado dinámicamente por almacen.js -->
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           PESTAÑA 2: NUEVO PRODUCTO (SEPARADO)
+           =================================================================== -->
+      <section id="tabNuevo" class="tab-section">
+        <div class="section-header-title">
+          <div>
+            <h2>Crear Nuevo Producto</h2>
+            <p>Añade una nueva variedad de salsa al catálogo para que los clientes puedan pedirla de inmediato.</p>
+          </div>
+        </div>
+
+        <div class="create-prod-container">
+          <form id="formNewProduct">
+            <div class="create-prod-grid">
+              
+              <!-- Columna 1: Información Básica -->
+              <div>
+                <div class="form-group">
+                  <label for="newProdName">Nombre de la Salsa *</label>
+                  <input type="text" id="newProdName" class="form-control" placeholder="Ej: Salsa BBQ Ahumada Artesanal" required>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="newProdCategory">Categoría</label>
+                    <select id="newProdCategory" class="form-control">
+                      <option value="cremosa">Cremosa</option>
+                      <option value="especial">Especial</option>
+                      <option value="vegetal">Vegetal</option>
+                      <option value="crujiente">Crujiente</option>
+                      <option value="picante">Picante</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="newProdBadge">Etiqueta / Badge</label>
+                    <input type="text" id="newProdBadge" class="form-control" placeholder="Ej: NUEVO SABOR">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="newProdStockStatus">Estado de Inventario</label>
+                    <select id="newProdStockStatus" class="form-control">
+                      <option value="disponible">🟢 Disponible (En Stock)</option>
+                      <option value="proximamente">🟡 Próximamente (En desarrollo)</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="newProdStockQty">Unidades Iniciales</label>
+                    <input type="number" id="newProdStockQty" class="form-control" value="30" min="0">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="newProdDesc">Descripción y Notas de Sabor</label>
+                  <textarea id="newProdDesc" class="form-control" rows="3" placeholder="Describe los ingredientes principales, textura y maridaje sugerido..."></textarea>
+                </div>
+              </div>
+
+              <!-- Columna 2: Precios e Imagen -->
+              <div>
+                <div class="form-group">
+                  <label>Precios por Tamaño Oficial (USD $)</label>
+                  <div class="prices-grid-3">
+                    <div class="price-mini-box">
+                      <label>7 oz ($)</label>
+                      <input type="number" step="0.5" id="newProdPrice7oz" value="2" required>
+                    </div>
+                    <div class="price-mini-box">
+                      <label>16 oz ($)</label>
+                      <input type="number" step="0.5" id="newProdPrice16oz" value="4" required>
+                    </div>
+                    <div class="price-mini-box">
+                      <label>22 oz ($)</label>
+                      <input type="number" step="0.5" id="newProdPrice22oz" value="6" required>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Foto del Producto</label>
+                  
+                  <div class="img-upload-box" onclick="document.getElementById('newProdFileInput').click()">
+                    <input type="file" id="newProdFileInput" accept="image/*" style="display: none;">
+                    <img id="newProdPreviewImg" src="" alt="Vista previa" style="display: none;">
+                    
+                    <div id="newProdPreviewPlaceholder">
+                      <div style="font-size: 2rem; margin-bottom: 6px;">📷</div>
+                      <strong style="color: var(--gold-primary); font-size: 0.9rem;">Haz clic para subir foto</strong>
+                      <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">PNG, JPG o JFIF de tu computadora</p>
+                    </div>
+                  </div>
+
+                  <div style="margin-top: 10px;">
+                    <label style="font-size: 0.75rem; color: var(--text-dim);">O pega una ruta / URL de imagen:</label>
+                    <input type="text" id="newProdImgUrl" class="form-control" placeholder="assets/images/foto.jfif">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <button type="submit" class="btn-create-submit">
+              <span>✨ Publicar Nueva Salsa en la Web</span>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           PESTAÑA 3: PEDIDOS Y ALERTAS SONORAS
+           =================================================================== -->
+      <section id="tabPedidos" class="tab-section">
+        <div class="section-header-title">
+          <div>
+            <h2>Gestión de Pedidos Recibidos</h2>
+            <p>Monitoreo en tiempo real de consultas y órdenes de clientes vía web con timbre de alerta.</p>
+          </div>
+        </div>
+
+        <!-- Métricas resumidas -->
+        <div class="orders-stats-row">
+          <div class="stat-card">
+            <span>Total de Pedidos</span>
+            <h3 id="statTotalOrders">0</h3>
+          </div>
+          <div class="stat-card">
+            <span>Pendientes / Nuevos</span>
+            <h3 id="statPendingOrders" style="color: var(--gold-primary);">0</h3>
+          </div>
+          <div class="stat-card">
+            <span>Ventas Estimadas</span>
+            <h3 id="statTotalSales" style="color: var(--color-green);">$0.00</h3>
+          </div>
+        </div>
+
+        <!-- Barra de herramientas y sonido -->
+        <div class="orders-toolbar">
+          <div class="notif-toggle-wrapper">
+            <label class="switch">
+              <input type="checkbox" id="toggleOrderNotif" checked>
+              <span class="slider"></span>
+            </label>
+            <label for="toggleOrderNotif" class="switch-label">
+              <span>🔔 Notificación de nuevo pedido (Sonido & Push)</span>
+            </label>
+          </div>
+
+          <div class="orders-actions-btns">
+            <button type="button" id="btnTestSound" class="btn-tool" title="Comprobar que el audio suena en este dispositivo">
+              <span>🔊 Probar Sonido</span>
+            </button>
+            <button type="button" id="btnSimulateOrder" class="btn-tool btn-test-order" title="Genera una orden ficticia para comprobar la alerta">
+              <span>🧪 Simular Pedido de Prueba</span>
+            </button>
+            <select id="filterOrderStatus" class="order-status-select">
+              <option value="todos">Todos los Estados</option>
+              <option value="nuevo">Nuevos</option>
+              <option value="en_preparacion">En Preparación</option>
+              <option value="entregado">Entregados</option>
+              <option value="cancelado">Cancelados</option>
+            </select>
+            <button type="button" id="btnClearOrders" class="btn-tool" style="color: var(--color-red);" title="Vaciar historial">
+              <span>🗑️ Limpiar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Lista de Pedidos -->
+        <div id="ordersListContainer" class="orders-list-wrap">
+          <!-- Renderizado dinámico -->
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           PESTAÑA 4: GESTIÓN DE USUARIOS Y ROLES
+           =================================================================== -->
+      <section id="tabUsuarios" class="tab-section">
+        <div class="section-header-title">
+          <div>
+            <h2>Gestión de Usuarios y Roles</h2>
+            <p>Otorga acceso al almacén a nuevos colaboradores mediante su correo electrónico.</p>
+          </div>
+        </div>
+
+        <div class="roles-layout">
+          
+          <!-- Formulario para otorgar rol -->
+          <div class="role-form-card">
+            <h3>Asignar Rol a Usuario</h3>
+            <p>Ingresa los datos de la persona a autorizar.</p>
+
+            <form id="formAssignRole">
+              <div class="form-group">
+                <label for="userEmail">Correo Electrónico *</label>
+                <input type="email" id="userEmail" class="form-control" placeholder="nuevo.admin@ejemplo.com" required>
+              </div>
+
+              <div class="form-group">
+                <label for="userName">Nombre o Alias</label>
+                <input type="text" id="userName" class="form-control" placeholder="Ej: Carlos Encargado">
+              </div>
+
+              <div class="form-group">
+                <label for="userPass">Contraseña de Acceso *</label>
+                <input type="password" id="userPass" class="form-control" placeholder="Mínimo 4 caracteres" required>
+              </div>
+
+              <div class="form-group">
+                <label for="userRole">Rol Autorizado</label>
+                <select id="userRole" class="form-control">
+                  <option value="admin">Administrador (Acceso Total)</option>
+                  <option value="operador">Operador (Gestión de Pedidos)</option>
+                </select>
+              </div>
+
+              <button type="submit" class="btn-create-submit" style="margin-top: 14px;">
+                <span>➕ Asignar Rol y Guardar</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Tabla de usuarios autorizados -->
+          <div class="users-table-card">
+            <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 6px;">Usuarios Autorizados</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Personas con credenciales para acceder a este panel.</p>
+
+            <div style="overflow-x: auto;">
+              <table class="users-table">
+                <thead>
+                  <tr>
+                    <th>Usuario / Correo</th>
+                    <th>Nombre</th>
+                    <th>Rol</th>
+                    <th>Fecha</th>
+                    <th style="text-align: right;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                  <!-- Renderizado dinámicamente -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="assets/js/auth.js?v=9.0"></script>
+  <script src="assets/js/catalog.js?v=9.0"></script>
+  <script src="assets/js/almacen.js?v=9.0"></script>
+</body>
+</html>

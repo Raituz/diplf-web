@@ -252,6 +252,31 @@ button {
   box-shadow: var(--shadow-glow);
 }
 
+.btn-admin-header {
+  display: none; /* Invisible para rol cliente, se activa con JS si isAdmin() */
+  background: #181920;
+  color: var(--primary-gold);
+  border: 1.5px solid var(--primary-gold);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.82rem;
+  letter-spacing: 0.8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  align-items: center;
+  gap: 7px;
+  text-decoration: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  transition: all 0.25s ease;
+}
+
+.btn-admin-header:hover {
+  background: var(--primary-gold);
+  color: #000000;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
+}
+
 .cart-count-badge {
   background: #000000;
   color: #ffffff;
