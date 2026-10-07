@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Órdenes | DIP LF Salsas Artesanales</title>
+  <meta name="description" content="Consulta y seguimiento de tus pedidos de salsas artesanales DIP LF en tiempo real.">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/jpeg" href="assets/images/Logo.jpeg">
+
+  <!-- Estilos Dedicados para la Página de Órdenes -->
+  <link rel="stylesheet" href="assets/css/ordenes.css?v=1.0">
+</head>
+<body class="orders-body">
+
+  <div class="orders-layout">
+    
+    <!-- =========================================================================
+         1. SIDEBAR LATERAL (Como en la referencia visual)
+         ========================================================================= -->
+    <aside class="orders-sidebar">
+      <!-- Logo Marca -->
+      <a href="index.html" class="sidebar-brand" title="Volver a la Tienda DIP LF">
+        <div class="brand-avatar">
+          <img src="assets/images/Logo.jpeg" alt="Logo DIP LF">
+        </div>
+      </a>
+
+      <!-- Menú de Navegación Vertical -->
+      <nav class="sidebar-nav">
+        <a href="#buscar" class="sidebar-nav-item" id="sidebarBtnSearch" onclick="focusOrdersSearch(event)" title="Buscar Órdenes">
+          <span class="nav-icon">🔍</span>
+          <span class="nav-label">Buscar</span>
+        </a>
+
+        <a href="https://wa.me/584143572462?text=Hola%20DIP%20LF,%20quisiera%20consultar%20sobre%20mi%20orden." target="_blank" rel="noopener noreferrer" class="sidebar-nav-item" title="Chat y Soporte WhatsApp">
+          <span class="nav-icon">💬</span>
+          <span class="nav-label">Chat</span>
+        </a>
+
+        <a href="ordenes.html" class="sidebar-nav-item active" title="Mis Órdenes">
+          <span class="nav-icon">📦</span>
+          <span class="nav-label">Órdenes</span>
+        </a>
+
+        <a href="index.html" class="sidebar-nav-item" title="Ir a la Tienda de Salsas">
+          <span class="nav-icon">🥣</span>
+          <span class="nav-label">Tienda</span>
+        </a>
+
+        <a href="almacen.html" class="sidebar-nav-item admin-only" id="sidebarAdminLink" style="display: none;" title="Panel de Almacén">
+          <span class="nav-icon">🔒</span>
+          <span class="nav-label">Almacén</span>
+        </a>
+      </nav>
+
+      <!-- Pie del Sidebar -->
+      <div class="sidebar-footer">
+        <a href="index.html" class="sidebar-exit-btn" title="Volver al Inicio">
+          <span>← Salir</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- =========================================================================
+         2. CONTENIDO PRINCIPAL: LISTADO DE ÓRDENES
+         ========================================================================= -->
+    <main class="orders-main">
+      
+      <!-- Topbar Header -->
+      <header class="orders-topbar">
+        <div class="topbar-left">
+          <div class="topbar-title-wrap">
+            <h1 class="orders-page-title">Mis Órdenes</h1>
+            <span id="ordersCountBadge" class="orders-results-count">0 órdenes</span>
+          </div>
+          <p class="orders-page-subtitle">Monitoreo en vivo de tus pedidos de salsas artesanales DIP LF y coordinación de entregas.</p>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Tasa BCV Pill -->
+          <div class="topbar-bcv-pill" title="Tasa oficial de cambio BCV">
+            <span class="bcv-icon">💵</span>
+            <div class="bcv-info">
+              <span class="bcv-label">TASA BCV</span>
+              <strong id="bcvRateDisplay" class="bcv-val">Bs. 395.00</strong>
+            </div>
+          </div>
+
+          <!-- Perfil / Datos del Cliente -->
+          <div class="topbar-profile-pill" id="customerProfilePill">
+            <div class="profile-avatar">👤</div>
+            <div class="profile-meta">
+              <span id="topbarCustomerName" class="profile-name">Cliente</span>
+              <span id="topbarCustomerId" class="profile-id">Sin registro</span>
+            </div>
+          </div>
+
+          <!-- Botón Volver a la Tienda -->
+          <a href="index.html" class="btn-back-store">
+            <span>+ Nueva Compra</span>
+          </a>
+        </div>
+      </header>
+
+      <!-- Barra de Filtros y Búsqueda -->
+      <div class="orders-filter-toolbar">
+        <!-- Input de Búsqueda -->
+        <div class="filter-search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="inputSearchOrders" class="orders-search-input" placeholder="Buscar por # de orden (ej: ORD-802092), salsa, teléfono o cédula..." autocomplete="off">
+          <button type="button" id="btnClearSearch" class="btn-clear-search" style="display: none;" onclick="clearOrdersSearch()">✕</button>
+        </div>
+
+        <!-- Filtro por Estado -->
+        <div class="filter-dropdown-wrap">
+          <label for="selectFilterStatus" class="dropdown-label">Estado:</label>
+          <select id="selectFilterStatus" class="orders-filter-select">
+            <option value="todos">Cualquier Estado</option>
+            <option value="pagado">✅ Pagado (Confirmado)</option>
+            <option value="en_preparacion">🔵 En Preparación</option>
+            <option value="listo_entrega">🛵 Listo para Entrega / Delivery</option>
+            <option value="entregado">🟢 Entregado</option>
+            <option value="pendiente">⏳ Pendiente</option>
+          </select>
+        </div>
+
+        <!-- Botón Refrescar en Vivo -->
+        <button type="button" class="btn-refresh-orders" onclick="refreshOrdersData()" title="Sincronizar pedidos con el servidor">
+          <span class="refresh-icon">🔄</span>
+          <span>Actualizar</span>
+        </button>
+      </div>
+
+      <!-- Contenedor de Lista de Órdenes (Cards Horizontales estilo referencia) -->
+      <div id="ordersCardsContainer" class="orders-cards-container">
+        <!-- Renderizado dinámicamente por assets/js/ordenes.js -->
+        <div class="orders-loading-state">
+          <div class="orders-spinner">⏳</div>
+          <p>Cargando tus órdenes...</p>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- =========================================================================
+       3. MODAL DE GUÍA & DETALLES DE ORDEN (Con Stepper en tiempo real)
+       ========================================================================= -->
+  <div id="orderGuideModal" class="order-modal-backdrop" style="display: none;" onclick="closeOrderModal(event)">
+    <div class="order-modal-dialog" onclick="event.stopPropagation()">
+      <div class="order-modal-header">
+        <div>
+          <span class="modal-pretitle">GUÍA DETALLADA DE PEDIDO</span>
+          <h2 id="modalOrderTitle" class="modal-order-number">#ORD-XXXXXX</h2>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeOrderModal()">✕</button>
+      </div>
+
+      <div class="order-modal-body">
+        
+        <!-- Stepper en Tiempo Real -->
+        <div class="modal-stepper-wrap">
+          <div class="stepper-progress-bar" id="modalStepperBar">
+            <div class="stepper-progress-fill" id="modalStepperFill"></div>
+          </div>
+          <div class="modal-stepper-steps">
+            <div class="modal-step" id="modalStep1">
+              <div class="modal-step-circle">1</div>
+              <span class="modal-step-title">Recibido</span>
+              <span class="modal-step-sub" id="modalStep1Sub">Confirmado</span>
+            </div>
+            <div class="modal-step" id="modalStep2">
+              <div class="modal-step-circle">2</div>
+              <span class="modal-step-title">En Preparación</span>
+              <span class="modal-step-sub">Cocina DIP LF</span>
+            </div>
+            <div class="modal-step" id="modalStep3">
+              <div class="modal-step-circle">3</div>
+              <span class="modal-step-title">Listo p/ Entrega</span>
+              <span class="modal-step-sub">Empacado / Delivery</span>
+            </div>
+            <div class="modal-step" id="modalStep4">
+              <div class="modal-step-circle">4</div>
+              <span class="modal-step-title">Entregado</span>
+              <span class="modal-step-sub">Completado</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ficha de Datos del Cliente & Pago -->
+        <div class="modal-details-grid">
+          <div class="modal-info-box">
+            <h4>👤 Datos del Cliente</h4>
+            <p><strong>Nombre:</strong> <span id="modalCustomerName">-</span></p>
+            <p><strong>Cédula / RIF:</strong> <span id="modalCustomerId">-</span></p>
+            <p><strong>Teléfono:</strong> <span id="modalCustomerPhone">-</span></p>
+          </div>
+          <div class="modal-info-box">
+            <h4>💳 Método y Pago</h4>
+            <p><strong>Forma:</strong> <span id="modalPaymentMethod">-</span></p>
+            <p><strong>Banco:</strong> <span id="modalBankName">-</span></p>
+            <p><strong>Referencia:</strong> <span id="modalReferenceNumber">-</span></p>
+          </div>
+        </div>
+
+        <!-- Tabla de Productos -->
+        <div class="modal-items-section">
+          <h4>🥣 Productos de la Orden</h4>
+          <div id="modalItemsList" class="modal-items-list">
+            <!-- Renderizado dinámico -->
+          </div>
+
+          <div class="modal-totals-bar">
+            <span>Total a Pagar / Pagado:</span>
+            <div class="modal-totals-right">
+              <strong id="modalTotalUsd" class="modal-total-usd">$0.00 USD</strong>
+              <span id="modalTotalBs" class="modal-total-bs">Bs. 0,00</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="order-modal-footer">
+        <button type="button" id="btnModalWhatsappCoord" class="btn-modal-whatsapp" onclick="openModalWhatsappCoord()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+          </svg>
+          <span>💬 Coordinar Entrega por WhatsApp</span>
+        </button>
+
+        <button type="button" class="btn-modal-close-action" onclick="closeOrderModal()">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast de Notificaciones -->
+  <div id="ordersToast" class="orders-toast"></div>
+
+  <!-- Scripts -->
+  <script src="assets/js/auth.js?v=9.6"></script>
+  <script src="assets/js/catalog.js?v=9.6"></script>
+  <script src="assets/js/ordenes.js?v=1.0"></script>
+</body>
+</html>

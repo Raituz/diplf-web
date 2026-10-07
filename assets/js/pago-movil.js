@@ -859,7 +859,7 @@ window.sharePendingOrderWhatsapp = function() {
   window.open(url, '_blank');
 };
 
-// Navegar directamente a la sección de Rastreo de Órdenes
+// Navegar directamente a la página nueva de Órdenes
 window.goToOrderTracking = function(orderId) {
   const targetId = orderId || (lastCreatedOrder ? lastCreatedOrder.id : null) || localStorage.getItem('diplf_last_order_id');
   
@@ -867,15 +867,10 @@ window.goToOrderTracking = function(orderId) {
     toggleDrawer(false);
   }
 
-  if (targetId && typeof window.trackOrderById === 'function') {
-    window.trackOrderById(targetId);
-  }
-
-  const section = document.getElementById('ordenes');
-  if (section) {
-    section.scrollIntoView({ behavior: 'smooth' });
+  if (targetId) {
+    window.location.href = `ordenes.html?id=${encodeURIComponent(targetId)}`;
   } else {
-    window.location.hash = '#ordenes';
+    window.location.href = 'ordenes.html';
   }
 };
 

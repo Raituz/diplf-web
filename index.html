@@ -42,7 +42,7 @@
           <li><a href="#comocomprar" class="nav-link">Cómo Comprar</a></li>
           <li><a href="#nosotros" class="nav-link">Nosotros</a></li>
           <li><a href="#consignacion" class="nav-link">Consignación</a></li>
-          <li><a href="#ordenes" class="nav-link">Rastreo de Pedido</a></li>
+          <li><a href="ordenes.html" class="nav-link">Órdenes</a></li>
         </ul>
       </nav>
 
@@ -879,45 +879,7 @@
   </section>
 
   <!-- =========================================================================
-       8. SECCIÓN DE RASTREO Y GUÍA DE ÓRDENES EN TIEMPO REAL
-       ========================================================================= -->
-  <section id="ordenes" class="section-orders-tracking">
-    <div class="tracking-container">
-      
-      <div class="tracking-header">
-        <span class="section-tag">ESTADO EN TIEMPO REAL & GUÍA</span>
-        <h2>RASTREO DE PEDIDOS:<br><span>CONSULTA EL ESTADO DE TU COMPRA</span></h2>
-        <p class="tracking-intro">
-          Ingresa tu número de orden (ej: <code>#ORD-802092</code>), tu número de teléfono o cédula para revisar tu guía de pedido, estado de preparación en cocina y coordinar la entrega o delivery de tus salsas.
-        </p>
-      </div>
-
-      <!-- Buscador de Orden -->
-      <form id="orderTrackingForm" class="tracking-search-form" onsubmit="event.preventDefault(); window.trackOrderById(document.getElementById('orderSearchInput').value);">
-        <div class="tracking-search-box">
-          <span class="search-input-icon">🔍</span>
-          <input type="text" id="orderSearchInput" class="tracking-search-input" placeholder="Ingresa tu # de orden, teléfono o cédula..." required autocomplete="off">
-          <button type="submit" class="btn-tracking-search-submit">
-            <span>Rastrear Orden</span>
-          </button>
-        </div>
-      </form>
-
-      <!-- Contenedor dinámico de resultados de rastreo -->
-      <div id="orderTrackingResult" class="tracking-result-container">
-        <!-- Generado dinámicamente por orders-tracking.js -->
-        <div class="tracking-empty-initial">
-          <span class="empty-initial-icon">📦</span>
-          <h4>¿Tienes un pedido activo?</h4>
-          <p>Escribe tu número de orden arriba para ver su progreso paso a paso en tiempo real.</p>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- =========================================================================
-       9. ELEMENTOS FLOTANTES (Como en la referencia image_0.png)
+       8. ELEMENTOS FLOTANTES (Como en la referencia image_0.png)
        ========================================================================= -->
 
   <!-- Barra flotante a la izquierda (Tu consulta de pedido) -->
@@ -1010,7 +972,7 @@
           <li><a href="#comocomprar">Cómo Comprar</a></li>
           <li><a href="#nosotros">Sobre DIP LF</a></li>
           <li><a href="#consignacion">Venta a Consignación</a></li>
-          <li><a href="#ordenes">Rastrear mi Orden</a></li>
+          <li><a href="ordenes.html">Mis Órdenes</a></li>
         </ul>
       </div>
 
@@ -1039,6 +1001,5 @@
   <script src="assets/js/catalog.js?v=9.6"></script>
   <script src="assets/js/main.js?v=9.6"></script>
   <script src="assets/js/pago-movil.js?v=9.6"></script>
-  <script src="assets/js/orders-tracking.js?v=9.6"></script>
 </body>
 </html>
