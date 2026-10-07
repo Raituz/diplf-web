@@ -162,6 +162,11 @@ function saveCart() {
 
 // Añadir producto al carrito
 function addToCart(flavorId, sizeKey, quantity = 1) {
+  // Si veníamos de una confirmación previa de pago, reiniciar el panel para el nuevo pedido
+  if (window.isOrderSuccessActive && typeof window.resetOrderDrawer === 'function') {
+    window.resetOrderDrawer();
+  }
+
   const catalog = getStoreCatalog();
   const flavor = catalog.find(f => f.id === flavorId);
   if (!flavor) return;
@@ -283,6 +288,13 @@ function renderDrawerItems() {
 
   const { totalCount, totalPrice } = getCartTotals();
 
+  // Si la pantalla de confirmación exitosa está activa, no mostrar estado vacío
+  if (window.isOrderSuccessActive) {
+    if (drawerEmpty) drawerEmpty.style.display = 'none';
+    drawerList.innerHTML = '';
+    return;
+  }
+
   if (totalCount === 0) {
     if (drawerEmpty) drawerEmpty.style.display = 'block';
     drawerList.innerHTML = '';
@@ -337,6 +349,10 @@ function toggleDrawer(open) {
     drawer.classList.remove('active');
     overlay.classList.remove('active');
     document.body.style.overflow = '';
+    // Si se cierra el drawer mientras la confirmación estaba en pantalla, reiniciar para el próximo uso
+    if (window.isOrderSuccessActive && typeof window.resetOrderDrawer === 'function') {
+      window.resetOrderDrawer();
+    }
   }
 }
 

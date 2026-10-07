@@ -412,6 +412,13 @@ function updatePagoMovilAmounts() {
   if (elUsdSub) elUsdSub.textContent = `($${(typeof formatUsdAmount === 'function' ? formatUsdAmount(totalPrice) : totalPrice.toFixed(2))} USD)`;
   if (elTotalBsBadge) elTotalBsBadge.textContent = bsFormatted;
 
+  // Si la orden ya fue aprobada y estamos en pantalla de éxito, no alterar visibilidad
+  if (window.isOrderSuccessActive) {
+    if (container) container.style.display = 'flex';
+    if (drawerFooter) drawerFooter.style.display = 'none';
+    return;
+  }
+
   // Si el carrito está vacío, ocultar el formulario de pago y el footer
   if (container) {
     container.style.display = (totalCount > 0) ? 'flex' : 'none';
@@ -679,29 +686,47 @@ window.handlePagoMovilSubmit = async function(event) {
     });
   } catch (_) {}
 
-  // 3. Vaciar carrito SOLO tras confirmación real
+  // 3. Activar bandera de orden confirmada para mantener panel de éxito visible en el drawer
+  window.isOrderSuccessActive = true;
+
+  // 4. Vaciar carrito SOLO tras confirmación real del banco
   cart = [];
   if (typeof saveCart === 'function') saveCart();
   if (typeof updateCartUI === 'function') updateCartUI();
 
-  // 4. Mostrar panel de confirmación en el Drawer
+  // 5. Mostrar panel de confirmación en el Drawer
   showOrderSuccessState(savedOrder, verifiedResult);
 };
 
 // Mostrar pantalla de confirmación verificada dentro del Drawer
 function showOrderSuccessState(order, verifiedData) {
+  window.isOrderSuccessActive = true;
+
+  const container = document.getElementById('pagoMovilModuleContainer');
+  const drawerEmpty = document.getElementById('drawerEmptyState');
   const drawerCartList = document.getElementById('drawerCartList');
   const sectionHeading = document.querySelector('.drawer-section-heading');
   const checkoutTabs = document.querySelector('.checkout-method-tabs');
   const panelForm = document.getElementById('panelPagoMovil');
   const panelSuccess = document.getElementById('panelPagoMovilSuccess');
   const drawerFooter = document.querySelector('.drawer-footer');
+  const btnSubmit = document.getElementById('btnSubmitPagoMovil');
 
+  if (drawerEmpty) drawerEmpty.style.display = 'none';
   if (drawerCartList) drawerCartList.style.display = 'none';
   if (sectionHeading) sectionHeading.style.display = 'none';
   if (checkoutTabs) checkoutTabs.style.display = 'none';
   if (panelForm) panelForm.style.display = 'none';
   if (drawerFooter) drawerFooter.style.display = 'none';
+
+  // Asegurar que el contenedor principal esté visible
+  if (container) container.style.display = 'flex';
+
+  // Restaurar el botón para que no se quede con el spinner "Verificando..."
+  if (btnSubmit) {
+    btnSubmit.disabled = false;
+    btnSubmit.innerHTML = '<span>⚡ Confirmar y Enviar Pago Móvil</span>';
+  }
 
   if (panelSuccess) {
     panelSuccess.style.display = 'block';
@@ -763,6 +788,10 @@ window.sharePendingOrderWhatsapp = function() {
 
 // Reiniciar drawer para un nuevo pedido
 window.resetOrderDrawer = function() {
+  window.isOrderSuccessActive = false;
+
+  const container = document.getElementById('pagoMovilModuleContainer');
+  const drawerEmpty = document.getElementById('drawerEmptyState');
   const drawerCartList = document.getElementById('drawerCartList');
   const sectionHeading = document.querySelector('.drawer-section-heading');
   const checkoutTabs = document.querySelector('.checkout-method-tabs');
@@ -773,12 +802,16 @@ window.resetOrderDrawer = function() {
 
   hidePmVerificationAlert();
 
-  if (drawerCartList) drawerCartList.style.display = 'flex';
-  if (sectionHeading) sectionHeading.style.display = 'flex';
-  if (checkoutTabs) checkoutTabs.style.display = 'grid';
-  if (panelForm) panelForm.style.display = 'flex';
+  const count = (typeof cart !== 'undefined' && Array.isArray(cart)) ? cart.length : 0;
+
+  if (drawerEmpty) drawerEmpty.style.display = (count === 0) ? 'block' : 'none';
+  if (drawerCartList) drawerCartList.style.display = (count > 0) ? 'flex' : 'none';
+  if (sectionHeading) sectionHeading.style.display = (count > 0) ? 'flex' : 'none';
+  if (checkoutTabs) checkoutTabs.style.display = (count > 0) ? 'grid' : 'none';
+  if (panelForm) panelForm.style.display = (count > 0) ? 'flex' : 'none';
   if (panelSuccess) panelSuccess.style.display = 'none';
-  if (drawerFooter) drawerFooter.style.display = 'block';
+  if (container) container.style.display = (count > 0) ? 'flex' : 'none';
+  if (drawerFooter) drawerFooter.style.display = (count > 0) ? 'block' : 'none';
 
   if (btnSubmit) {
     btnSubmit.disabled = false;
@@ -789,7 +822,5 @@ window.resetOrderDrawer = function() {
   const form = document.getElementById('formPagoMovilSubmit');
   if (form) form.reset();
 
-  if (typeof toggleDrawer === 'function') {
-    toggleDrawer(false);
-  }
+  switchCheckoutMethod('pagomovil');
 };
