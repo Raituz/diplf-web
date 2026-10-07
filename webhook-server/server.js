@@ -105,15 +105,16 @@ function parseBankSms(smsText, sender) {
   };
 
   // 1. Identificar Banco por remitente o texto
-  if (sender === '2661' || sender === '2662' || lower.includes('bdv') || lower.includes('banco de venezuela')) {
+  const senderLower = String(sender || '').toLowerCase();
+  if (sender === '2661' || sender === '2662' || senderLower.includes('bdv') || lower.includes('bdv') || lower.includes('banco de venezuela')) {
     parsed.bank = 'Banco de Venezuela (BDV)';
-  } else if (sender === '2846' || lower.includes('banesco')) {
+  } else if (sender === '2846' || senderLower.includes('banesco') || lower.includes('banesco')) {
     parsed.bank = 'Banesco';
-  } else if (sender === '24024' || lower.includes('mercantil')) {
+  } else if (sender === '24024' || senderLower.includes('mercantil') || lower.includes('mercantil')) {
     parsed.bank = 'Mercantil Banco';
-  } else if (sender === '1111' || lower.includes('provincial') || lower.includes('bbva')) {
+  } else if (sender === '1111' || senderLower.includes('provincial') || lower.includes('provincial') || lower.includes('bbva')) {
     parsed.bank = 'BBVA Provincial';
-  } else if (sender === '26448' || lower.includes('bancamiga')) {
+  } else if (sender === '26448' || senderLower.includes('bancamiga') || lower.includes('bancamiga')) {
     parsed.bank = 'Bancamiga';
   } else if (sender === '262' || lower.includes('bnc') || lower.includes('nacional de credito')) {
     parsed.bank = 'Banco Nacional de Crédito (BNC)';
@@ -542,14 +543,17 @@ function handleRoute(req, res, pathname, queryParams, body) {
       return sendJsonResponse(res, 401, { error: 'Token de webhook no autorizado.' });
     }
 
-    // Extraer texto del SMS
+    // Extraer texto del SMS o Notificación Push de la app bancaria
     // Varias apps de Android usan diferentes claves en su JSON
-    const smsText = body.message || body.text || body.body || body.content || body.sms || '';
-    const sender = body.sender || body.from || body.origin || 'BANCO';
+    let smsText = body.message || body.text || body.body || body.content || body.sms || body.notification || body.notification_text || body.not_text || '';
+    if (body.title && typeof body.title === 'string' && !smsText.includes(body.title)) {
+      smsText = `${body.title} - ${smsText}`;
+    }
+    const sender = body.sender || body.from || body.origin || body.app || body.application || body.title || 'BANCO';
     const devicePhone = body.phone || body.device || AUTHORIZED_PHONE;
 
     if (!smsText) {
-      return sendJsonResponse(res, 400, { error: 'El campo de mensaje SMS no puede estar vacío.' });
+      return sendJsonResponse(res, 400, { error: 'El campo de mensaje o notificación no puede estar vacío.' });
     }
 
     console.log(`\n--- [SMS RECIBIDO DE ${sender}] ---`);
