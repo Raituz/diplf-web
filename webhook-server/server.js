@@ -404,12 +404,14 @@ function handleRoute(req, res, pathname, queryParams, body) {
       const smsRef = body.paymentDetails?.reference ? String(body.paymentDetails.reference).trim() : '';
       const smsEntry = smsLogsDb.find(s => 
         (body.smsId && s.id === body.smsId) || 
+        (smsRef && s.matchedRef && String(s.matchedRef) === smsRef) ||
         (smsRef && s.parsed && s.parsed.reference && String(s.parsed.reference).includes(smsRef))
       );
       if (smsEntry) {
         smsEntry.matched = true;
         smsEntry.matchedOrderId = newOrder.id;
-        smsEntry.matchedAt = new Date().toISOString();
+        smsEntry.matchedAt = smsEntry.matchedAt || new Date().toISOString();
+        if (smsRef && !smsEntry.matchedRef) smsEntry.matchedRef = smsRef;
         saveJsonFile(SMS_LOGS_FILE, smsLogsDb);
 
         newOrder.status = 'pagado';
@@ -420,7 +422,7 @@ function handleRoute(req, res, pathname, queryParams, body) {
             smsId: smsEntry.id,
             sender: smsEntry.sender,
             bank: smsEntry.parsed?.bank,
-            smsReference: smsEntry.parsed?.reference,
+            smsReference: smsEntry.parsed?.reference || smsEntry.matchedRef || smsRef,
             smsAmount: smsEntry.parsed?.amount,
             phone: smsEntry.parsed?.phone,
             rawText: smsEntry.rawText,
@@ -501,13 +503,28 @@ function handleRoute(req, res, pathname, queryParams, body) {
       // CASO B: Coincidencia por Teléfono Emisor + Monto (para Bancamiga Suite y apps cuyas notificaciones omiten la ref)
       let phoneAndAmountMatches = false;
       if (!refMatches && !entry.parsed.reference && entry.parsed.phone && clientPhone && amountMatches) {
-        const smsPhoneClean = String(entry.parsed.phone).replace(/[^0-9]/g, '');
-        if (smsPhoneClean === clientPhone || (smsPhoneClean.length >= 7 && clientPhone.endsWith(smsPhoneClean.slice(-7)))) {
-          // Asegurar que la notificación fue en los últimos 30 minutos
-          const receivedTime = new Date(entry.receivedAt).getTime();
-          const ageMinutes = (Date.now() - receivedTime) / (1000 * 60);
-          if (ageMinutes <= 30) {
-            phoneAndAmountMatches = true;
+        // Validación de compatibilidad de banco si el cliente lo indicó
+        let bankMatches = true;
+        if (body.bank && entry.parsed.bank) {
+          const clientBankStr = String(body.bank).toLowerCase();
+          const smsBankStr = String(entry.parsed.bank).toLowerCase();
+          if (smsBankStr.includes('bancamiga') && !clientBankStr.includes('bancamiga')) {
+            bankMatches = false;
+          } else if ((smsBankStr.includes('venezuela') || smsBankStr.includes('bdv')) && 
+                     (!clientBankStr.includes('venezuela') && !clientBankStr.includes('bdv'))) {
+            bankMatches = false;
+          }
+        }
+
+        if (bankMatches) {
+          const smsPhoneClean = String(entry.parsed.phone).replace(/[^0-9]/g, '');
+          if (smsPhoneClean === clientPhone || (smsPhoneClean.length >= 7 && clientPhone.endsWith(smsPhoneClean.slice(-7)))) {
+            // Asegurar que la notificación fue en los últimos 30 minutos
+            const receivedTime = new Date(entry.receivedAt).getTime();
+            const ageMinutes = (Date.now() - receivedTime) / (1000 * 60);
+            if (ageMinutes <= 30) {
+              phoneAndAmountMatches = true;
+            }
           }
         }
       }
@@ -522,10 +539,17 @@ function handleRoute(req, res, pathname, queryParams, body) {
     }
 
     if (matchedSms) {
+      // 1. Quemar y bloquear inmediatamente la notificación bancaria para impedir reuso o referencias falsas
+      matchedSms.matched = true;
+      matchedSms.matchedAt = new Date().toISOString();
+      matchedSms.matchedRef = rawRef;
+      saveJsonFile(SMS_LOGS_FILE, smsLogsDb);
+
       console.log(`\n======================================================`);
       console.log(`>>> [VERIFICACIÓN DE PAGO MÓVIL EXITOSA] <<<`);
       console.log(`Referencia solicitada: ${rawRef} | Coincide con SMS: ${matchedSms.id}`);
       console.log(`Banco: ${matchedSms.parsed.bank} | Monto: Bs. ${matchedSms.parsed.amount}`);
+      console.log(`Notificación bancaria consumida (matched: true). Bloqueada contra reuso.`);
       console.log(`======================================================\n`);
 
       return sendJsonResponse(res, 200, {

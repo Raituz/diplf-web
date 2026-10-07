@@ -398,6 +398,8 @@ function recordNewOrder(orderData) {
       paymentDetails: orderData.paymentDetails || null,
       customerNote: orderData.note || orderData.customerNote || 'Pedido web para WhatsApp',
       status: orderData.status || 'nuevo', // 'pendiente', 'pagado', 'nuevo', 'en_preparacion', 'entregado', 'cancelado'
+      verifiedBySms: orderData.verifiedBySms || false,
+      smsId: orderData.smsId || null,
       verifiedAt: orderData.verifiedAt || null,
       smsMatch: orderData.smsMatch || null
     };

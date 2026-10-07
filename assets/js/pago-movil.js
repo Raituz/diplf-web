@@ -675,12 +675,16 @@ window.handlePagoMovilSubmit = async function(event) {
 
   lastCreatedOrder = savedOrder;
 
-  // 2. Registrar en servidor webhook para marcar SMS como usado
+  // 2. Registrar en servidor webhook para marcar SMS como usado y asociarlo a la orden
   try {
     fetch(`${webhookUrl}/api/orders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(savedOrder)
+      body: JSON.stringify({
+        ...savedOrder,
+        smsId: verifiedResult.smsId || savedOrder.smsId,
+        verifiedBySms: true
+      })
     }).catch(err => {
       console.log('Error notificando pedido al servidor:', err.message);
     });
