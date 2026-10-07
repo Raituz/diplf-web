@@ -3133,3 +3133,828 @@ button {
     min-height: 44px;
   }
 }
+
+/* =============================================================================
+   11. SECCIÓN DE RASTREO Y GUÍA DE PEDIDOS (#ordenes)
+   ============================================================================= */
+.section-orders-tracking {
+  padding: 90px 24px;
+  background: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.08) 0%, rgba(10, 10, 10, 1) 70%), #0a0a0a;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  position: relative;
+}
+
+.tracking-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.tracking-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.tracking-header h2 {
+  font-family: var(--font-heading);
+  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.15;
+  margin: 12px 0 14px;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+}
+
+.tracking-header h2 span {
+  background: linear-gradient(135deg, var(--gold-light, #fde047), var(--primary-gold, #f59e0b));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.tracking-intro {
+  color: #94a3b8;
+  font-size: 0.96rem;
+  max-width: 640px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.tracking-intro code {
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.12);
+  padding: 2px 7px;
+  border-radius: 5px;
+  font-weight: 700;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* Buscador de Orden */
+.tracking-search-form {
+  margin: 0 auto 36px;
+  max-width: 620px;
+}
+
+.tracking-search-box {
+  display: flex;
+  align-items: center;
+  background: #18181b;
+  border: 2px solid rgba(245, 158, 11, 0.35);
+  border-radius: 50px;
+  padding: 6px 8px 6px 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(245, 158, 11, 0.1);
+  transition: all 0.25s ease;
+}
+
+.tracking-search-box:focus-within {
+  border-color: #f59e0b;
+  box-shadow: 0 10px 35px rgba(245, 158, 11, 0.25);
+  transform: translateY(-2px);
+}
+
+.search-input-icon {
+  font-size: 1.1rem;
+  margin-right: 10px;
+  opacity: 0.7;
+}
+
+.tracking-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 0.96rem;
+  font-weight: 500;
+  padding: 8px 0;
+}
+
+.tracking-search-input::placeholder {
+  color: #64748b;
+  font-size: 0.88rem;
+}
+
+.btn-tracking-search-submit {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #000;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 40px;
+  font-weight: 800;
+  font-size: 0.88rem;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-tracking-search-submit:hover {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  transform: scale(1.02);
+  box-shadow: 0 6px 18px rgba(245, 158, 11, 0.35);
+}
+
+/* Estado de Carga y Vacío */
+.tracking-loading-state,
+.tracking-empty-initial,
+.tracking-empty-card {
+  text-align: center;
+  padding: 44px 20px;
+  background: #141416;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  color: #94a3b8;
+}
+
+.tracking-spinner {
+  font-size: 2.2rem;
+  animation: spinSlow 2s linear infinite;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+@keyframes spinSlow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.empty-initial-icon,
+.empty-icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.tracking-empty-card h3 {
+  color: #fff;
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.tracking-empty-card p {
+  max-width: 500px;
+  margin: 0 auto 18px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.btn-help-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #25d366;
+  color: #000;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 0.88rem;
+  padding: 12px 22px;
+  border-radius: 30px;
+  transition: all 0.2s ease;
+}
+
+.btn-help-whatsapp:hover {
+  background: #22c55e;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3);
+}
+
+/* Tarjeta Principal de la Orden */
+.tracking-order-card {
+  background: #141417;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(245, 158, 11, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: fadeIn 0.35s ease-out;
+}
+
+/* Header de la tarjeta */
+.tracking-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.order-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tracking-guia-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #94a3b8;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.order-id-copy-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tracking-order-number {
+  font-family: var(--font-heading);
+  font-size: 1.7rem;
+  font-weight: 900;
+  color: #fbbf24;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.btn-copy-order-id {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e2e8f0;
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-copy-order-id:hover {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: #f59e0b;
+  color: #fbbf24;
+}
+
+.order-meta-badges {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.tracking-date-label {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+/* Badges de Estado */
+.tracking-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.status-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+  animation: pulseDot 1.8s infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+.tracking-status-badge.badge-pagado {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.tracking-status-badge.badge-en_preparacion {
+  background: rgba(59, 130, 246, 0.18);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+.tracking-status-badge.badge-listo_entrega {
+  background: rgba(168, 85, 247, 0.2);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.45);
+}
+
+.tracking-status-badge.badge-entregado {
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.45);
+}
+
+.tracking-status-badge.badge-nuevo,
+.tracking-status-badge.badge-pendiente {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.tracking-status-badge.badge-cancelado {
+  background: rgba(239, 68, 68, 0.18);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+/* Stepper Visual de Estado */
+.tracking-stepper-box {
+  position: relative;
+  padding: 24px 10px 10px;
+}
+
+.stepper-progress-bar {
+  position: absolute;
+  top: 40px;
+  left: 6%;
+  right: 6%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  z-index: 1;
+}
+
+.stepper-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b, #10b981);
+  width: var(--step-percent, 0%);
+  transition: width 0.5s ease-in-out;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+}
+
+.stepper-steps-grid {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.stepper-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #1f1f23;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+  transition: all 0.3s ease;
+}
+
+.stepper-step.completed .step-circle {
+  background: #10b981;
+  border-color: #10b981;
+  color: #000;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.5);
+}
+
+.stepper-step.current .step-circle {
+  background: #f59e0b;
+  border-color: #fde047;
+  color: #000;
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.8);
+  transform: scale(1.15);
+  animation: pulseCircle 1.8s infinite;
+}
+
+@keyframes pulseCircle {
+  0%, 100% { box-shadow: 0 0 16px rgba(245, 158, 11, 0.6); }
+  50% { box-shadow: 0 0 26px rgba(245, 158, 11, 0.9); }
+}
+
+.step-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.step-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #cbd5e1;
+}
+
+.stepper-step.current .step-title {
+  color: #fbbf24;
+}
+
+.step-desc {
+  font-size: 0.7rem;
+  color: #64748b;
+}
+
+.stepper-step.completed .step-desc,
+.stepper-step.current .step-desc {
+  color: #94a3b8;
+}
+
+.tracking-cancelled-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 12px;
+  padding: 14px 18px;
+  color: #fca5a5;
+  font-size: 0.9rem;
+}
+
+.cancelled-icon {
+  font-size: 1.6rem;
+}
+
+/* Grid de Detalles (Cliente & Pago) */
+.tracking-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.tracking-info-pill {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.info-pill-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 8px;
+}
+
+.pill-icon {
+  font-size: 1.1rem;
+}
+
+.pill-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #fbbf24;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-pill-body p {
+  margin: 0 0 6px 0;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  line-height: 1.45;
+}
+
+.info-pill-body p strong {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.ref-highlight {
+  color: #fbbf24;
+  font-family: monospace;
+  font-weight: 800;
+  background: rgba(245, 158, 11, 0.12);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.bs-highlight {
+  color: #38bdf8;
+  font-weight: 800;
+}
+
+/* Tabla de Productos */
+.tracking-products-section {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.products-section-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 14px 0;
+}
+
+.tracking-items-table-wrap {
+  overflow-x: auto;
+}
+
+.tracking-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.tracking-items-table th {
+  text-align: left;
+  color: #64748b;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  padding: 0 0 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tracking-items-table td {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  color: #e2e8f0;
+}
+
+.item-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.salsa-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f59e0b;
+}
+
+.item-size-badge {
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.tracking-totals-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.totals-count-info {
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.totals-amount-info {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.totals-label {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+}
+
+.totals-usd {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #fbbf24;
+}
+
+.totals-bs {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+/* Barra de Acciones de la Orden */
+.tracking-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding-top: 8px;
+}
+
+.btn-track-whatsapp-coord {
+  flex: 1;
+  min-width: 260px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #25d366;
+  color: #000;
+  border: none;
+  border-radius: 14px;
+  padding: 14px 24px;
+  font-size: 0.92rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.3);
+}
+
+.btn-track-whatsapp-coord:hover {
+  background: #22c55e;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(37, 211, 102, 0.45);
+}
+
+.btn-track-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 20px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-track-refresh:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Botón en el Drawer tras éxito */
+.btn-track-order-direct {
+  width: 100%;
+  padding: 13px 18px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #000;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35);
+}
+
+.btn-track-order-direct:hover {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(245, 158, 11, 0.5);
+}
+
+/* Resultados Múltiples */
+.tracking-multiple-card {
+  background: #141417;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 18px;
+  padding: 24px;
+}
+
+.multiple-title {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.multiple-sub {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  margin-bottom: 18px;
+}
+
+.multiple-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.multiple-order-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.multiple-order-row:hover {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.4);
+  transform: translateX(4px);
+}
+
+.multiple-row-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.multiple-row-mid {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.btn-select-order {
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+  pointer-events: none;
+}
+
+/* Responsive Móvil para Stepper y Tracking */
+@media (max-width: 640px) {
+  .section-orders-tracking {
+    padding: 60px 16px;
+  }
+
+  .tracking-order-card {
+    padding: 18px 14px;
+    border-radius: 16px;
+    gap: 18px;
+  }
+
+  .order-meta-badges {
+    align-items: flex-start;
+  }
+
+  .tracking-stepper-box {
+    padding: 20px 4px 6px;
+  }
+
+  .stepper-steps-grid {
+    gap: 4px;
+  }
+
+  .step-circle {
+    width: 30px;
+    height: 30px;
+    font-size: 0.75rem;
+    margin-bottom: 6px;
+  }
+
+  .step-title {
+    font-size: 0.7rem;
+  }
+
+  .step-desc {
+    display: none;
+  }
+
+  .stepper-progress-bar {
+    top: 34px;
+    left: 10%;
+    right: 10%;
+  }
+
+  .tracking-totals-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tracking-actions-bar {
+    flex-direction: column;
+  }
+
+  .btn-track-whatsapp-coord,
+  .btn-track-refresh {
+    width: 100%;
+  }
+}

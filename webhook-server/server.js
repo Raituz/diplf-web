@@ -385,10 +385,43 @@ function handleRoute(req, res, pathname, queryParams, body) {
     }
   }
 
-  // 3. PEDIDOS: OBTENER TODOS (GET /api/orders)
+  // 3. PEDIDOS: OBTENER TODOS O BUSCAR POR QUERY (GET /api/orders)
   if (req.method === 'GET' && pathname === '/api/orders') {
     ordersDb = loadJsonFile(ORDERS_FILE, []);
-    return sendJsonResponse(res, 200, { success: true, orders: ordersDb });
+    const search = queryParams.get('search') || queryParams.get('q');
+    if (search) {
+      const q = String(search).trim().toLowerCase();
+      const cleanDigits = q.replace(/[^0-9]/g, '');
+      const filtered = ordersDb.filter(o => 
+        (o.id && o.id.toLowerCase().includes(q)) ||
+        (cleanDigits.length >= 4 && o.customerPhone && o.customerPhone.replace(/[^0-9]/g, '').includes(cleanDigits)) ||
+        (cleanDigits.length >= 4 && o.customerId && o.customerId.replace(/[^0-9]/g, '').includes(cleanDigits)) ||
+        (o.customerName && o.customerName.toLowerCase().includes(q)) ||
+        (cleanDigits.length >= 4 && o.paymentDetails?.reference && String(o.paymentDetails.reference).includes(cleanDigits))
+      );
+      return sendJsonResponse(res, 200, { success: true, count: filtered.length, orders: filtered });
+    }
+    return sendJsonResponse(res, 200, { success: true, count: ordersDb.length, orders: ordersDb });
+  }
+
+  // 3.1 PEDIDOS: OBTENER PEDIDO INDIVIDUAL POR ID (GET /api/orders/:id)
+  if (req.method === 'GET' && pathname.startsWith('/api/orders/')) {
+    const rawParam = decodeURIComponent(pathname.replace('/api/orders/', '')).trim();
+    ordersDb = loadJsonFile(ORDERS_FILE, []);
+    const qLower = rawParam.toLowerCase();
+    const qDigits = rawParam.replace(/[^0-9]/g, '');
+
+    const order = ordersDb.find(o => 
+      o.id.toLowerCase() === qLower ||
+      (qDigits.length >= 5 && o.id.replace(/[^0-9]/g, '') === qDigits) ||
+      (qDigits.length >= 7 && o.customerPhone && o.customerPhone.replace(/[^0-9]/g, '').endsWith(qDigits.slice(-7))) ||
+      (qDigits.length >= 6 && o.customerId && o.customerId.replace(/[^0-9]/g, '') === qDigits)
+    );
+
+    if (!order) {
+      return sendJsonResponse(res, 404, { success: false, error: 'Pedido no encontrado' });
+    }
+    return sendJsonResponse(res, 200, { success: true, order: order });
   }
 
   // 4. PEDIDOS: REGISTRAR NUEVO PEDIDO DESDE LA WEB (POST /api/orders)
@@ -405,6 +438,9 @@ function handleRoute(req, res, pathname, queryParams, body) {
       id: orderId,
       date: body.date || now.toISOString(),
       dateFormatted: body.dateFormatted || now.toLocaleString('es-VE'),
+      customerName: body.customerName || 'Cliente Web',
+      customerId: body.customerId || body.customerCedula || '',
+      customerPhone: body.customerPhone || (body.paymentDetails?.senderPhone || ''),
       items: body.items || [],
       totalCount: body.totalCount || 0,
       totalPrice: Number(body.totalPrice || 0),
@@ -412,8 +448,8 @@ function handleRoute(req, res, pathname, queryParams, body) {
       paymentDetails: body.paymentDetails || null,
       customerNote: body.customerNote || 'Pedido web con Pago Móvil',
       status: body.status || 'pendiente', // Por defecto pendiente
-      verifiedAt: null,
-      smsMatch: null
+      verifiedAt: body.verifiedAt || null,
+      smsMatch: body.smsMatch || null
     };
 
     // Si viene con smsId o verifiedBySms, marcar el SMS correspondiente como matched en sms_logs.json
@@ -574,9 +610,15 @@ function handleRoute(req, res, pathname, queryParams, body) {
 
   // 6. PEDIDOS: ACTUALIZAR ESTADO (PATCH /api/orders/:id)
   if (req.method === 'PATCH' && pathname.startsWith('/api/orders/')) {
-    const orderId = pathname.replace('/api/orders/', '').trim();
+    const rawParam = decodeURIComponent(pathname.replace('/api/orders/', '')).trim();
     ordersDb = loadJsonFile(ORDERS_FILE, []);
-    const order = ordersDb.find(o => o.id === orderId);
+    const qLower = rawParam.toLowerCase();
+    const qDigits = rawParam.replace(/[^0-9]/g, '');
+
+    const order = ordersDb.find(o => 
+      o.id.toLowerCase() === qLower ||
+      (qDigits.length >= 5 && o.id.replace(/[^0-9]/g, '') === qDigits)
+    );
 
     if (!order) {
       return sendJsonResponse(res, 404, { error: 'Pedido no encontrado' });
@@ -585,6 +627,10 @@ function handleRoute(req, res, pathname, queryParams, body) {
     if (body.status) order.status = body.status;
     if (body.verifiedBySms !== undefined) order.verifiedBySms = body.verifiedBySms;
     if (body.verifiedAt) order.verifiedAt = body.verifiedAt;
+    if (body.customerNote) order.customerNote = body.customerNote;
+    if (body.deliveryStatus) order.deliveryStatus = body.deliveryStatus;
+    if (body.deliveryNotes) order.deliveryNotes = body.deliveryNotes;
+    order.updatedAt = body.updatedAt || new Date().toISOString();
     
     saveJsonFile(ORDERS_FILE, ordersDb);
     return sendJsonResponse(res, 200, { success: true, order: order });

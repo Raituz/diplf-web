@@ -125,9 +125,43 @@ function initPagoMovilCheckoutUI() {
   container.className = 'pago-movil-checkout-module';
 
   container.innerHTML = `
-    <!-- Divisor y Título de Sección -->
+    <!-- Datos del Cliente (Identificación y Entrega) -->
     <div class="drawer-section-heading">
       <span class="heading-badge">Paso 2</span>
+      <span class="heading-title">Tus Datos para la Orden</span>
+    </div>
+
+    <div class="pm-customer-info-box">
+      <div class="pm-form-grid pm-customer-grid">
+        <div class="pm-input-group pm-col-full">
+          <label for="pmCustomerName">
+            <span>Nombre y Apellido</span>
+            <span class="req-star">*</span>
+          </label>
+          <input type="text" id="pmCustomerName" class="pm-input" placeholder="Ej: Carlos Mendoza" required autocomplete="name">
+        </div>
+
+        <div class="pm-input-group">
+          <label for="pmCustomerId">
+            <span>Cédula o RIF</span>
+            <span class="req-star">*</span>
+          </label>
+          <input type="text" id="pmCustomerId" class="pm-input" placeholder="Ej: V-21726495" required maxlength="12">
+        </div>
+
+        <div class="pm-input-group">
+          <label for="pmSenderPhone">
+            <span>Teléfono / WhatsApp</span>
+            <span class="req-star">*</span>
+          </label>
+          <input type="tel" id="pmSenderPhone" class="pm-input" placeholder="Ej: 04121234567" required pattern="[0-9]{10,11}" maxlength="11" oninput="hidePmVerificationAlert()">
+        </div>
+      </div>
+    </div>
+
+    <!-- Divisor y Título de Sección -->
+    <div class="drawer-section-heading" style="margin-top: 14px;">
+      <span class="heading-badge">Paso 3</span>
       <span class="heading-title">Método de Pago</span>
     </div>
 
@@ -190,16 +224,8 @@ function initPagoMovilCheckoutUI() {
 
       <!-- Formulario de Emisor y Referencia -->
       <form id="formPagoMovilSubmit" onsubmit="handlePagoMovilSubmit(event)">
-        <div class="pm-form-grid">
-          <div class="pm-input-group">
-            <label for="pmSenderPhone">
-              <span>Tu Teléfono Emisor</span>
-              <span class="req-star">*</span>
-            </label>
-            <input type="tel" id="pmSenderPhone" class="pm-input" placeholder="Ej: 04121234567" required pattern="[0-9]{10,11}" maxlength="11" oninput="hidePmVerificationAlert()">
-          </div>
-
-          <div class="pm-input-group">
+        <div class="pm-form-grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="pm-input-group" style="grid-column: 1 / -1;">
             <label for="pmSenderBank">
               <span>Banco desde donde envías</span>
               <span class="req-star">*</span>
@@ -210,7 +236,7 @@ function initPagoMovilCheckoutUI() {
             </select>
           </div>
 
-          <div class="pm-input-group">
+          <div class="pm-input-group" style="grid-column: 1 / -1;">
             <label for="pmReference">
               <span>Número de Referencia</span>
               <span class="req-star">*</span>
@@ -230,7 +256,7 @@ function initPagoMovilCheckoutUI() {
         <div class="wa-info-icon">💬</div>
         <h5 class="wa-info-title">Atención Directa por WhatsApp</h5>
         <p class="wa-info-desc">
-          No necesitas pagar por adelantado en la web. Al tocar el botón de abajo se abrirá WhatsApp con el resumen de tus salsas para coordinar tu método de pago preferido, entrega en persona o delivery.
+          Tus datos (Nombre, Cédula y Teléfono) quedarán registrados en tu orden. Al tocar el botón de abajo se abrirá WhatsApp con el resumen de tus salsas para coordinar tu método de pago preferido, entrega en persona o delivery.
         </p>
       </div>
     </div>
@@ -265,8 +291,11 @@ function initPagoMovilCheckoutUI() {
       </p>
 
       <div class="success-actions">
+        <button type="button" class="btn-track-order-direct" onclick="goToOrderTracking()">
+          📦 Ver Guía y Rastreo de mi Orden
+        </button>
         <button type="button" class="btn-share-whatsapp-order" onclick="sharePendingOrderWhatsapp()">
-          💬 Notificar por WhatsApp (Opcional)
+          💬 Notificar por WhatsApp
         </button>
         <button type="button" class="btn-new-order-reset" onclick="resetOrderDrawer()">
           🛍️ Realizar otro pedido
@@ -327,6 +356,17 @@ function initPagoMovilCheckoutUI() {
 
   // Actualizar datos del comercio en la vista
   updatePagoMovilDetailsView();
+
+  // Rellenar datos guardados del cliente si existen en localStorage
+  try {
+    const savedCustomer = JSON.parse(localStorage.getItem('diplf_customer_info') || '{}');
+    const nameInput = document.getElementById('pmCustomerName');
+    const idInput = document.getElementById('pmCustomerId');
+    const phoneInput = document.getElementById('pmSenderPhone');
+    if (savedCustomer.name && nameInput && !nameInput.value) nameInput.value = savedCustomer.name;
+    if (savedCustomer.id && idInput && !idInput.value) idInput.value = savedCustomer.id;
+    if (savedCustomer.phone && phoneInput && !phoneInput.value) phoneInput.value = savedCustomer.phone;
+  } catch (_) {}
 }
 
 // Disparador manual para el botón de Pago Móvil del footer
@@ -534,10 +574,26 @@ window.handlePagoMovilSubmit = async function(event) {
   const phoneInput = document.getElementById('pmSenderPhone');
   const bankInput = document.getElementById('pmSenderBank');
   const refInput = document.getElementById('pmReference');
+  const nameInput = document.getElementById('pmCustomerName');
+  const idInput = document.getElementById('pmCustomerId');
 
+  const customerName = (nameInput?.value || '').trim();
+  const customerId = (idInput?.value || '').trim().toUpperCase();
   const senderPhone = (phoneInput?.value || '').trim().replace(/[^0-9]/g, '');
   const senderBank = (bankInput?.value || '').trim();
   const reference = (refInput?.value || '').trim().replace(/[^0-9]/g, '');
+
+  if (!customerName || customerName.length < 3) {
+    alert('Por favor ingresa tu Nombre y Apellido para registrar la orden.');
+    nameInput?.focus();
+    return;
+  }
+
+  if (!customerId || customerId.length < 5) {
+    alert('Por favor ingresa tu Cédula o RIF (Ej: V-21726495).');
+    idInput?.focus();
+    return;
+  }
 
   if (senderPhone.length < 10) {
     alert('Por favor ingresa un número de teléfono válido (Ej: 04121234567).');
@@ -556,6 +612,15 @@ window.handlePagoMovilSubmit = async function(event) {
     refInput?.focus();
     return;
   }
+
+  // Guardar datos del cliente para su comodidad futura
+  try {
+    localStorage.setItem('diplf_customer_info', JSON.stringify({
+      name: customerName,
+      id: customerId,
+      phone: senderPhone
+    }));
+  } catch (_) {}
 
   hidePmVerificationAlert();
 
@@ -631,6 +696,9 @@ window.handlePagoMovilSubmit = async function(event) {
 
   // SI SE VERIFICA CON ÉXITO: CONSTRUIR Y REGISTRAR PEDIDO PAGADO
   const orderData = {
+    customerName: customerName,
+    customerId: customerId,
+    customerPhone: senderPhone,
     items: cart.map(i => ({
       flavorId: i.flavorId,
       name: i.name,
@@ -773,21 +841,42 @@ window.sharePendingOrderWhatsapp = function() {
   let msg = `¡Hola DIP LF! 👋 Acabo de realizar mi pedido en la web con Pago Móvil verificado:\n\n`;
   msg += `📦 *ORDEN:* #${o.id}\n`;
   msg += `✅ *ESTADO:* PAGADO (Confirmado por banco)\n`;
-  msg += `💳 *BANCO EMISOR:* ${p.originBank}\n`;
-  msg += `📱 *TELÉFONO EMISOR:* ${p.senderPhone}\n`;
-  msg += `🔢 *REFERENCIA:* ${p.reference}\n`;
-  msg += `💰 *MONTO:* Bs. ${p.amountBs} ($${o.totalPrice.toFixed(2)} USD)\n\n`;
+  if (o.customerName) msg += `👤 *CLIENTE:* ${o.customerName} (C.I: ${o.customerId || 'N/A'})\n`;
+  if (o.customerPhone || p.senderPhone) msg += `📱 *TELÉFONO:* ${o.customerPhone || p.senderPhone}\n`;
+  msg += `💳 *BANCO EMISOR:* ${p.originBank || 'N/A'}\n`;
+  msg += `🔢 *REFERENCIA:* ${p.reference || 'N/A'}\n`;
+  msg += `💰 *MONTO:* Bs. ${p.amountBs} ($${(o.totalPrice || 0).toFixed(2)} USD)\n\n`;
   msg += `🛒 *DETALLE DEL PEDIDO:*\n`;
 
   (o.items || []).forEach(it => {
     msg += `• ${it.quantity}x ${it.name} (${it.sizeName})\n`;
   });
 
-  msg += `\n¡Muchas gracias! Quedo a la espera de la entrega.`;
+  msg += `\n📍 *Por favor coordinar entrega o delivery para mi orden.* ¡Muchas gracias!`;
 
-  const phone = (typeof WHATSAPP_PHONE !== 'undefined') ? WHATSAPP_PHONE : '584122694517';
+  const phone = (typeof WHATSAPP_PHONE !== 'undefined') ? WHATSAPP_PHONE : '584143572462';
   const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
+};
+
+// Navegar directamente a la sección de Rastreo de Órdenes
+window.goToOrderTracking = function(orderId) {
+  const targetId = orderId || (lastCreatedOrder ? lastCreatedOrder.id : null) || localStorage.getItem('diplf_last_order_id');
+  
+  if (typeof toggleDrawer === 'function') {
+    toggleDrawer(false);
+  }
+
+  if (targetId && typeof window.trackOrderById === 'function') {
+    window.trackOrderById(targetId);
+  }
+
+  const section = document.getElementById('ordenes');
+  if (section) {
+    section.scrollIntoView({ behavior: 'smooth' });
+  } else {
+    window.location.hash = '#ordenes';
+  }
 };
 
 // Reiniciar drawer para un nuevo pedido

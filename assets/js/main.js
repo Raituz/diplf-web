@@ -365,9 +365,38 @@ function sendWhatsAppOrder() {
     return;
   }
 
-  // Registrar el pedido en el sistema para que aparezca en el Almacén con alerta de sonido
+  // Obtener datos del cliente si los llenó en el formulario o los tiene guardados
+  let customerName = (document.getElementById('pmCustomerName')?.value || '').trim();
+  let customerId = (document.getElementById('pmCustomerId')?.value || '').trim();
+  let customerPhone = (document.getElementById('pmSenderPhone')?.value || '').trim();
+
+  if (!customerName || !customerId || !customerPhone) {
+    try {
+      const saved = JSON.parse(localStorage.getItem('diplf_customer_info') || '{}');
+      if (!customerName && saved.name) customerName = saved.name;
+      if (!customerId && saved.id) customerId = saved.id;
+      if (!customerPhone && saved.phone) customerPhone = saved.phone;
+    } catch (_) {}
+  }
+
+  // Si los llenó, persistir
+  if (customerName || customerId || customerPhone) {
+    try {
+      localStorage.setItem('diplf_customer_info', JSON.stringify({
+        name: customerName,
+        id: customerId,
+        phone: customerPhone
+      }));
+    } catch (_) {}
+  }
+
+  // Registrar el pedido en el sistema para que aparezca en Almacén y en Rastreo
+  let savedOrder = null;
   if (typeof recordNewOrder === 'function') {
-    recordNewOrder({
+    savedOrder = recordNewOrder({
+      customerName: customerName || 'Cliente Web',
+      customerId: customerId || '',
+      customerPhone: customerPhone || '',
       items: cart.map(i => ({
         flavorId: i.flavorId,
         name: i.name,
@@ -378,12 +407,19 @@ function sendWhatsAppOrder() {
       })),
       totalCount: totalCount,
       totalPrice: totalPrice,
-      note: 'Pedido cliente desde web'
+      paymentMethod: 'whatsapp',
+      status: 'nuevo',
+      customerNote: 'Pedido para coordinar vía WhatsApp'
     });
   }
 
+  const orderNum = savedOrder ? savedOrder.id : ('ORD-' + Math.floor(100000 + Math.random() * 900000));
+
   let text = `¡Hola DIP LF! 👋 Quiero consultar y coordinar este pedido:\n\n`;
-  text += `🛒 *MI PEDIDO DE SALSAS:*\n`;
+  text += `📦 *ORDEN:* #${orderNum}\n`;
+  if (customerName) text += `👤 *CLIENTE:* ${customerName} ${customerId ? `(C.I: ${customerId})` : ''}\n`;
+  if (customerPhone) text += `📱 *TELÉFONO:* ${customerPhone}\n`;
+  text += `\n🛒 *MI PEDIDO DE SALSAS:*\n`;
 
   cart.forEach(item => {
     const subtotal = item.price * item.quantity;
@@ -392,10 +428,12 @@ function sendWhatsAppOrder() {
 
   text += `\n💵 *Total estimado:* $${totalPrice.toFixed(2)} USD\n`;
   text += `📍 *¿Tienen disponibilidad y delivery activo para hoy?*\n`;
-  text += `\n(Pedido realizado desde la web de DIP LF)`;
+  text += `\n(Pedido realizado desde la web de DIP LF - Guía #${orderNum})`;
 
   const url = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(text)}`;
   window.open(url, '_blank');
+
+  showOrderToast(`¡Orden #${orderNum} creada! Puedes rastrearla en la web.`);
 }
 
 // Toast de notificación simple

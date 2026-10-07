@@ -889,16 +889,66 @@ input:checked + .slider:before {
   border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
+.order-status-badge.listo_entrega {
+  background: rgba(168, 85, 247, 0.2);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.4);
+}
+
 .order-status-badge.entregado {
   background: var(--color-green-soft);
   color: var(--color-green);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  border: 1px solid rgba(168, 85, 129, 0.3);
 }
 
 .order-status-badge.cancelado {
   background: var(--color-red-soft);
   color: #fca5a5;
   border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.order-customer-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.customer-info-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 0.85rem;
+  color: #e2e8f0;
+}
+
+.customer-info-line strong {
+  color: var(--gold-primary);
+}
+
+.btn-wa-contact-customer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #25d366;
+  color: #000;
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+}
+
+.btn-wa-contact-customer:hover {
+  background: #22c55e;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
 }
 
 .order-products-table {

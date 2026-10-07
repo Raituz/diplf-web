@@ -645,6 +645,19 @@ function renderOrdersList(filterStatus = 'todos') {
         </div>
       </div>
 
+      <div class="order-customer-box">
+        <div class="customer-info-line">
+          <span>👤 <strong>Cliente:</strong> ${escapeHtml(order.customerName || 'Cliente Web')}</span>
+          ${order.customerId ? `<span>🪪 <strong>C.I / RIF:</strong> ${escapeHtml(order.customerId)}</span>` : ''}
+          ${order.customerPhone ? `<span>📱 <strong>Teléfono:</strong> ${escapeHtml(order.customerPhone)}</span>` : ''}
+        </div>
+        ${order.customerPhone ? `
+          <a href="https://wa.me/58${order.customerPhone.replace(/[^0-9]/g, '').replace(/^0/, '')}?text=${encodeURIComponent(`¡Hola ${order.customerName || 'estimado cliente'}! 👋 Te contactamos de DIP LF respecto a tu orden #${order.id}.`)}" target="_blank" class="btn-wa-contact-customer" title="Chatear con el cliente en WhatsApp">
+            💬 WhatsApp Cliente
+          </a>
+        ` : ''}
+      </div>
+
       <table class="order-products-table">
         <thead>
           <tr>
@@ -712,6 +725,7 @@ function renderOrdersList(filterStatus = 'todos') {
             <option value="pagado" ${order.status === 'pagado' ? 'selected' : ''}>✅ Pagado (Confirmado)</option>
             <option value="nuevo" ${order.status === 'nuevo' ? 'selected' : ''}>🟡 Nuevo (WhatsApp)</option>
             <option value="en_preparacion" ${order.status === 'en_preparacion' ? 'selected' : ''}>🔵 En Preparación</option>
+            <option value="listo_entrega" ${order.status === 'listo_entrega' ? 'selected' : ''}>🛵 Listo para Entrega / Delivery</option>
             <option value="entregado" ${order.status === 'entregado' ? 'selected' : ''}>🟢 Entregado</option>
             <option value="cancelado" ${order.status === 'cancelado' ? 'selected' : ''}>🔴 Cancelado</option>
           </select>
@@ -745,6 +759,7 @@ function formatStatusLabel(st) {
     case 'pagado': return '✅ Pagado (Confirmado)';
     case 'nuevo': return '🟡 Nuevo (WhatsApp)';
     case 'en_preparacion': return 'En Preparación';
+    case 'listo_entrega': return '🛵 Listo para Entrega';
     case 'entregado': return 'Entregado';
     case 'cancelado': return 'Cancelado';
     default: return st;
@@ -763,6 +778,9 @@ function simulateTestOrder() {
   const price2 = (sample2.prices?.['7oz'] || 2);
 
   const testOrder = recordNewOrder({
+    customerName: 'Carlos Mendoza',
+    customerId: 'V-21726495',
+    customerPhone: '04143572462',
     items: [
       { name: sample1.name, sizeName: '16 oz', sizeKey: '16oz', price: price1, quantity: qty1 },
       { name: sample2.name, sizeName: '7 oz', sizeKey: '7oz', price: price2, quantity: qty2 }

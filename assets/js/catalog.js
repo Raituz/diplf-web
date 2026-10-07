@@ -391,6 +391,9 @@ function recordNewOrder(orderData) {
         year: 'numeric', month: 'short', day: 'numeric',
         hour: '2-digit', minute: '2-digit' 
       }),
+      customerName: orderData.customerName || 'Cliente Web',
+      customerId: orderData.customerId || orderData.customerCedula || '',
+      customerPhone: orderData.customerPhone || (orderData.paymentDetails?.senderPhone || ''),
       items: orderData.items || [],
       totalCount: orderData.totalCount || 0,
       totalPrice: Number(orderData.totalPrice || 0),
@@ -406,9 +409,25 @@ function recordNewOrder(orderData) {
 
     orders.unshift(newOrder); // Más reciente primero
     localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
+    try {
+      localStorage.setItem('diplf_last_order_id', newOrder.id);
+    } catch (_) {}
     
     // Disparar evento de nuevo pedido
     window.dispatchEvent(new CustomEvent('diplf_new_order', { detail: newOrder }));
+
+    // Sincronizar en la nube Alwaysdata
+    try {
+      const webhookUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'https://diplf.alwaysdata.net';
+      fetch(`${webhookUrl}/api/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newOrder)
+      }).catch(err => {
+        console.warn('No se pudo sincronizar pedido con servidor webhook:', err.message);
+      });
+    } catch (_) {}
+
     return newOrder;
   } catch (err) {
     console.error('Error al registrar pedido:', err);
@@ -416,7 +435,7 @@ function recordNewOrder(orderData) {
   }
 }
 
-// Cambiar estado de un pedido
+// Cambiar estado de un pedido y sincronizar en la nube
 function updateOrderStatus(orderId, newStatus, additionalData = {}) {
   const orders = getOrders();
   const target = orders.find(o => o.id === orderId);
@@ -429,6 +448,22 @@ function updateOrderStatus(orderId, newStatus, additionalData = {}) {
 
   localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
   window.dispatchEvent(new CustomEvent('diplf_orders_updated', { detail: orders }));
+
+  // Sincronizar en tiempo real con servidor Alwaysdata
+  try {
+    const webhookUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'https://diplf.alwaysdata.net';
+    fetch(`${webhookUrl}/api/orders/${encodeURIComponent(orderId)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        status: newStatus,
+        ...additionalData
+      })
+    }).catch(err => {
+      console.warn('No se pudo sincronizar estado con servidor webhook:', err.message);
+    });
+  } catch (_) {}
+
   return true;
 }
 
