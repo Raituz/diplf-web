@@ -91,7 +91,7 @@ function getWebhookServerUrl() {
     const saved = localStorage.getItem(WEBHOOK_SERVER_URL_KEY);
     if (saved) return saved.trim();
   } catch (e) {}
-  return 'http://localhost:3000';
+  return 'https://diplf.alwaysdata.net';
 }
 
 function setWebhookServerUrl(url) {
