@@ -111,72 +111,99 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initPagoMovilCheckoutUI() {
+  const drawerBody = document.querySelector('.drawer-body');
+  const drawerCartList = document.getElementById('drawerCartList');
   const drawerFooter = document.querySelector('.drawer-footer');
-  if (!drawerFooter) return;
+  if (!drawerBody || !drawerFooter) return;
 
-  // Insertar selector de métodos de pago antes del total y botones
+  // Evitar duplicados si ya fue inicializado
+  if (document.getElementById('pagoMovilModuleContainer')) return;
+
+  // Contenedor principal de selección de método y formularios en .drawer-body
   const container = document.createElement('div');
   container.id = 'pagoMovilModuleContainer';
   container.className = 'pago-movil-checkout-module';
 
   container.innerHTML = `
+    <!-- Divisor y Título de Sección -->
+    <div class="drawer-section-heading">
+      <span class="heading-badge">Paso 2</span>
+      <span class="heading-title">Método de Pago</span>
+    </div>
+
     <!-- Selector de Método de Pago -->
     <div class="checkout-method-tabs">
       <button type="button" class="method-tab-btn active" data-method="pagomovil" onclick="switchCheckoutMethod('pagomovil')">
-        <span class="tab-icon">📱</span>
-        <span>Pago Móvil (VE)</span>
+        <span class="tab-icon">⚡</span>
+        <span class="tab-text">Pago Móvil (Instantáneo)</span>
       </button>
       <button type="button" class="method-tab-btn" data-method="whatsapp" onclick="switchCheckoutMethod('whatsapp')">
         <span class="tab-icon">💬</span>
-        <span>Coordinar WhatsApp</span>
+        <span class="tab-text">Coordinar WhatsApp</span>
       </button>
     </div>
 
     <!-- Panel 1: Formulario de Pago Móvil -->
     <div id="panelPagoMovil" class="payment-method-panel active">
-      <!-- Tarjeta de Datos Receptores DIP LF -->
+      <!-- Tarjeta Compacta y Moderna de Datos Receptores DIP LF -->
       <div class="pm-receiver-box">
         <div class="pm-receiver-header">
-          <span class="pm-badge">Datos de Pago Móvil DIP LF</span>
-          <button type="button" class="btn-copy-pm" onclick="copyPagoMovilData()">📋 Copiar Datos</button>
+          <div class="pm-receiver-title-badge">
+            <span class="pm-badge-dot"></span>
+            <span>Datos Pago Móvil DIP LF</span>
+          </div>
+          <button type="button" class="btn-copy-pm" onclick="copyPagoMovilData()" title="Copiar datos al portapapeles">
+            📋 Copiar Datos
+          </button>
         </div>
         <div class="pm-receiver-grid">
-          <div class="pm-data-item">
-            <span class="pm-label">Banco:</span>
-            <strong id="pmViewBank" class="pm-val">0102 - BDV / 0172 - Bancamiga</strong>
+          <div class="pm-data-pill">
+            <span class="pm-pill-label">📱 Teléfono</span>
+            <strong id="pmViewPhone" class="pm-pill-val">0412-2694517</strong>
           </div>
-          <div class="pm-data-item">
-            <span class="pm-label">Teléfono:</span>
-            <strong id="pmViewPhone" class="pm-val">0412-2694517</strong>
+          <div class="pm-data-pill">
+            <span class="pm-pill-label">🪪 Cédula / RIF</span>
+            <strong id="pmViewId" class="pm-pill-val">V-21726495</strong>
           </div>
-          <div class="pm-data-item">
-            <span class="pm-label">Cédula / RIF:</span>
-            <strong id="pmViewId" class="pm-val">V-21726495</strong>
+          <div class="pm-data-pill pm-pill-full">
+            <span class="pm-pill-label">🏦 Bancos Destino</span>
+            <strong id="pmViewBank" class="pm-pill-val pm-pill-banks">0102 - BDV / 0172 - Bancamiga</strong>
           </div>
-          <div class="pm-data-item">
-            <span class="pm-label">Tasa de Cambio:</span>
-            <strong id="pmViewRate" class="pm-val rate-gold">Bs. 395.00 / $</strong>
+          <div class="pm-data-pill pm-pill-full pm-pill-rate">
+            <span class="pm-pill-label">📈 Tasa Oficial BCV</span>
+            <strong id="pmViewRate" class="pm-pill-val rate-gold">Bs. 395.00 / $</strong>
           </div>
         </div>
       </div>
 
-      <!-- Resumen en Bolívares -->
+      <!-- Resumen en Bolívares con Alto Contraste -->
       <div class="pm-amount-summary">
-        <div class="pm-summary-label">Monto exacto a transferir:</div>
-        <div id="pmCalculatedBs" class="pm-calculated-bs">Bs. 0,00</div>
+        <div class="pm-amount-left">
+          <span class="pm-amount-title">Monto exacto a transferir:</span>
+          <span class="pm-amount-sub">Tasa oficial BCV</span>
+        </div>
+        <div class="pm-amount-right">
+          <div id="pmCalculatedBs" class="pm-calculated-bs">Bs. 0,00</div>
+          <div id="pmCalculatedUsdSub" class="pm-calculated-usd">($0.00 USD)</div>
+        </div>
       </div>
 
       <!-- Formulario de Emisor y Referencia -->
       <form id="formPagoMovilSubmit" onsubmit="handlePagoMovilSubmit(event)">
         <div class="pm-form-grid">
           <div class="pm-input-group">
-            <label for="pmSenderPhone">Teléfono Emisor (Tu teléfono)</label>
-            <input type="tel" id="pmSenderPhone" class="pm-input" placeholder="04121234567" required pattern="[0-9]{10,11}" maxlength="11" oninput="hidePmVerificationAlert()">
-            <small class="pm-hint">Número desde donde hiciste el pago móvil.</small>
+            <label for="pmSenderPhone">
+              <span>Tu Teléfono Emisor</span>
+              <span class="req-star">*</span>
+            </label>
+            <input type="tel" id="pmSenderPhone" class="pm-input" placeholder="Ej: 04121234567" required pattern="[0-9]{10,11}" maxlength="11" oninput="hidePmVerificationAlert()">
           </div>
 
           <div class="pm-input-group">
-            <label for="pmSenderBank">Banco de Origen</label>
+            <label for="pmSenderBank">
+              <span>Banco desde donde envías</span>
+              <span class="req-star">*</span>
+            </label>
             <select id="pmSenderBank" class="pm-input select-bank" required onchange="hidePmVerificationAlert()">
               <option value="" disabled selected>Selecciona tu banco emisor...</option>
               ${VENEZUELA_BANKS.map(b => `<option value="${b.name}">${b.name}</option>`).join('')}
@@ -184,22 +211,27 @@ function initPagoMovilCheckoutUI() {
           </div>
 
           <div class="pm-input-group">
-            <label for="pmReference">Número de Referencia</label>
-            <input type="text" id="pmReference" class="pm-input ref-input" placeholder="Ej: 12345678 (o últimos dígitos)" required minlength="4" maxlength="14" oninput="hidePmVerificationAlert()">
-            <small class="pm-hint">Código de referencia generado por tu banco.</small>
+            <label for="pmReference">
+              <span>Número de Referencia</span>
+              <span class="req-star">*</span>
+            </label>
+            <input type="text" id="pmReference" class="pm-input ref-input" placeholder="Ej: 007588648037 (o últimos dígitos)" required minlength="4" maxlength="14" oninput="hidePmVerificationAlert()">
           </div>
         </div>
 
         <!-- Alerta interactiva de error si no se encuentra el pago móvil en cuenta -->
         <div id="pmVerificationAlert" class="pm-verify-alert" style="display: none;"></div>
-
-        <button type="submit" id="btnSubmitPagoMovil" class="btn-confirm-pagomovil">
-          <span>⚡ Confirmar y Enviar Pago Móvil</span>
-        </button>
       </form>
+    </div>
 
-      <div class="pm-security-note">
-        🛡️ Verificación bancaria instantánea. El sistema comprueba en tiempo real que tu Pago Móvil haya ingresado a nuestra cuenta antes de aprobar tu pedido.
+    <!-- Panel 2: Información para Coordinar por WhatsApp -->
+    <div id="panelWhatsappInfo" class="panel-whatsapp-info" style="display: none;">
+      <div class="wa-info-card">
+        <div class="wa-info-icon">💬</div>
+        <h5 class="wa-info-title">Atención Directa por WhatsApp</h5>
+        <p class="wa-info-desc">
+          No necesitas pagar por adelantado en la web. Al tocar el botón de abajo se abrirá WhatsApp con el resumen de tus salsas para coordinar tu método de pago preferido, entrega en persona o delivery.
+        </p>
       </div>
     </div>
 
@@ -243,28 +275,73 @@ function initPagoMovilCheckoutUI() {
     </div>
   `;
 
-  // Insertar en el footer del drawer
-  const drawerTotalRow = drawerFooter.querySelector('.drawer-total-row');
-  const btnSubmitWhatsapp = document.getElementById('btnSubmitOrder');
-  const drawerNote = drawerFooter.querySelector('.drawer-note');
-
-  if (drawerTotalRow) {
-    drawerFooter.insertBefore(container, drawerTotalRow);
+  // 1. Insertar módulo de checkout en .drawer-body después de los productos
+  if (drawerCartList) {
+    drawerCartList.after(container);
   } else {
-    drawerFooter.prepend(container);
+    drawerBody.appendChild(container);
   }
 
-  // Ocultar botón original de whatsapp cuando pagomovil esté activo
-  if (btnSubmitWhatsapp) {
-    btnSubmitWhatsapp.style.display = 'none';
+  // 2. Insertar botón de Pago Móvil en .drawer-footer (sticky abajo)
+  let btnSubmitPagoMovil = document.getElementById('btnSubmitPagoMovil');
+  if (!btnSubmitPagoMovil) {
+    btnSubmitPagoMovil = document.createElement('button');
+    btnSubmitPagoMovil.type = 'button';
+    btnSubmitPagoMovil.id = 'btnSubmitPagoMovil';
+    btnSubmitPagoMovil.className = 'btn-confirm-pagomovil';
+    btnSubmitPagoMovil.onclick = function(e) { window.submitPagoMovilForm(e); };
+    btnSubmitPagoMovil.innerHTML = '<span>⚡ Confirmar y Enviar Pago Móvil</span>';
+
+    const btnWhatsapp = document.getElementById('btnSubmitOrder');
+    if (btnWhatsapp) {
+      drawerFooter.insertBefore(btnSubmitPagoMovil, btnWhatsapp);
+    } else {
+      drawerFooter.appendChild(btnSubmitPagoMovil);
+    }
   }
-  if (drawerNote) {
-    drawerNote.style.display = 'none';
+
+  // 3. Agregar badge en Bolívares en la fila del total del footer
+  let totalBsBadge = document.getElementById('drawerTotalBsBadge');
+  if (!totalBsBadge) {
+    const totalTitle = drawerFooter.querySelector('.total-title');
+    if (totalTitle) {
+      totalBsBadge = document.createElement('span');
+      totalBsBadge.id = 'drawerTotalBsBadge';
+      totalBsBadge.className = 'total-bs-tag';
+      totalTitle.after(totalBsBadge);
+    }
   }
+
+  // 4. Agregar nota de seguridad compacta en el footer
+  let pmSecNote = document.getElementById('pmSecurityNote');
+  if (!pmSecNote) {
+    pmSecNote = document.createElement('div');
+    pmSecNote.id = 'pmSecurityNote';
+    pmSecNote.className = 'pm-security-note-footer';
+    pmSecNote.innerHTML = '🛡️ Verificación bancaria instantánea 24/7';
+    drawerFooter.appendChild(pmSecNote);
+  }
+
+  // Activar método por defecto (Pago Móvil)
+  switchCheckoutMethod('pagomovil');
 
   // Actualizar datos del comercio en la vista
   updatePagoMovilDetailsView();
 }
+
+// Disparador manual para el botón de Pago Móvil del footer
+window.submitPagoMovilForm = function(event) {
+  if (event) event.preventDefault();
+  const form = document.getElementById('formPagoMovilSubmit');
+  if (!form) return;
+
+  // Validación nativa HTML5 de inputs
+  if (form.reportValidity && !form.reportValidity()) {
+    return;
+  }
+
+  handlePagoMovilSubmit(event);
+};
 
 // Cambiar entre pestaña Pago Móvil y WhatsApp
 window.switchCheckoutMethod = function(method) {
@@ -275,18 +352,27 @@ window.switchCheckoutMethod = function(method) {
   });
 
   const panelPM = document.getElementById('panelPagoMovil');
+  const panelWA = document.getElementById('panelWhatsappInfo');
   const btnSubmitWhatsapp = document.getElementById('btnSubmitOrder');
+  const btnSubmitPagoMovil = document.getElementById('btnSubmitPagoMovil');
   const drawerNote = document.querySelector('.drawer-note');
+  const pmSecNote = document.getElementById('pmSecurityNote');
 
   if (method === 'pagomovil') {
-    if (panelPM) panelPM.style.display = 'block';
+    if (panelPM) panelPM.style.display = 'flex';
+    if (panelWA) panelWA.style.display = 'none';
+    if (btnSubmitPagoMovil) btnSubmitPagoMovil.style.display = 'flex';
     if (btnSubmitWhatsapp) btnSubmitWhatsapp.style.display = 'none';
     if (drawerNote) drawerNote.style.display = 'none';
+    if (pmSecNote) pmSecNote.style.display = 'block';
     updatePagoMovilAmounts();
   } else {
     if (panelPM) panelPM.style.display = 'none';
+    if (panelWA) panelWA.style.display = 'block';
+    if (btnSubmitPagoMovil) btnSubmitPagoMovil.style.display = 'none';
     if (btnSubmitWhatsapp) btnSubmitWhatsapp.style.display = 'flex';
     if (drawerNote) drawerNote.style.display = 'block';
+    if (pmSecNote) pmSecNote.style.display = 'none';
   }
 };
 
@@ -311,14 +397,28 @@ function updatePagoMovilDetailsView() {
 // Actualizar cálculo de Bolívares según total de carrito
 function updatePagoMovilAmounts() {
   const elBs = document.getElementById('pmCalculatedBs');
-  if (!elBs) return;
+  const elUsdSub = document.getElementById('pmCalculatedUsdSub');
+  const elTotalBsBadge = document.getElementById('drawerTotalBsBadge');
+  const container = document.getElementById('pagoMovilModuleContainer');
+  const drawerFooter = document.querySelector('.drawer-footer');
 
   if (typeof getCartTotals !== 'function') return;
-  const { totalPrice } = getCartTotals();
+  const { totalCount, totalPrice } = getCartTotals();
   const rate = getBcvRate();
   const totalBs = totalPrice * rate;
+  const bsFormatted = `Bs. ${totalBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-  elBs.textContent = `Bs. ${totalBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (elBs) elBs.textContent = bsFormatted;
+  if (elUsdSub) elUsdSub.textContent = `($${totalPrice.toFixed(2)} USD)`;
+  if (elTotalBsBadge) elTotalBsBadge.textContent = bsFormatted;
+
+  // Si el carrito está vacío, ocultar el formulario de pago y el footer
+  if (container) {
+    container.style.display = (totalCount > 0) ? 'flex' : 'none';
+  }
+  if (drawerFooter) {
+    drawerFooter.style.display = (totalCount > 0) ? 'block' : 'none';
+  }
 }
 
 // Hook para actualizar montos cuando cambia el carrito
@@ -590,12 +690,18 @@ window.handlePagoMovilSubmit = async function(event) {
 
 // Mostrar pantalla de confirmación verificada dentro del Drawer
 function showOrderSuccessState(order, verifiedData) {
+  const drawerCartList = document.getElementById('drawerCartList');
+  const sectionHeading = document.querySelector('.drawer-section-heading');
+  const checkoutTabs = document.querySelector('.checkout-method-tabs');
   const panelForm = document.getElementById('panelPagoMovil');
   const panelSuccess = document.getElementById('panelPagoMovilSuccess');
-  const drawerTotalRow = document.querySelector('.drawer-total-row');
+  const drawerFooter = document.querySelector('.drawer-footer');
 
+  if (drawerCartList) drawerCartList.style.display = 'none';
+  if (sectionHeading) sectionHeading.style.display = 'none';
+  if (checkoutTabs) checkoutTabs.style.display = 'none';
   if (panelForm) panelForm.style.display = 'none';
-  if (drawerTotalRow) drawerTotalRow.style.display = 'none';
+  if (drawerFooter) drawerFooter.style.display = 'none';
 
   if (panelSuccess) {
     panelSuccess.style.display = 'block';
@@ -622,6 +728,10 @@ function showOrderSuccessState(order, verifiedData) {
     if (elInfo) {
       elInfo.innerHTML = `Confirmamos con éxito la recepción de tu transferencia bancaria en nuestro teléfono <strong>04122694517</strong>. Tu pedido ya está marcado como <strong>PAGADO</strong> y entra en preparación de inmediato.`;
     }
+
+    // Scroll al inicio del drawer suavemente
+    const drawerBody = document.querySelector('.drawer-body');
+    if (drawerBody) drawerBody.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
 
@@ -653,16 +763,23 @@ window.sharePendingOrderWhatsapp = function() {
 
 // Reiniciar drawer para un nuevo pedido
 window.resetOrderDrawer = function() {
+  const drawerCartList = document.getElementById('drawerCartList');
+  const sectionHeading = document.querySelector('.drawer-section-heading');
+  const checkoutTabs = document.querySelector('.checkout-method-tabs');
   const panelForm = document.getElementById('panelPagoMovil');
   const panelSuccess = document.getElementById('panelPagoMovilSuccess');
-  const drawerTotalRow = document.querySelector('.drawer-total-row');
+  const drawerFooter = document.querySelector('.drawer-footer');
   const btnSubmit = document.getElementById('btnSubmitPagoMovil');
 
   hidePmVerificationAlert();
 
-  if (panelForm) panelForm.style.display = 'block';
+  if (drawerCartList) drawerCartList.style.display = 'flex';
+  if (sectionHeading) sectionHeading.style.display = 'flex';
+  if (checkoutTabs) checkoutTabs.style.display = 'grid';
+  if (panelForm) panelForm.style.display = 'flex';
   if (panelSuccess) panelSuccess.style.display = 'none';
-  if (drawerTotalRow) drawerTotalRow.style.display = 'flex';
+  if (drawerFooter) drawerFooter.style.display = 'block';
+
   if (btnSubmit) {
     btnSubmit.disabled = false;
     btnSubmit.innerHTML = '<span>⚡ Confirmar y Enviar Pago Móvil</span>';

@@ -290,7 +290,7 @@ function renderDrawerItems() {
         </div>
         <div class="cart-item-info">
           <h5>${item.name}</h5>
-          <span class="cart-item-meta">${item.sizeName} • $${item.price}.00 c/u</span>
+          <span class="cart-item-meta">${item.sizeName} • $${Number(item.price).toFixed(2)} c/u</span>
           <div class="cart-item-controls">
             <button class="btn-qty" onclick="updateCartItemQty('${item.cartItemId}', -1)">-</button>
             <span class="qty-number">${item.quantity}</span>
