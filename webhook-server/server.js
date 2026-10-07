@@ -501,30 +501,16 @@ function handleRoute(req, res, pathname, queryParams, body) {
       }
 
       // CASO B: Coincidencia por Teléfono Emisor + Monto (para Bancamiga Suite y apps cuyas notificaciones omiten la ref)
+      // Nota: La notificación viene del banco RECEPTOR (Bancamiga), mientras que el cliente selecciona su banco EMISOR (Venezuela, Banesco, etc.).
       let phoneAndAmountMatches = false;
       if (!refMatches && !entry.parsed.reference && entry.parsed.phone && clientPhone && amountMatches) {
-        // Validación de compatibilidad de banco si el cliente lo indicó
-        let bankMatches = true;
-        if (body.bank && entry.parsed.bank) {
-          const clientBankStr = String(body.bank).toLowerCase();
-          const smsBankStr = String(entry.parsed.bank).toLowerCase();
-          if (smsBankStr.includes('bancamiga') && !clientBankStr.includes('bancamiga')) {
-            bankMatches = false;
-          } else if ((smsBankStr.includes('venezuela') || smsBankStr.includes('bdv')) && 
-                     (!clientBankStr.includes('venezuela') && !clientBankStr.includes('bdv'))) {
-            bankMatches = false;
-          }
-        }
-
-        if (bankMatches) {
-          const smsPhoneClean = String(entry.parsed.phone).replace(/[^0-9]/g, '');
-          if (smsPhoneClean === clientPhone || (smsPhoneClean.length >= 7 && clientPhone.endsWith(smsPhoneClean.slice(-7)))) {
-            // Asegurar que la notificación fue en los últimos 30 minutos
-            const receivedTime = new Date(entry.receivedAt).getTime();
-            const ageMinutes = (Date.now() - receivedTime) / (1000 * 60);
-            if (ageMinutes <= 30) {
-              phoneAndAmountMatches = true;
-            }
+        const smsPhoneClean = String(entry.parsed.phone).replace(/[^0-9]/g, '');
+        if (smsPhoneClean === clientPhone || (smsPhoneClean.length >= 7 && clientPhone.endsWith(smsPhoneClean.slice(-7)))) {
+          // Asegurar que la notificación fue en los últimos 30 minutos
+          const receivedTime = new Date(entry.receivedAt).getTime();
+          const ageMinutes = (Date.now() - receivedTime) / (1000 * 60);
+          if (ageMinutes <= 30) {
+            phoneAndAmountMatches = true;
           }
         }
       }
