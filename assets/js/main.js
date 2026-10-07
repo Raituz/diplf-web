@@ -51,6 +51,7 @@ const FLAVORS_DATA = [
     badge: 'SABOR INTENSO',
     desc: 'Equilibrio perfecto de ajo suave asado con perejil fresco del campo.',
     image: '',
+    isComingSoon: true,
     defaultSize: '16oz',
     isDarkBg: false
   },
@@ -61,6 +62,7 @@ const FLAVORS_DATA = [
     badge: '100% CRIOLLA',
     desc: 'Aguacate cremoso, pimentón verde, cilantro y condimentos tradicionales frescos.',
     image: '',
+    isComingSoon: true,
     defaultSize: '16oz',
     isDarkBg: false
   },
