@@ -15,8 +15,8 @@ const path = require('path');
 const os = require('os');
 
 // Configuración general
-const PORT = process.env.PORT || 3000;
-const HOST = process.env.IP || '0.0.0.0';
+const PORT = parseInt(process.env.PORT, 10) || 3000;
+const HOST = process.env.IP || null;
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || 'diplf_secret_2026';
 const AUTHORIZED_PHONE = process.env.AUTHORIZED_PHONE || '04122694517';
 
@@ -512,20 +512,32 @@ function handleRoute(req, res, pathname, queryParams, body) {
   sendJsonResponse(res, 404, { error: `Ruta no encontrada: ${req.method} ${pathname}` });
 }
 
-// Iniciar servidor
-server.listen(PORT, HOST, () => {
+// Manejo de errores de escucha
+server.on('error', (err) => {
+  console.error('[ERROR CRÍTICO] Error en el servidor HTTP:', err.message);
+});
+
+function onServerListening() {
   console.log(`\n======================================================`);
   console.log(`🚀 [DIP LF] Servidor Webhook Pago Móvil SMS Activo`);
-  console.log(`📡 Puerto: ${PORT}`);
+  console.log(`📡 Puerto: ${PORT} | Host: ${HOST || 'todas las interfaces (dual IPv4/IPv6)'}`);
   console.log(`📱 Teléfono Receptor Autorizado: ${systemConfig.receiverPhone || AUTHORIZED_PHONE}`);
   console.log(`🔑 Webhook Secret Token: ${systemConfig.webhookSecret || WEBHOOK_SECRET}`);
   console.log(`------------------------------------------------------`);
   console.log(`📍 Endpoints disponibles:`);
-  console.log(`   - Webhook SMS: POST http://localhost:${PORT}/api/webhook/sms`);
-  console.log(`   - API Pedidos: GET/POST http://localhost:${PORT}/api/orders`);
-  console.log(`   - Simulador:   POST http://localhost:${PORT}/api/test/sms`);
-  console.log(`   - Estado:      GET  http://localhost:${PORT}/api/status`);
+  console.log(`   - Webhook SMS: POST /api/webhook/sms`);
+  console.log(`   - API Pedidos: GET/POST /api/orders`);
+  console.log(`   - Simulador:   POST /api/test/sms`);
+  console.log(`   - Estado:      GET  /api/status`);
   console.log(`======================================================\n`);
+}
+
+// Iniciar servidor
+if (HOST) {
+  server.listen(PORT, HOST, onServerListening);
+} else {
+  server.listen(PORT, onServerListening);
+}
 
   // Mostrar IPs locales para configurar la app Android
   const networkInterfaces = os.networkInterfaces();
