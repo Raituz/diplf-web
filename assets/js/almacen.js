@@ -158,6 +158,11 @@ function setupEventListeners() {
     renderOrdersList();
     renderOrdersStats();
   });
+
+  // Escuchar actualización remota del catálogo desde la nube
+  window.addEventListener('diplf_catalog_updated', () => {
+    renderProductsGrid();
+  });
 }
 
 // Inicializar componentes del panel
@@ -398,7 +403,7 @@ window.saveProductChanges = function(prodId) {
   });
 
   if (res.success) {
-    showAdminToast(`¡"${name}" actualizado con éxito!`);
+    showAdminToast(`¡"${name}" actualizado con éxito y guardado en la nube!`);
   } else {
     alert(res.message || 'Error al actualizar el producto.');
   }

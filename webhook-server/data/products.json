@@ -1,0 +1,189 @@
+[
+  {
+    "id": "tocineta",
+    "name": "Tocineta",
+    "category": "cremosa",
+    "badge": "★ MÁS VENDIDA",
+    "desc": "Cremosa base artesanal con trocitos de tocineta ahumada crujiente seleccionada.",
+    "image": "assets/images/Tocineta foto vieja.jfif",
+    "prices": {
+      "7oz": 0.001,
+      "16oz": 4,
+      "22oz": 6
+    },
+    "stockStatus": "disponible",
+    "stockQty": 50,
+    "isComingSoon": false,
+    "isDarkBg": false
+  },
+  {
+    "id": "tartara",
+    "name": "Tártara",
+    "category": "cremosa",
+    "badge": "CLÁSICA GOURMET",
+    "desc": "Nuestra receta secreta con pepinillos finos, hierbas aromáticas y toque cítrico.",
+    "image": "assets/images/Tartara foto vieja.jfif",
+    "prices": {
+      "7oz": 2,
+      "16oz": 4,
+      "22oz": 6
+    },
+    "stockStatus": "disponible",
+    "stockQty": 45,
+    "isComingSoon": false,
+    "isDarkBg": false
+  },
+  {
+    "id": "antipasto",
+    "name": "Antipasto",
+    "category": "especial",
+    "badge": "TRADICIÓN ITALIANA",
+    "desc": "Vegetales frescos macerados en aceite de oliva y especias premium de la casa.",
+    "image": "assets/images/Antipasto Foto vieja.jfif",
+    "prices": {
+      "7oz": 2,
+      "16oz": 4,
+      "22oz": 6
+    },
+    "stockStatus": "disponible",
+    "stockQty": 40,
+    "isComingSoon": false,
+    "isDarkBg": false
+  },
+  {
+    "id": "ajo_perejil",
+    "name": "Ajo con Perejil",
+    "category": "cremosa",
+    "badge": "SABOR INTENSO",
+    "desc": "Equilibrio perfecto de ajo suave asado con perejil fresco del campo.",
+    "image": "",
+    "prices": {
+      "7oz": 2,
+      "16oz": 4,
+      "22oz": 6
+    },
+    "stockStatus": "proximamente",
+    "stockQty": 0,
+    "isComingSoon": true,
+    "isDarkBg": false
+  },
+  {
+    "id": "guasacaca",
+    "name": "Guasacaca",
+    "category": "vegetal",
+    "badge": "100% CRIOLLA",
+    "desc": "Aguacate cremoso, pimentón verde, cilantro y condimentos tradicionales frescos.",
+    "image": "",
+    "prices": {
+      "7oz": 2,
+      "16oz": 4,
+      "22oz": 6
+    },
+    "stockStatus": "proximamente",
+    "stockQty": 0,
+    "isComingSoon": true,
+    "isDarkBg": false
+  },
+  {
+    "id": "atun",
+    "name": "Atún Especial",
+    "category": "especial",
+    "badge": "DEL MAR",
+    "desc": "Lomos de atún seleccionados mezclados con crema suave y toque de cebollín.",
+    "image": "assets/images/Atun Foto vieja.jfif",
+    "prices": {
+      "7oz": 2,
+      "16oz": 4,
+      "22oz": 6
+    },
+    "stockStatus": "disponible",
+    "stockQty": 35,
+    "isComingSoon": false,
+    "isDarkBg": false
+  },
+  {
+    "id": "cebolla_dulce",
+    "name": "Cebolla Dulce",
+    "category": "cremosa",
+    "badge": "CARAMELIZADA",
+    "desc": "Cebollas suavemente caramelizadas a fuego lento con notas agridulces.",
+    "image": "assets/images/Cebola dulce foto vieja.jfif",
+    "prices": {
+      "7oz": 2,
+      "16oz": 4,
+      "22oz": 6
+    },
+    "stockStatus": "disponible",
+    "stockQty": 50,
+    "isComingSoon": false,
+    "isDarkBg": false
+  },
+  {
+    "id": "pimenton",
+    "name": "Pimentón Ahumado",
+    "category": "especial",
+    "badge": "DULCE & AHUMADO",
+    "desc": "Pimentones rojos asados combinados en una salsa sutil y deliciosa.",
+    "image": "assets/images/Pimenton foto vieja.jfif",
+    "prices": {
+      "7oz": 2,
+      "16oz": 4,
+      "22oz": 6
+    },
+    "stockStatus": "disponible",
+    "stockQty": 30,
+    "isComingSoon": false,
+    "isDarkBg": false
+  },
+  {
+    "id": "pepinillo",
+    "name": "Pepinillo Deli",
+    "category": "cremosa",
+    "badge": "AGRIDULCE",
+    "desc": "Deliciosa salsa con toque de pepinillos dulces tipo gourmet neoyorquino.",
+    "image": "assets/images/Pepinillo foto Vieja.jfif",
+    "prices": {
+      "7oz": 2,
+      "16oz": 4,
+      "22oz": 6
+    },
+    "stockStatus": "disponible",
+    "stockQty": 35,
+    "isComingSoon": false,
+    "isDarkBg": false
+  },
+  {
+    "id": "mcdonalds",
+    "name": "Estilo McDonald's",
+    "category": "cremosa",
+    "badge": "SECRETO CASERO",
+    "desc": "Inspirada en la salsa especial de hamburguesa más famosa del mundo.",
+    "image": "assets/images/McDonals Foto vieja.jfif",
+    "prices": {
+      "7oz": 2,
+      "16oz": 4,
+      "22oz": 6
+    },
+    "stockStatus": "disponible",
+    "stockQty": 60,
+    "isComingSoon": false,
+    "isDarkBg": false
+  },
+  {
+    "id": "taki",
+    "name": "Taki Crunch",
+    "category": "crujiente",
+    "badge": "★ PRONTO DISPONIBLE",
+    "desc": "Explosión picante y crujiente con auténticos Takis Fuego. (Próximamente disponible).",
+    "image": "",
+    "prices": {
+      "7oz": 2,
+      "16oz": 4,
+      "22oz": 6
+    },
+    "stockStatus": "proximamente",
+    "stockQty": 0,
+    "isComingSoon": true,
+    "isDarkBg": false
+  }
+]

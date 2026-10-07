@@ -16,7 +16,7 @@ const INITIAL_FLAVORS = [
     badge: '★ MÁS VENDIDA',
     desc: 'Cremosa base artesanal con trocitos de tocineta ahumada crujiente seleccionada.',
     image: 'assets/images/Tocineta foto vieja.jfif',
-    prices: { '7oz': 2, '16oz': 4, '22oz': 6 },
+    prices: { '7oz': 0.001, '16oz': 4, '22oz': 6 },
     stockStatus: 'disponible',
     stockQty: 50,
     isComingSoon: false,
@@ -185,11 +185,85 @@ function getCatalog() {
   return [...INITIAL_FLAVORS];
 }
 
-// Guardar catálogo
-function saveCatalog(products) {
+// Helper para obtener URL del backend / webhook en la nube
+function getCatalogApiUrl() {
+  if (typeof getWebhookServerUrl === 'function') {
+    return getWebhookServerUrl();
+  }
+  try {
+    const saved = localStorage.getItem('diplf_webhook_server_url');
+    if (saved) return saved.trim();
+  } catch (e) {}
+  return 'https://diplf.alwaysdata.net';
+}
+
+// Sincronizar catálogo desde el servidor en la nube (Alwaysdata)
+async function syncCatalogWithServer() {
+  try {
+    const apiUrl = getCatalogApiUrl();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+    const res = await fetch(`${apiUrl}/api/products`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && Array.isArray(data.products) && data.products.length > 0) {
+        // Normalizar imágenes si vienen con rutas relativas antiguas
+        data.products.forEach(item => {
+          if (item.image && typeof item.image === 'string') {
+            item.image = item.image.replace(/^(\.\.\/|\.\/)/, '');
+          }
+        });
+
+        // Guardar en localStorage para disponibilidad y caché
+        localStorage.setItem(CATALOG_STORAGE_KEY, JSON.stringify(data.products));
+
+        // Disparar evento para actualizar todas las vistas abiertas
+        window.dispatchEvent(new CustomEvent('diplf_catalog_updated', { detail: data.products }));
+        console.log(`[CATÁLOGO NUBE] Sincronizados ${data.products.length} productos desde ${apiUrl}`);
+        return data.products;
+      }
+    }
+  } catch (err) {
+    // Si no hay internet o el servidor no responde, continuar con localStorage sin error
+    console.warn('[CATÁLOGO] Usando copia local de productos (servidor en reposo o sin red)');
+  }
+  return null;
+}
+
+// Guardar catálogo en localStorage y sincronizarlo inmediatamente a la nube Alwaysdata
+function saveCatalog(products, syncRemote = true) {
   try {
     localStorage.setItem(CATALOG_STORAGE_KEY, JSON.stringify(products));
     window.dispatchEvent(new CustomEvent('diplf_catalog_updated', { detail: products }));
+
+    // Sincronizar a la nube para que cualquier usuario, teléfono o incógnito vea los cambios
+    if (syncRemote) {
+      const apiUrl = getCatalogApiUrl();
+      fetch(`${apiUrl}/api/products`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ products })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res && res.success) {
+          console.log('[CATÁLOGO NUBE] Catálogo guardado en el servidor Alwaysdata con éxito.');
+        }
+      })
+      .catch(err => {
+        console.warn('[CATÁLOGO NUBE] Error al sincronizar con el servidor en la nube:', err);
+      });
+    }
+
     return true;
   } catch (err) {
     console.error('Error al guardar catálogo:', err);
@@ -199,7 +273,7 @@ function saveCatalog(products) {
 
 // Restablecer catálogo de fábrica
 function resetDefaultCatalog() {
-  saveCatalog(INITIAL_FLAVORS);
+  saveCatalog(INITIAL_FLAVORS, true);
   return [...INITIAL_FLAVORS];
 }
 
@@ -412,5 +486,16 @@ function playNotificationChime() {
     }
   } catch (e) {
     console.warn('No se pudo reproducir audio chime:', e);
+  }
+}
+
+// Auto-sincronizar catálogo con la nube Alwaysdata al cargar la página
+if (typeof window !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      syncCatalogWithServer();
+    });
+  } else {
+    syncCatalogWithServer();
   }
 }

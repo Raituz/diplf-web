@@ -224,6 +224,18 @@ function clearCart() {
   updateCartUI();
 }
 
+// Formateador limpio de moneda en USD (evita problemas de precisión decimal como 6.000999999999994)
+function formatUsdAmount(val) {
+  const n = Number(val);
+  if (isNaN(n)) return '0.00';
+  // Si es un monto minúsculo para pruebas (ej: 0.001)
+  if (n > 0 && n < 0.01) {
+    return n.toFixed(3);
+  }
+  return n.toFixed(2);
+}
+window.formatUsdAmount = formatUsdAmount;
+
 // Calcular totales
 function getCartTotals() {
   let totalCount = 0;
@@ -250,7 +262,7 @@ function updateCartUI() {
   const floatingText = document.getElementById('floatingBarText');
   if (floatingBar && floatingText) {
     if (totalCount > 0) {
-      floatingText.textContent = `Tu consulta: ${totalCount} ${totalCount === 1 ? 'salsa' : 'salsas'} · $${totalPrice}`;
+      floatingText.textContent = `Tu consulta: ${totalCount} ${totalCount === 1 ? 'salsa' : 'salsas'} · $${formatUsdAmount(totalPrice)}`;
       floatingBar.classList.add('visible');
     } else {
       floatingBar.classList.remove('visible');
@@ -282,7 +294,7 @@ function renderDrawerItems() {
 
   let html = '';
   cart.forEach(item => {
-    const subtotal = (item.price * item.quantity).toFixed(2);
+    const subtotal = formatUsdAmount(item.price * item.quantity);
     html += `
       <div class="cart-item-row">
         <div class="cart-item-img">
@@ -290,7 +302,7 @@ function renderDrawerItems() {
         </div>
         <div class="cart-item-info">
           <h5>${item.name}</h5>
-          <span class="cart-item-meta">${item.sizeName} • $${Number(item.price).toFixed(2)} c/u</span>
+          <span class="cart-item-meta">${item.sizeName} • $${formatUsdAmount(item.price)} c/u</span>
           <div class="cart-item-controls">
             <button class="btn-qty" onclick="updateCartItemQty('${item.cartItemId}', -1)">-</button>
             <span class="qty-number">${item.quantity}</span>
@@ -307,7 +319,7 @@ function renderDrawerItems() {
 
   drawerList.innerHTML = html;
   if (drawerTotal) {
-    drawerTotal.textContent = `$${totalPrice.toFixed(2)}`;
+    drawerTotal.textContent = `$${formatUsdAmount(totalPrice)}`;
   }
 }
 

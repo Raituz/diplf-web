@@ -409,7 +409,7 @@ function updatePagoMovilAmounts() {
   const bsFormatted = `Bs. ${totalBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   if (elBs) elBs.textContent = bsFormatted;
-  if (elUsdSub) elUsdSub.textContent = `($${totalPrice.toFixed(2)} USD)`;
+  if (elUsdSub) elUsdSub.textContent = `($${(typeof formatUsdAmount === 'function' ? formatUsdAmount(totalPrice) : totalPrice.toFixed(2))} USD)`;
   if (elTotalBsBadge) elTotalBsBadge.textContent = bsFormatted;
 
   // Si el carrito está vacío, ocultar el formulario de pago y el footer

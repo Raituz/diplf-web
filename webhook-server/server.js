@@ -25,6 +25,7 @@ const DATA_DIR = path.join(__dirname, 'data');
 const ORDERS_FILE = path.join(DATA_DIR, 'orders.json');
 const SMS_LOGS_FILE = path.join(DATA_DIR, 'sms_logs.json');
 const CONFIG_FILE = path.join(DATA_DIR, 'config.json');
+const PRODUCTS_FILE = path.join(DATA_DIR, 'products.json');
 
 // Asegurar directorio de datos
 if (!fs.existsSync(DATA_DIR)) {
@@ -70,6 +71,7 @@ function saveJsonFile(filePath, data) {
 let ordersDb = loadJsonFile(ORDERS_FILE, []);
 let smsLogsDb = loadJsonFile(SMS_LOGS_FILE, []);
 let systemConfig = loadJsonFile(CONFIG_FILE, DEFAULT_CONFIG);
+let productsDb = loadJsonFile(PRODUCTS_FILE, []);
 
 // =============================================================================
 // MOTOR DE PARSEO DE SMS DE BANCOS VENEZOLANOS
@@ -665,6 +667,54 @@ function handleRoute(req, res, pathname, queryParams, body) {
       rate: systemConfig.bcvRate || 395.00,
       currency: 'VES',
       updatedAt: new Date().toISOString()
+    });
+  }
+
+  // 10. PRODUCTOS: OBTENER CATÁLOGO GLOBAL (GET /api/products)
+  if (req.method === 'GET' && pathname === '/api/products') {
+    productsDb = loadJsonFile(PRODUCTS_FILE, []);
+    return sendJsonResponse(res, 200, {
+      success: true,
+      count: productsDb.length,
+      products: productsDb
+    });
+  }
+
+  // 11. PRODUCTOS: GUARDAR O ACTUALIZAR CATÁLOGO COMPLETO (POST / PUT /api/products)
+  if ((req.method === 'POST' || req.method === 'PUT') && pathname === '/api/products') {
+    const incomingList = Array.isArray(body) ? body : (body.products || body.items);
+    if (!Array.isArray(incomingList) || incomingList.length === 0) {
+      return sendJsonResponse(res, 400, { error: 'Lista de productos inválida o vacía.' });
+    }
+
+    productsDb = incomingList;
+    saveJsonFile(PRODUCTS_FILE, productsDb);
+    console.log(`[CATÁLOGO ACTUALIZADO EN LA NUBE] Se guardaron ${productsDb.length} productos en data/products.json`);
+
+    return sendJsonResponse(res, 200, {
+      success: true,
+      count: productsDb.length,
+      products: productsDb
+    });
+  }
+
+  // 12. PRODUCTOS: ACTUALIZAR PRODUCTO INDIVIDUAL (PATCH /api/products/:id)
+  if (req.method === 'PATCH' && pathname.startsWith('/api/products/')) {
+    const prodId = pathname.replace('/api/products/', '').trim();
+    productsDb = loadJsonFile(PRODUCTS_FILE, []);
+    const idx = productsDb.findIndex(p => p.id === prodId);
+
+    if (idx === -1) {
+      return sendJsonResponse(res, 404, { error: `Producto con ID "${prodId}" no encontrado.` });
+    }
+
+    productsDb[idx] = { ...productsDb[idx], ...body };
+    saveJsonFile(PRODUCTS_FILE, productsDb);
+    console.log(`[PRODUCTO ACTUALIZADO EN LA NUBE] ID: ${prodId}`);
+
+    return sendJsonResponse(res, 200, {
+      success: true,
+      product: productsDb[idx]
     });
   }
 
