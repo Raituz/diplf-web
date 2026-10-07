@@ -530,15 +530,6 @@ function onServerListening() {
   console.log(`   - Simulador:   POST /api/test/sms`);
   console.log(`   - Estado:      GET  /api/status`);
   console.log(`======================================================\n`);
-}
-
-// Iniciar servidor
-if (HOST) {
-  server.listen(PORT, HOST, onServerListening);
-} else {
-  server.listen(PORT, onServerListening);
-}
-
   // Mostrar IPs locales para configurar la app Android
   const networkInterfaces = os.networkInterfaces();
   console.log(`📲 Direcciones para configurar en tu teléfono Android (misma red WiFi):`);
@@ -550,4 +541,11 @@ if (HOST) {
     }
   }
   console.log(`======================================================\n`);
-});
+}
+
+// Iniciar servidor
+if (HOST) {
+  server.listen(PORT, HOST, onServerListening);
+} else {
+  server.listen(PORT, onServerListening);
+}
