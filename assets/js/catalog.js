@@ -161,6 +161,19 @@ function getCatalog() {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
+        let modified = false;
+        parsed.forEach(item => {
+          if (item.image && typeof item.image === 'string') {
+            const cleaned = item.image.replace(/^(\.\.\/|\.\/)/, '');
+            if (cleaned !== item.image) {
+              item.image = cleaned;
+              modified = true;
+            }
+          }
+        });
+        if (modified) {
+          saveCatalog(parsed);
+        }
         return parsed;
       }
     }

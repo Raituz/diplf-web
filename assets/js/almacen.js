@@ -1,16 +1,70 @@
-// Resolver rutas relativas si se accede desde /almacen/
-function resolveAssetPath(path) {
-  if (!path) return '';
-  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:') || path.startsWith('blob:')) {
-    return path;
+// Resolver rutas relativas de imágenes universalmente para Web (GitHub Pages), subcarpetas y local
+function resolveAssetPath(imagePath) {
+  if (!imagePath || typeof imagePath !== 'string') return '';
+  const trimmed = imagePath.trim();
+  if (!trimmed) return '';
+
+  // 1. Data URLs (Base64) o Blob URLs
+  if (trimmed.startsWith('data:') || trimmed.startsWith('blob:')) {
+    return trimmed;
   }
-  const p = window.location.pathname;
-  const isSubdir = p.endsWith('/almacen/') || p.endsWith('/almacen') || p.includes('/almacen/index.html');
-  if (isSubdir && !path.startsWith('../')) {
-    return '../' + path;
+
+  // 2. URLs absolutas externas (http / https)
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return encodeURI(trimmed);
   }
-  return path;
+
+  // Limpiar cualquier prefijo relativo inicial (../, ./, /)
+  const clean = trimmed.replace(/^(\.\.\/|\.\/|\/)+/, '');
+
+  // 3. Entorno Web (GitHub Pages o servidor HTTP/HTTPS)
+  if (window.location.protocol.startsWith('http')) {
+    const parts = window.location.pathname.split('/').filter(Boolean);
+    let repoBase = '';
+    // En GitHub Pages: https://raituz.github.io/diplf-web/... -> parts[0] es 'diplf-web'
+    if (window.location.hostname.includes('github.io') && parts.length > 0) {
+      repoBase = '/' + parts[0];
+    }
+    return encodeURI(`${window.location.origin}${repoBase}/${clean}`);
+  }
+
+  // 4. Entorno Local de Archivos (file:///)
+  // Verificar si la página actual está dentro de una subcarpeta llamada 'almacen'
+  const isInsideAlmacenFolder = window.location.pathname.includes('/almacen/') || window.location.pathname.includes('\\almacen\\');
+  if (isInsideAlmacenFolder) {
+    return encodeURI('../' + clean);
+  }
+  return encodeURI(clean);
 }
+
+// Mecanismo de autoreparación si una imagen no carga en el navegador
+window.handleAdminImgError = function(img, originalPath) {
+  if (!img) return;
+  const currentStep = parseInt(img.dataset.failStep || '0', 10);
+  
+  if (currentStep === 0) {
+    img.dataset.failStep = '1';
+    // Intento 1: ruta relativa directa sin ../
+    if (originalPath) {
+      img.src = encodeURI(originalPath.replace(/^(\.\.\/|\.\/|\/)+/, ''));
+      return;
+    }
+  } else if (currentStep === 1) {
+    img.dataset.failStep = '2';
+    // Intento 2: ruta con ../
+    if (originalPath) {
+      img.src = encodeURI('../' + originalPath.replace(/^(\.\.\/|\.\/|\/)+/, ''));
+      return;
+    }
+  } else if (currentStep === 2) {
+    img.dataset.failStep = '3';
+    // Intento 3: fallback con Logo oficial
+    img.src = resolveAssetPath('assets/images/Logo.jpeg');
+    return;
+  }
+
+  img.onerror = null;
+};
 
 document.addEventListener('DOMContentLoaded', () => {
   initAuthUI();
@@ -179,7 +233,7 @@ function renderProductsGrid(filterText = '') {
       <div class="prod-card-top">
         <div class="prod-img-preview-wrap" id="preview_wrap_${prod.id}">
           ${prod.image 
-            ? `<img src="${resolveAssetPath(prod.image)}" id="img_${prod.id}" alt="${prod.name}">` 
+            ? `<img src="${resolveAssetPath(prod.image)}" id="img_${prod.id}" alt="${escapeHtml(prod.name)}" onerror="handleAdminImgError(this, '${escapeHtml(prod.image)}')">` 
             : `<div class="no-img-text" id="img_text_${prod.id}">Sin imagen<br>(Próx.)</div>`}
         </div>
         <div class="prod-top-meta">
@@ -304,7 +358,7 @@ function updateProductPreviewImg(prodId, src) {
   const wrap = document.getElementById(`preview_wrap_${prodId}`);
   if (!wrap) return;
   if (src && src.trim() !== '') {
-    wrap.innerHTML = `<img src="${resolveAssetPath(src)}" id="img_${prodId}" alt="Preview">`;
+    wrap.innerHTML = `<img src="${resolveAssetPath(src)}" id="img_${prodId}" alt="Preview" onerror="handleAdminImgError(this, '${escapeHtml(src)}')">`;
   } else {
     wrap.innerHTML = `<div class="no-img-text" id="img_text_${prodId}">Sin imagen<br>(Próx.)</div>`;
   }
