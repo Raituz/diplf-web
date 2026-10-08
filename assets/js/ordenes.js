@@ -454,8 +454,11 @@
             </div>
 
             <div class="order-actions-group">
+              <button type="button" class="btn-order-chat-direct" onclick="openCustomerChat('${order.id}')" title="Chatear en vivo con DIP LF">
+                💬 Chat
+              </button>
               <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="btn-order-chat" title="Coordinar entrega o consultar por WhatsApp">
-                💬
+                📱 WhatsApp
               </a>
               <button type="button" class="btn-order-action" onclick="openOrderModal('${order.id}')">
                 Ver Guía
@@ -845,6 +848,160 @@
       toast.classList.remove('active');
     }, 2800);
   }
+
+  // =============================================================================
+  // 8. CHAT EN VIVO DE ATENCIÓN AL CLIENTE POR PEDIDO
+  // =============================================================================
+  let activeChatOrderId = null;
+  let chatPollingTimer = null;
+
+  window.openCustomerChatFromModal = function() {
+    if (activeModalOrder && activeModalOrder.id) {
+      const targetId = activeModalOrder.id;
+      closeOrderModal();
+      openCustomerChat(targetId);
+    }
+  };
+
+  window.openCustomerChat = function(orderId) {
+    if (!orderId) return;
+    activeChatOrderId = orderId;
+
+    const modal = document.getElementById('customerChatModal');
+    const subtitle = document.getElementById('chatModalOrderSubtitle');
+    if (subtitle) subtitle.textContent = `Orden #${orderId}`;
+
+    if (modal) {
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Cargar mensajes iniciales
+    fetchChatMessages(orderId);
+
+    // Iniciar auto-refresco cada 3 segundos
+    if (chatPollingTimer) clearInterval(chatPollingTimer);
+    chatPollingTimer = setInterval(() => {
+      if (activeChatOrderId) fetchChatMessages(activeChatOrderId);
+    }, 3000);
+
+    const input = document.getElementById('chatInputText');
+    if (input) {
+      setTimeout(() => input.focus(), 250);
+    }
+  };
+
+  window.closeCustomerChatModal = function(event) {
+    if (event && event.target && event.target.id !== 'customerChatModal' && !event.target.classList.contains('modal-close-btn')) {
+      return;
+    }
+    const modal = document.getElementById('customerChatModal');
+    if (modal) {
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+    activeChatOrderId = null;
+    if (chatPollingTimer) {
+      clearInterval(chatPollingTimer);
+      chatPollingTimer = null;
+    }
+  };
+
+  async function fetchChatMessages(orderId) {
+    try {
+      const webhookUrl = getWebhookUrl();
+      const res = await fetch(`${webhookUrl}/api/chat/${encodeURIComponent(orderId)}?reader=customer`, {
+        signal: AbortSignal.timeout(5000)
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const messages = data.messages || [];
+      renderChatMessages(messages);
+    } catch (_) {}
+  }
+
+  function renderChatMessages(messages) {
+    const container = document.getElementById('chatMessagesContainer');
+    if (!container) return;
+
+    if (!messages || messages.length === 0) {
+      container.innerHTML = `
+        <div class="chat-empty-hint">
+          <p>👋 ¡Hola! Escribe tus dudas o indicaciones para tu pedido aquí y la gerencia de DIP LF te responderá al instante.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const wasScrolledToBottom = (container.scrollHeight - container.scrollTop <= container.clientHeight + 60);
+
+    container.innerHTML = messages.map(msg => {
+      const isCustomer = (msg.sender === 'customer');
+      const timeStr = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+      return `
+        <div class="chat-bubble-row ${isCustomer ? 'bubble-right' : 'bubble-left'}">
+          <div class="chat-bubble ${isCustomer ? 'bubble-customer' : 'bubble-admin'}">
+            <span class="chat-sender-name">${escapeHtml(msg.senderName || (isCustomer ? 'Tú' : 'DIP LF'))}</span>
+            <p class="chat-bubble-text">${escapeHtml(msg.text)}</p>
+            <span class="chat-bubble-time">${timeStr}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    if (wasScrolledToBottom) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }
+
+  window.sendCustomerChatMessage = async function(event) {
+    if (event) event.preventDefault();
+    if (!activeChatOrderId) return;
+
+    const input = document.getElementById('chatInputText');
+    const text = input ? input.value.trim() : '';
+    if (!text) return;
+
+    input.value = '';
+    const btnSend = document.getElementById('btnSendChatMessage');
+    if (btnSend) btnSend.disabled = true;
+
+    let custName = 'Cliente';
+    let custPhone = '';
+    try {
+      const rawCustomer = localStorage.getItem(CUSTOMER_STORAGE_KEY);
+      if (rawCustomer) {
+        const c = JSON.parse(rawCustomer);
+        if (c.name) custName = c.name;
+        if (c.phone) custPhone = c.phone;
+      }
+    } catch (_) {}
+
+    try {
+      const webhookUrl = getWebhookUrl();
+      const res = await fetch(`${webhookUrl}/api/chat/${encodeURIComponent(activeChatOrderId)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: text,
+          sender: 'customer',
+          senderName: custName,
+          customerName: custName,
+          customerPhone: custPhone
+        }),
+        signal: AbortSignal.timeout(6000)
+      });
+
+      if (res.ok) {
+        fetchChatMessages(activeChatOrderId);
+      }
+    } catch (err) {
+      console.warn('Error enviando mensaje de chat:', err);
+    } finally {
+      if (btnSend) btnSend.disabled = false;
+      input?.focus();
+    }
+  };
 
   function escapeHtml(str) {
     if (!str) return '';
