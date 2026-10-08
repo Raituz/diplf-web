@@ -13,7 +13,55 @@
   <link rel="icon" type="image/jpeg" href="assets/images/Logo.jpeg">
   
   <!-- Estilos CSS con Cache Buster -->
-  <link rel="stylesheet" href="assets/css/styles.css?v=9.6">
+  <link rel="stylesheet" href="assets/css/styles.css?v=10.1">
+  <style>
+    /* Estilo garantizado inmediato para el botón Órdenes */
+    .btn-orders-header {
+      background: #1c132b !important;
+      border: 1.5px solid #8b5cf6 !important;
+      color: #f1f5f9 !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-weight: 800;
+      font-size: 0.78rem;
+      letter-spacing: 0.8px;
+      padding: 7px 14px;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(139, 92, 246, 0.25);
+      transition: all 0.22s ease;
+      white-space: nowrap;
+    }
+    .btn-orders-header:hover {
+      background: #8b5cf6 !important;
+      border-color: #a78bfa !important;
+      color: #ffffff !important;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5) !important;
+    }
+    .btn-orders-header svg {
+      color: #c084fc;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+    .btn-orders-header:hover svg {
+      color: #ffffff;
+      transform: scale(1.08);
+    }
+    .orders-count-badge {
+      background: #8b5cf6;
+      color: #ffffff;
+      font-size: 0.7rem;
+      font-weight: 900;
+      padding: 2px 7px;
+      border-radius: 9999px;
+      min-width: 18px;
+      text-align: center;
+      line-height: 1.2;
+    }
+  </style>
 </head>
 <body>
 
@@ -42,7 +90,6 @@
           <li><a href="#comocomprar" class="nav-link">Cómo Comprar</a></li>
           <li><a href="#nosotros" class="nav-link">Nosotros</a></li>
           <li><a href="#consignacion" class="nav-link">Consignación</a></li>
-          <li><a href="ordenes.html" class="nav-link">Órdenes</a></li>
         </ul>
       </nav>
 
@@ -1008,9 +1055,9 @@
   </footer>
 
   <!-- Scripts JavaScript con Cache Buster -->
-  <script src="assets/js/auth.js?v=9.6"></script>
-  <script src="assets/js/catalog.js?v=9.6"></script>
-  <script src="assets/js/main.js?v=9.6"></script>
-  <script src="assets/js/pago-movil.js?v=9.6"></script>
+  <script src="assets/js/auth.js?v=10.1"></script>
+  <script src="assets/js/catalog.js?v=10.1"></script>
+  <script src="assets/js/main.js?v=10.1"></script>
+  <script src="assets/js/pago-movil.js?v=10.1"></script>
 </body>
 </html>
