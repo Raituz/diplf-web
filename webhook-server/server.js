@@ -728,7 +728,8 @@ function handleRoute(req, res, pathname, queryParams, body) {
   // 6.5 CHAT: ENVIAR MENSAJE A UN PEDIDO (POST /api/chat/:orderId)
   if (req.method === 'POST' && pathname.startsWith('/api/chat/')) {
     const rawOrderId = decodeURIComponent(pathname.replace('/api/chat/', '')).trim();
-    if (!rawOrderId || !body || !body.text) {
+    const msgText = (body?.text || body?.message || body?.rawText || queryParams.get('text') || '').trim();
+    if (!rawOrderId || !msgText) {
       return sendJsonResponse(res, 400, { error: 'Datos de mensaje inválidos (se requiere texto)' });
     }
 
@@ -736,15 +737,15 @@ function handleRoute(req, res, pathname, queryParams, body) {
     ordersDb = loadJsonFile(ORDERS_FILE, []);
 
     const linkedOrder = ordersDb.find(o => (o.id || '').toLowerCase() === rawOrderId.toLowerCase());
-    const sender = (body.sender || 'customer').toLowerCase();
+    const sender = (body?.sender || queryParams.get('sender') || 'customer').toLowerCase();
     const nowIso = new Date().toISOString();
 
     let thread = chatsDb[rawOrderId];
     if (!thread) {
       thread = {
         orderId: rawOrderId,
-        customerName: body.customerName || linkedOrder?.customerName || 'Cliente Web',
-        customerPhone: body.customerPhone || linkedOrder?.customerPhone || linkedOrder?.paymentDetails?.senderPhone || '',
+        customerName: body?.customerName || linkedOrder?.customerName || 'Cliente Web',
+        customerPhone: body?.customerPhone || linkedOrder?.customerPhone || linkedOrder?.paymentDetails?.senderPhone || '',
         unreadByAdmin: 0,
         unreadByCustomer: 0,
         messages: []
@@ -752,18 +753,18 @@ function handleRoute(req, res, pathname, queryParams, body) {
       chatsDb[rawOrderId] = thread;
     }
 
-    if (body.customerName && (!thread.customerName || thread.customerName === 'Cliente Web')) {
+    if (body?.customerName && (!thread.customerName || thread.customerName === 'Cliente Web')) {
       thread.customerName = body.customerName;
     }
-    if (body.customerPhone && !thread.customerPhone) {
+    if (body?.customerPhone && !thread.customerPhone) {
       thread.customerPhone = body.customerPhone;
     }
 
     const newMsg = {
       id: 'msg-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
       sender: sender,
-      senderName: body.senderName || (sender === 'admin' ? 'DIP LF Soporte' : thread.customerName),
-      text: String(body.text).trim(),
+      senderName: body?.senderName || (sender === 'admin' ? 'DIP LF Soporte' : thread.customerName),
+      text: msgText,
       timestamp: nowIso
     };
 
