@@ -184,7 +184,8 @@
       });
 
       if (!res.ok) return;
-      const remoteOrders = await res.json();
+      const data = await res.json();
+      const remoteOrders = Array.isArray(data) ? data : (Array.isArray(data?.orders) ? data.orders : []);
       if (!Array.isArray(remoteOrders)) return;
 
       // Unir y actualizar manteniendo la versión más reciente
@@ -303,10 +304,10 @@
       // 1. Filtro por Estado
       if (selectedStatus !== 'todos') {
         const orderStatus = (order.status || 'nuevo').toLowerCase().trim();
+        if (selectedStatus === 'entregado' && orderStatus !== 'entregado' && !orderStatus.includes('entregado')) return false;
+        if (selectedStatus === 'listo_entrega' && (orderStatus !== 'listo_entrega' && !orderStatus.includes('listo') && !orderStatus.includes('delivery'))) return false;
         if (selectedStatus === 'pagado' && !orderStatus.includes('pagado')) return false;
         if (selectedStatus === 'en_preparacion' && !orderStatus.includes('preparac')) return false;
-        if (selectedStatus === 'listo_entrega' && !orderStatus.includes('entrega') && !orderStatus.includes('delivery')) return false;
-        if (selectedStatus === 'entregado' && !orderStatus.includes('entregado')) return false;
         if (selectedStatus === 'pendiente' && (!orderStatus.includes('pendiente') && orderStatus !== 'nuevo')) return false;
         if (selectedStatus === 'cancelado' && !orderStatus.includes('cancel')) return false;
       }
@@ -713,6 +714,15 @@
 
   function normalizeStatusClass(status) {
     const s = (status || 'nuevo').toLowerCase().trim();
+    if (s === 'entregado' || s === 'completado' || s.includes('entregad')) {
+      return 'entregado';
+    }
+    if (s === 'listo_entrega' || s.includes('listo') || s.includes('delivery')) {
+      return 'listo_entrega';
+    }
+    if (s === 'en_preparacion' || s.includes('preparac')) {
+      return 'en_preparacion';
+    }
     if (s === 'pagado' || s === 'confirmado' || s.includes('pagado')) {
       return 'pagado';
     }
@@ -722,37 +732,28 @@
     if (s === 'pendiente' || s === 'nuevo' || s.includes('pendiente')) {
       return 'pendiente';
     }
-    if (s === 'en_preparacion' || s.includes('preparac')) {
-      return 'en_preparacion';
-    }
-    if (s === 'listo_entrega' || s.includes('entrega') || s.includes('delivery')) {
-      return 'listo_entrega';
-    }
-    if (s === 'entregado') {
-      return 'entregado';
-    }
     return 'otro';
   }
 
   function getStatusDisplayInfo(status) {
     const s = (status || 'nuevo').toLowerCase().trim();
-    if (s === 'pagado' || s.includes('pagado')) {
-      return { label: 'Pagado (Confirmado)' };
+    if (s === 'entregado' || s === 'completado' || s.includes('entregad')) {
+      return { label: 'Entregado' };
     }
-    if (s === 'cancelado' || s.includes('cancel')) {
-      return { label: 'Cancelado' };
-    }
-    if (s === 'pendiente' || s === 'nuevo' || s.includes('pendiente')) {
-      return { label: 'Pendiente de Pago' };
+    if (s === 'listo_entrega' || s.includes('listo') || s.includes('delivery')) {
+      return { label: 'Listo para Entrega' };
     }
     if (s === 'en_preparacion' || s.includes('preparac')) {
       return { label: 'En Preparación' };
     }
-    if (s === 'listo_entrega' || s.includes('entrega') || s.includes('delivery')) {
-      return { label: 'Listo para Entrega' };
+    if (s === 'pagado' || s.includes('pagado') || s === 'confirmado') {
+      return { label: 'Pagado (Confirmado)' };
     }
-    if (s === 'entregado') {
-      return { label: 'Entregado' };
+    if (s === 'cancelado' || s.includes('cancel') || s === 'anulado') {
+      return { label: 'Cancelado' };
+    }
+    if (s === 'pendiente' || s === 'nuevo' || s.includes('pendiente')) {
+      return { label: 'Pendiente de Pago' };
     }
     return { label: status || 'Procesando' };
   }
