@@ -13,7 +13,7 @@
   <link rel="icon" type="image/jpeg" href="assets/images/Logo.jpeg">
 
   <!-- Estilos Dedicados para la Página de Órdenes -->
-  <link rel="stylesheet" href="assets/css/ordenes.css?v=1.0">
+  <link rel="stylesheet" href="assets/css/ordenes.css?v=1.1">
 </head>
 <body class="orders-body">
 
@@ -122,10 +122,11 @@
           <select id="selectFilterStatus" class="orders-filter-select">
             <option value="todos">Cualquier Estado</option>
             <option value="pagado">✅ Pagado (Confirmado)</option>
+            <option value="pendiente">⏳ Pendiente de Pago</option>
+            <option value="cancelado">🔴 Cancelado</option>
             <option value="en_preparacion">🔵 En Preparación</option>
             <option value="listo_entrega">🛵 Listo para Entrega / Delivery</option>
-            <option value="entregado">🟢 Entregado</option>
-            <option value="pendiente">⏳ Pendiente</option>
+            <option value="entregado">🟣 Entregado</option>
           </select>
         </div>
 
@@ -248,6 +249,6 @@
   <!-- Scripts -->
   <script src="assets/js/auth.js?v=9.6"></script>
   <script src="assets/js/catalog.js?v=9.6"></script>
-  <script src="assets/js/ordenes.js?v=1.0"></script>
+  <script src="assets/js/ordenes.js?v=1.1"></script>
 </body>
 </html>

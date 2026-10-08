@@ -298,12 +298,13 @@
     currentFilteredOrders = allOrders.filter(order => {
       // 1. Filtro por Estado
       if (selectedStatus !== 'todos') {
-        const orderStatus = (order.status || 'nuevo').toLowerCase();
-        if (selectedStatus === 'pagado' && orderStatus !== 'pagado') return false;
-        if (selectedStatus === 'en_preparacion' && orderStatus !== 'en_preparacion') return false;
-        if (selectedStatus === 'listo_entrega' && orderStatus !== 'listo_entrega') return false;
-        if (selectedStatus === 'entregado' && orderStatus !== 'entregado') return false;
-        if (selectedStatus === 'pendiente' && (orderStatus !== 'pendiente' && orderStatus !== 'nuevo')) return false;
+        const orderStatus = (order.status || 'nuevo').toLowerCase().trim();
+        if (selectedStatus === 'pagado' && !orderStatus.includes('pagado')) return false;
+        if (selectedStatus === 'en_preparacion' && !orderStatus.includes('preparac')) return false;
+        if (selectedStatus === 'listo_entrega' && !orderStatus.includes('entrega') && !orderStatus.includes('delivery')) return false;
+        if (selectedStatus === 'entregado' && !orderStatus.includes('entregado')) return false;
+        if (selectedStatus === 'pendiente' && (!orderStatus.includes('pendiente') && orderStatus !== 'nuevo')) return false;
+        if (selectedStatus === 'cancelado' && !orderStatus.includes('cancel')) return false;
       }
 
       // 2. Filtro por Búsqueda de Texto
@@ -699,39 +700,49 @@
   // =============================================================================
 
   function normalizeStatusClass(status) {
-    const s = (status || 'nuevo').toLowerCase();
-    switch (s) {
-      case 'pagado': return 'pagado';
-      case 'en_preparacion': return 'en_preparacion';
-      case 'listo_entrega': return 'listo_entrega';
-      case 'entregado': return 'entregado';
-      case 'pendiente': return 'pendiente';
-      case 'nuevo': return 'nuevo';
-      case 'cancelado': return 'cancelado';
-      default: return 'nuevo';
+    const s = (status || 'nuevo').toLowerCase().trim();
+    if (s === 'pagado' || s === 'confirmado' || s.includes('pagado')) {
+      return 'pagado';
     }
+    if (s === 'cancelado' || s === 'anulado' || s.includes('cancel')) {
+      return 'cancelado';
+    }
+    if (s === 'pendiente' || s === 'nuevo' || s.includes('pendiente')) {
+      return 'pendiente';
+    }
+    if (s === 'en_preparacion' || s.includes('preparac')) {
+      return 'en_preparacion';
+    }
+    if (s === 'listo_entrega' || s.includes('entrega') || s.includes('delivery')) {
+      return 'listo_entrega';
+    }
+    if (s === 'entregado') {
+      return 'entregado';
+    }
+    return 'otro';
   }
 
   function getStatusDisplayInfo(status) {
-    const s = (status || 'nuevo').toLowerCase();
-    switch (s) {
-      case 'pagado':
-        return { label: 'Pagado (Confirmado)' };
-      case 'en_preparacion':
-        return { label: 'En Preparación' };
-      case 'listo_entrega':
-        return { label: 'Listo para Entrega' };
-      case 'entregado':
-        return { label: 'Entregado' };
-      case 'pendiente':
-        return { label: 'Pendiente de Pago' };
-      case 'nuevo':
-        return { label: 'Nuevo Pedido' };
-      case 'cancelado':
-        return { label: 'Cancelado' };
-      default:
-        return { label: status || 'Procesando' };
+    const s = (status || 'nuevo').toLowerCase().trim();
+    if (s === 'pagado' || s.includes('pagado')) {
+      return { label: 'Pagado (Confirmado)' };
     }
+    if (s === 'cancelado' || s.includes('cancel')) {
+      return { label: 'Cancelado' };
+    }
+    if (s === 'pendiente' || s === 'nuevo' || s.includes('pendiente')) {
+      return { label: 'Pendiente de Pago' };
+    }
+    if (s === 'en_preparacion' || s.includes('preparac')) {
+      return { label: 'En Preparación' };
+    }
+    if (s === 'listo_entrega' || s.includes('entrega') || s.includes('delivery')) {
+      return { label: 'Listo para Entrega' };
+    }
+    if (s === 'entregado') {
+      return { label: 'Entregado' };
+    }
+    return { label: status || 'Procesando' };
   }
 
   function buildOrderTitle(order) {

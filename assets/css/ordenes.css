@@ -412,7 +412,7 @@ body.orders-body {
   gap: 16px;
 }
 
-/* Card Individual Horizontal */
+/* Card Individual Horizontal (Morado por defecto para todos los demás estados: En Preparación, Listo Entrega, Entregado, etc.) */
 .order-card-row {
   background: var(--orders-bg-card-grad);
   border: 1px solid var(--orders-card-border);
@@ -434,7 +434,7 @@ body.orders-body {
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(139, 92, 246, 0.18);
 }
 
-/* Borde indicador izquierdo */
+/* Borde indicador izquierdo (Morado por defecto) */
 .order-card-row::before {
   content: '';
   position: absolute;
@@ -443,23 +443,90 @@ body.orders-body {
   bottom: 0;
   width: 5px;
   background: var(--orders-accent-purple);
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
+/* =============================================================================
+   ESTADOS CON COLOR DEDICADO:
+   1. Pagado y Confirmado -> Verde
+   2. Pendiente de Pago -> Amarillo
+   3. Cancelado -> Rojo
+   4. Todos los demás -> Morado (por defecto arriba)
+   ============================================================================= */
+
+/* 1. PAGADO Y CONFIRMADO (VERDE) */
+.order-card-row.status-pagado {
+  background: linear-gradient(135deg, #093b2a 0%, #041c14 100%);
+  border-color: rgba(16, 185, 129, 0.38);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(16, 185, 129, 0.18);
+}
+.order-card-row.status-pagado:hover {
+  border-color: rgba(16, 185, 129, 0.7);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), 0 0 24px rgba(16, 185, 129, 0.25);
+}
 .order-card-row.status-pagado::before {
-  background: var(--orders-accent-green);
+  background: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+}
+.order-card-row.status-pagado .order-card-icon-box {
+  background: rgba(16, 185, 129, 0.14);
+  border-color: rgba(16, 185, 129, 0.3);
 }
 
-.order-card-row.status-en_preparacion::before {
-  background: var(--orders-accent-blue);
+/* 2. PENDIENTE DE PAGO (AMARILLO) */
+.order-card-row.status-pendiente,
+.order-card-row.status-nuevo {
+  background: linear-gradient(135deg, #3d2b06 0%, #1c1302 100%);
+  border-color: rgba(245, 158, 11, 0.38);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(245, 158, 11, 0.18);
+}
+.order-card-row.status-pendiente:hover,
+.order-card-row.status-nuevo:hover {
+  border-color: rgba(245, 158, 11, 0.7);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), 0 0 24px rgba(245, 158, 11, 0.25);
+}
+.order-card-row.status-pendiente::before,
+.order-card-row.status-nuevo::before {
+  background: #f59e0b;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
+}
+.order-card-row.status-pendiente .order-card-icon-box,
+.order-card-row.status-nuevo .order-card-icon-box {
+  background: rgba(245, 158, 11, 0.14);
+  border-color: rgba(245, 158, 11, 0.3);
 }
 
-.order-card-row.status-listo_entrega::before {
-  background: #c084fc;
+/* 3. CANCELADO (ROJO) */
+.order-card-row.status-cancelado {
+  background: linear-gradient(135deg, #421014 0%, #200609 100%);
+  border-color: rgba(239, 68, 68, 0.38);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(239, 68, 68, 0.18);
+}
+.order-card-row.status-cancelado:hover {
+  border-color: rgba(239, 68, 68, 0.7);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), 0 0 24px rgba(239, 68, 68, 0.25);
+}
+.order-card-row.status-cancelado::before {
+  background: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+}
+.order-card-row.status-cancelado .order-card-icon-box {
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
+/* 4. DEMÁS ESTADOS (EN PREPARACIÓN, LISTO ENTREGA, ENTREGADO - MORADO COMO ESTÁ YA) */
+.order-card-row.status-en_preparacion,
+.order-card-row.status-listo_entrega,
+.order-card-row.status-entregado {
+  background: var(--orders-bg-card-grad);
+  border-color: var(--orders-card-border);
+}
+.order-card-row.status-en_preparacion::before,
+.order-card-row.status-listo_entrega::before,
 .order-card-row.status-entregado::before {
-  background: #34d399;
+  background: var(--orders-accent-purple);
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.6);
 }
 
 /* Lado Izquierdo: Icono + Título del Pedido */
