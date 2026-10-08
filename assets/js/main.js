@@ -668,6 +668,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Determina si una orden está activa/incompleta (requiere atención del cliente o entrega)
+  function isOrderActive(order) {
+    if (!order || !order.status) return true;
+    const s = String(order.status).toLowerCase().trim();
+    // Desaparece si está entregado o completado, o si fue cancelado
+    if (s === 'entregado' || s === 'completado' || s.includes('entregad')) return false;
+    if (s === 'cancelado' || s === 'anulado' || s === 'rechazado' || s.includes('cancel')) return false;
+    // Permanece para: pendiente, pagado, en_preparacion, listo_entrega, etc.
+    return true;
+  }
+
   // Actualizar contador del botón Órdenes
   function updateOrdersHeaderBadge() {
     const badge = document.getElementById('headerOrdersBadge');
@@ -676,18 +687,56 @@ document.addEventListener('DOMContentLoaded', () => {
       const raw = localStorage.getItem('diplf_orders');
       if (raw) {
         const orders = JSON.parse(raw);
-        if (Array.isArray(orders) && orders.length > 0) {
-          badge.textContent = orders.length;
-          badge.style.display = 'inline-flex';
-          return;
+        if (Array.isArray(orders)) {
+          const activeOrders = orders.filter(isOrderActive);
+          if (activeOrders.length > 0) {
+            badge.textContent = activeOrders.length > 9 ? '9+' : activeOrders.length;
+            badge.style.display = 'inline-flex';
+            return;
+          }
         }
       }
     } catch (_) {}
     badge.style.display = 'none';
   }
 
+  // Sincronizar en tiempo real con el servidor Alwaysdata para reflejar de inmediato si el gerente marcó "entregado"
+  async function syncOrdersWithServer() {
+    try {
+      const webhookUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'https://diplf.alwaysdata.net';
+      const res = await fetch(`${webhookUrl}/api/orders`, { signal: AbortSignal.timeout(4500) });
+      if (res.ok) {
+        const data = await res.json();
+        const remoteOrders = Array.isArray(data) ? data : (Array.isArray(data?.orders) ? data.orders : []);
+        if (Array.isArray(remoteOrders) && remoteOrders.length > 0) {
+          const localRaw = localStorage.getItem('diplf_orders');
+          const localOrders = localRaw ? JSON.parse(localRaw) : [];
+          const map = new Map();
+          remoteOrders.forEach(ro => { if (ro && ro.id) map.set(ro.id, ro); });
+          if (Array.isArray(localOrders)) {
+            localOrders.forEach(lo => {
+              if (lo && lo.id) {
+                if (!map.has(lo.id)) {
+                  map.set(lo.id, lo);
+                } else {
+                  const ro = map.get(lo.id);
+                  map.set(lo.id, { ...lo, ...ro, status: ro.status || lo.status });
+                }
+              }
+            });
+          }
+          const merged = Array.from(map.values());
+          localStorage.setItem('diplf_orders', JSON.stringify(merged));
+          updateOrdersHeaderBadge();
+        }
+      }
+    } catch (_) {}
+  }
+
   updateAdminHeaderButton();
   updateOrdersHeaderBadge();
+  syncOrdersWithServer();
+  setInterval(syncOrdersWithServer, 15000);
 
   // Escuchar si cambia la sesión, órdenes o el catálogo
   window.addEventListener('diplf_auth_changed', updateAdminHeaderButton);
