@@ -58,10 +58,14 @@
     // Sincronizar con servidor Alwaysdata
     fetchRemoteOrders().then(() => {
       checkUrlTargetOrder();
+      fetchChatThreads();
     });
 
     // Iniciar sondeo periódico cada 15 segundos para cambios de estado en Almacén
     pollingIntervalId = setInterval(fetchRemoteOrders, 15000);
+
+    // Sondeo de mensajes y notificaciones de chat cada 4 segundos
+    setInterval(fetchChatThreads, 4000);
   });
 
   // Mostrar datos del cliente en la barra superior
@@ -454,12 +458,17 @@
             </div>
 
             <div class="order-actions-group">
-              <button type="button" class="btn-order-chat-direct" onclick="openCustomerChat('${order.id}')" title="Chatear en vivo con DIP LF">
-                💬 Chat
+              <button type="button" class="btn-order-chat-direct" onclick="openCustomerChat('${order.id}')" title="Chatear en vivo con el gerente de DIP LF">
+                <span>💬 Chat</span>
+                <span id="chat-badge-${order.id}" class="chat-unread-badge" style="${(Number(chatThreadsData[order.id]?.unreadByCustomer || 0) > 0) ? '' : 'display: none;'}">${Number(chatThreadsData[order.id]?.unreadByCustomer || 0) || ''}</span>
               </button>
-              <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="btn-order-chat" title="Coordinar entrega o consultar por WhatsApp">
-                📱 WhatsApp
+
+              <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="btn-order-whatsapp-icon" title="Coordinar entrega por WhatsApp">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                </svg>
               </a>
+
               <button type="button" class="btn-order-action" onclick="openOrderModal('${order.id}')">
                 Ver Guía
               </button>
@@ -852,8 +861,121 @@
   // =============================================================================
   // 8. CHAT EN VIVO DE ATENCIÓN AL CLIENTE POR PEDIDO
   // =============================================================================
+  let chatThreadsData = {};
+  let knownAdminMsgIds = new Set();
+  let isFirstChatPoll = true;
   let activeChatOrderId = null;
   let chatPollingTimer = null;
+  let cachedAudioCtx = null;
+
+  // Inicializar o desbloquear el contexto de audio con la primera interacción del usuario
+  function getAudioContext() {
+    try {
+      if (!cachedAudioCtx) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) cachedAudioCtx = new AudioCtx();
+      }
+      if (cachedAudioCtx && cachedAudioCtx.state === 'suspended') {
+        cachedAudioCtx.resume().catch(() => {});
+      }
+    } catch (_) {}
+    return cachedAudioCtx;
+  }
+  document.addEventListener('click', () => { getAudioContext(); }, { once: true });
+  document.addEventListener('touchstart', () => { getAudioContext(); }, { once: true });
+
+  // Sonido de campana para nuevos mensajes del gerente (sintetizador Web Audio)
+  function playManagerMessageSound() {
+    try {
+      const audioCtx = getAudioContext();
+      if (!audioCtx) return;
+
+      const now = audioCtx.currentTime;
+
+      // Nota 1 (Campana aguda E5 -> A5, suave y elegante)
+      const osc1 = audioCtx.createOscillator();
+      const gain1 = audioCtx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(659.25, now);
+      osc1.frequency.exponentialRampToValueAtTime(880.00, now + 0.08);
+      gain1.gain.setValueAtTime(0.001, now);
+      gain1.gain.exponentialRampToValueAtTime(0.32, now + 0.03);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+      osc1.connect(gain1);
+      gain1.connect(audioCtx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.28);
+
+      // Nota 2 (Campana brillante A5 -> E6) a los 110ms
+      const osc2 = audioCtx.createOscillator();
+      const gain2 = audioCtx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(880.00, now + 0.11);
+      osc2.frequency.exponentialRampToValueAtTime(1318.51, now + 0.20);
+      gain2.gain.setValueAtTime(0.001, now + 0.11);
+      gain2.gain.exponentialRampToValueAtTime(0.38, now + 0.15);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.48);
+      osc2.connect(gain2);
+      gain2.connect(audioCtx.destination);
+      osc2.start(now + 0.11);
+      osc2.stop(now + 0.48);
+    } catch (_) {}
+  }
+
+  // Sondeo en vivo de hilos de chat y actualización de badges / sonido
+  window.fetchChatThreads = async function() {
+    try {
+      const webhookUrl = getWebhookUrl();
+      const res = await fetch(`${webhookUrl}/api/chat/threads`, {
+        signal: AbortSignal.timeout(5000)
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const threads = data.threads || [];
+
+      let hasNewManagerMsg = false;
+
+      threads.forEach(t => {
+        chatThreadsData[t.orderId] = t;
+        const unread = Number(t.unreadByCustomer || 0);
+
+        // Actualizar badge en tarjeta del pedido
+        const badgeEl = document.getElementById(`chat-badge-${t.orderId}`);
+        if (badgeEl) {
+          if (unread > 0) {
+            badgeEl.textContent = unread > 9 ? '9+' : unread;
+            badgeEl.style.display = 'inline-flex';
+          } else {
+            badgeEl.style.display = 'none';
+          }
+        }
+
+        // Revisar si llegaron mensajes nuevos del gerente (admin)
+        if (Array.isArray(t.messages)) {
+          t.messages.forEach(m => {
+            if (m.sender === 'admin') {
+              if (!knownAdminMsgIds.has(m.id)) {
+                if (!isFirstChatPoll) {
+                  hasNewManagerMsg = true;
+                }
+                knownAdminMsgIds.add(m.id);
+              }
+            }
+          });
+        }
+      });
+
+      if (hasNewManagerMsg) {
+        playManagerMessageSound();
+        showOrdersToast('💬 ¡Nuevo mensaje de DIP LF en tu pedido!');
+        if (activeChatOrderId) {
+          fetchChatMessages(activeChatOrderId);
+        }
+      }
+
+      isFirstChatPoll = false;
+    } catch (_) {}
+  };
 
   window.openCustomerChatFromModal = function() {
     if (activeModalOrder && activeModalOrder.id) {
@@ -867,6 +989,13 @@
     if (!orderId) return;
     activeChatOrderId = orderId;
 
+    // Quitar badge inmediatamente en interfaz
+    const badgeEl = document.getElementById(`chat-badge-${orderId}`);
+    if (badgeEl) badgeEl.style.display = 'none';
+    if (chatThreadsData[orderId]) {
+      chatThreadsData[orderId].unreadByCustomer = 0;
+    }
+
     const modal = document.getElementById('customerChatModal');
     const subtitle = document.getElementById('chatModalOrderSubtitle');
     if (subtitle) subtitle.textContent = `Orden #${orderId}`;
@@ -876,10 +1005,10 @@
       document.body.style.overflow = 'hidden';
     }
 
-    // Cargar mensajes iniciales
+    // Cargar mensajes iniciales (con reader=customer para limpiar no leídos en backend)
     fetchChatMessages(orderId);
 
-    // Iniciar auto-refresco cada 3 segundos
+    // Auto-refresco en vivo cada 3 segundos mientras el chat esté abierto
     if (chatPollingTimer) clearInterval(chatPollingTimer);
     chatPollingTimer = setInterval(() => {
       if (activeChatOrderId) fetchChatMessages(activeChatOrderId);
@@ -905,6 +1034,8 @@
       clearInterval(chatPollingTimer);
       chatPollingTimer = null;
     }
+    // Re-sincronizar threads para asegurar estado
+    fetchChatThreads();
   };
 
   async function fetchChatMessages(orderId) {
