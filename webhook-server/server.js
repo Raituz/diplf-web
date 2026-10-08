@@ -941,7 +941,12 @@ function handleRoute(req, res, pathname, queryParams, body) {
   // 13. SERVICIO DE ARCHIVOS ESTÁTICOS PARA EL FRONTEND (index.html, ordenes.html, etc.)
   if (req.method === 'GET') {
     try {
-      const staticBase = path.resolve(__dirname, '..');
+      let staticBase = path.resolve(__dirname, '..');
+      if (fs.existsSync(path.join(__dirname, 'diplf-web', 'index.html'))) {
+        staticBase = path.join(__dirname, 'diplf-web');
+      } else if (fs.existsSync('/home/diplf/diplf-web/index.html')) {
+        staticBase = '/home/diplf/diplf-web';
+      }
       let sanitizedPath = path.normalize(pathname).replace(/^(\.\.[\/\\])+/, '');
       if (sanitizedPath === '/' || sanitizedPath === '\\') sanitizedPath = '/index.html';
       const targetFilePath = path.join(staticBase, sanitizedPath);
@@ -959,7 +964,9 @@ function handleRoute(req, res, pathname, queryParams, body) {
           '.jpeg': 'image/jpeg',
           '.jfif': 'image/jpeg',
           '.svg': 'image/svg+xml',
-          '.ico': 'image/x-icon'
+          '.ico': 'image/x-icon',
+          '.pdf': 'application/pdf',
+          '.apk': 'application/vnd.android.package-archive'
         };
         const mimeType = mimeMap[ext] || 'application/octet-stream';
         const isDynamicAsset = ['.html', '.css', '.js', '.json'].includes(ext);
