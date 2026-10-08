@@ -26,6 +26,7 @@ const ORDERS_FILE = path.join(DATA_DIR, 'orders.json');
 const SMS_LOGS_FILE = path.join(DATA_DIR, 'sms_logs.json');
 const CONFIG_FILE = path.join(DATA_DIR, 'config.json');
 const PRODUCTS_FILE = path.join(DATA_DIR, 'products.json');
+const CHATS_FILE = path.join(DATA_DIR, 'chats.json');
 
 // Asegurar directorio de datos
 if (!fs.existsSync(DATA_DIR)) {
@@ -72,6 +73,7 @@ let ordersDb = loadJsonFile(ORDERS_FILE, []);
 let smsLogsDb = loadJsonFile(SMS_LOGS_FILE, []);
 let systemConfig = loadJsonFile(CONFIG_FILE, DEFAULT_CONFIG);
 let productsDb = loadJsonFile(PRODUCTS_FILE, []);
+let chatsDb = loadJsonFile(CHATS_FILE, {});
 
 // =============================================================================
 // MOTOR DE PARSEO DE SMS DE BANCOS VENEZOLANOS
@@ -670,6 +672,113 @@ function handleRoute(req, res, pathname, queryParams, body) {
     const deleted = initialLength > ordersDb.length;
     console.log(`[PEDIDOS] Eliminación de orden "${rawParam}". Resultado: ${deleted ? 'Eliminada' : 'No encontrada'}. Total restantes: ${ordersDb.length}`);
     return sendJsonResponse(res, 200, { success: true, deleted, count: ordersDb.length });
+  }
+
+  // 6.3 CHAT: LISTA DE HILOS / CONVERSACIONES POR CLIENTE (GET /api/chat/threads)
+  if (req.method === 'GET' && pathname === '/api/chat/threads') {
+    chatsDb = loadJsonFile(CHATS_FILE, {});
+    const threadsList = Object.values(chatsDb).sort((a, b) => {
+      const timeA = new Date(a.lastTimestamp || 0).getTime();
+      const timeB = new Date(b.lastTimestamp || 0).getTime();
+      return timeB - timeA;
+    });
+    return sendJsonResponse(res, 200, { success: true, count: threadsList.length, threads: threadsList });
+  }
+
+  // 6.4 CHAT: OBTENER MENSAJES DE UN PEDIDO ESPECÍFICO (GET /api/chat/:orderId)
+  if (req.method === 'GET' && pathname.startsWith('/api/chat/')) {
+    const rawOrderId = decodeURIComponent(pathname.replace('/api/chat/', '')).trim();
+    if (!rawOrderId || rawOrderId === 'threads') {
+      return sendJsonResponse(res, 400, { error: 'ID de orden no especificado' });
+    }
+
+    chatsDb = loadJsonFile(CHATS_FILE, {});
+    ordersDb = loadJsonFile(ORDERS_FILE, []);
+
+    let thread = chatsDb[rawOrderId];
+    if (!thread) {
+      const linkedOrder = ordersDb.find(o => (o.id || '').toLowerCase() === rawOrderId.toLowerCase());
+      thread = {
+        orderId: rawOrderId,
+        customerName: linkedOrder?.customerName || 'Cliente Web',
+        customerPhone: linkedOrder?.customerPhone || linkedOrder?.paymentDetails?.senderPhone || '',
+        lastMessage: 'Conversación iniciada',
+        lastTimestamp: linkedOrder?.date || new Date().toISOString(),
+        unreadByAdmin: 0,
+        unreadByCustomer: 0,
+        messages: []
+      };
+      chatsDb[rawOrderId] = thread;
+      saveJsonFile(CHATS_FILE, chatsDb);
+    }
+
+    // Si quien lee es admin, marcar unreadByAdmin = 0
+    const reader = queryParams.get('reader') || '';
+    if (reader === 'admin') {
+      thread.unreadByAdmin = 0;
+      saveJsonFile(CHATS_FILE, chatsDb);
+    } else if (reader === 'customer') {
+      thread.unreadByCustomer = 0;
+      saveJsonFile(CHATS_FILE, chatsDb);
+    }
+
+    return sendJsonResponse(res, 200, { success: true, thread: thread, messages: thread.messages || [] });
+  }
+
+  // 6.5 CHAT: ENVIAR MENSAJE A UN PEDIDO (POST /api/chat/:orderId)
+  if (req.method === 'POST' && pathname.startsWith('/api/chat/')) {
+    const rawOrderId = decodeURIComponent(pathname.replace('/api/chat/', '')).trim();
+    if (!rawOrderId || !body || !body.text) {
+      return sendJsonResponse(res, 400, { error: 'Datos de mensaje inválidos (se requiere texto)' });
+    }
+
+    chatsDb = loadJsonFile(CHATS_FILE, {});
+    ordersDb = loadJsonFile(ORDERS_FILE, []);
+
+    const linkedOrder = ordersDb.find(o => (o.id || '').toLowerCase() === rawOrderId.toLowerCase());
+    const sender = (body.sender || 'customer').toLowerCase();
+    const nowIso = new Date().toISOString();
+
+    let thread = chatsDb[rawOrderId];
+    if (!thread) {
+      thread = {
+        orderId: rawOrderId,
+        customerName: body.customerName || linkedOrder?.customerName || 'Cliente Web',
+        customerPhone: body.customerPhone || linkedOrder?.customerPhone || linkedOrder?.paymentDetails?.senderPhone || '',
+        unreadByAdmin: 0,
+        unreadByCustomer: 0,
+        messages: []
+      };
+      chatsDb[rawOrderId] = thread;
+    }
+
+    if (body.customerName && (!thread.customerName || thread.customerName === 'Cliente Web')) {
+      thread.customerName = body.customerName;
+    }
+    if (body.customerPhone && !thread.customerPhone) {
+      thread.customerPhone = body.customerPhone;
+    }
+
+    const newMsg = {
+      id: 'msg-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+      sender: sender,
+      senderName: body.senderName || (sender === 'admin' ? 'DIP LF Soporte' : thread.customerName),
+      text: String(body.text).trim(),
+      timestamp: nowIso
+    };
+
+    thread.messages.push(newMsg);
+    thread.lastMessage = newMsg.text;
+    thread.lastTimestamp = nowIso;
+
+    if (sender === 'customer') {
+      thread.unreadByAdmin = (thread.unreadByAdmin || 0) + 1;
+    } else {
+      thread.unreadByCustomer = (thread.unreadByCustomer || 0) + 1;
+    }
+
+    saveJsonFile(CHATS_FILE, chatsDb);
+    return sendJsonResponse(res, 201, { success: true, message: newMsg, thread: thread });
   }
 
   // 7. WEBHOOK PRINCIPAL: RECEPCIÓN DE SMS BANCARIO (POST /api/webhook/sms)
