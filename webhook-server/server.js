@@ -962,10 +962,17 @@ function handleRoute(req, res, pathname, queryParams, body) {
           '.ico': 'image/x-icon'
         };
         const mimeType = mimeMap[ext] || 'application/octet-stream';
-        res.writeHead(200, {
+        const isDynamicAsset = ['.html', '.css', '.js', '.json'].includes(ext);
+        const headers = {
           'Content-Type': mimeType,
           'Access-Control-Allow-Origin': '*'
-        });
+        };
+        if (isDynamicAsset) {
+          headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0';
+          headers['Pragma'] = 'no-cache';
+          headers['Expires'] = '0';
+        }
+        res.writeHead(200, headers);
         fs.createReadStream(targetFilePath).pipe(res);
         return;
       }
