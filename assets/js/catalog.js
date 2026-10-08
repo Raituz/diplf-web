@@ -467,10 +467,51 @@ function updateOrderStatus(orderId, newStatus, additionalData = {}) {
   return true;
 }
 
-// Eliminar o limpiar historial de pedidos
-function clearAllOrders() {
+// Eliminar o limpiar historial de pedidos (Local y Servidor Webhook)
+async function clearAllOrders() {
   localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify([]));
   window.dispatchEvent(new CustomEvent('diplf_orders_updated', { detail: [] }));
+
+  try {
+    const webhookUrl = (typeof getWebhookServerUrl === 'function') 
+      ? getWebhookServerUrl() 
+      : 'https://diplf.alwaysdata.net';
+
+    // 1. Enviar DELETE a /api/orders
+    await fetch(`${webhookUrl}/api/orders`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' }
+    }).catch(() => {
+      // 2. Fallback POST a /api/orders/clear
+      return fetch(`${webhookUrl}/api/orders/clear`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+    });
+  } catch (err) {
+    console.warn('Advertencia al limpiar pedidos del servidor:', err);
+  }
+}
+
+// Eliminar un pedido individual (Local y Servidor Webhook)
+async function deleteOrderById(orderId) {
+  try {
+    let orders = getOrders();
+    const cleanId = String(orderId).trim();
+    orders = orders.filter(o => o.id !== cleanId && o.id !== ('#' + cleanId));
+    localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
+    window.dispatchEvent(new CustomEvent('diplf_orders_updated', { detail: orders }));
+
+    const webhookUrl = (typeof getWebhookServerUrl === 'function') 
+      ? getWebhookServerUrl() 
+      : 'https://diplf.alwaysdata.net';
+
+    await fetch(`${webhookUrl}/api/orders/${encodeURIComponent(cleanId)}`, {
+      method: 'DELETE'
+    });
+  } catch (err) {
+    console.warn('Advertencia al eliminar pedido del servidor:', err);
+  }
 }
 
 // Ajustes de notificaciones de sonido / push

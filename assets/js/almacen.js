@@ -559,12 +559,25 @@ function initOrdersView() {
   // Botón limpiar historial
   const btnClearOrders = document.getElementById('btnClearOrders');
   if (btnClearOrders) {
-    btnClearOrders.addEventListener('click', () => {
-      if (confirm('¿Deseas vaciar el historial de pedidos? Esta acción no se puede deshacer.')) {
-        clearAllOrders();
+    btnClearOrders.addEventListener('click', async () => {
+      const currentOrders = getOrders();
+      if (currentOrders.length === 0) {
+        showAdminToast('El historial de pedidos ya está vacío.');
+        return;
+      }
+
+      if (confirm(`¿Estás seguro de que deseas vaciar y eliminar los ${currentOrders.length} pedidos del historial?\n\nEsta acción borrará los pedidos permanentemente tanto de este navegador como del servidor webhook.`)) {
+        btnClearOrders.disabled = true;
+        btnClearOrders.style.opacity = '0.5';
+
+        await clearAllOrders();
+        lastKnownOrdersCount = 0;
         renderOrdersList();
         renderOrdersStats();
-        showAdminToast('Historial de pedidos vaciado.');
+        showAdminToast('Historial de pedidos vaciado exitosamente en navegador y servidor.');
+
+        btnClearOrders.disabled = false;
+        btnClearOrders.style.opacity = '1';
       }
     });
   }
@@ -729,11 +742,25 @@ function renderOrdersList(filterStatus = 'todos') {
             <option value="entregado" ${order.status === 'entregado' ? 'selected' : ''}>🟢 Entregado</option>
             <option value="cancelado" ${order.status === 'cancelado' ? 'selected' : ''}>🔴 Cancelado</option>
           </select>
+
+          <button type="button" class="btn-delete-order" onclick="confirmDeleteIndividualOrder('${order.id}')" title="Eliminar permanentemente este pedido">
+            🗑️ Eliminar
+          </button>
         </div>
       </div>
     </div>
   `).join('');
 }
+
+window.confirmDeleteIndividualOrder = async function(orderId) {
+  if (confirm(`¿Estás seguro de que deseas eliminar permanentemente el pedido #${orderId} tanto del navegador como del servidor?`)) {
+    await deleteOrderById(orderId);
+    lastKnownOrdersCount = getOrders().length;
+    renderOrdersStats();
+    renderOrdersList(document.getElementById('filterOrderStatus')?.value || 'todos');
+    showAdminToast(`Pedido #${orderId} eliminado.`);
+  }
+};
 
 window.handleOrderStatusChange = function(orderId, newStatus) {
   updateOrderStatus(orderId, newStatus);

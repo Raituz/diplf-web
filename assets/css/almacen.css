@@ -994,6 +994,28 @@ input:checked + .slider:before {
   font-size: 0.85rem;
 }
 
+.btn-delete-order {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.btn-delete-order:hover {
+  background: rgba(239, 68, 68, 0.28);
+  border-color: #ef4444;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
 /* Empty states */
 .empty-placeholder {
   text-align: center;

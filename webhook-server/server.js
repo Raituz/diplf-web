@@ -644,6 +644,34 @@ function handleRoute(req, res, pathname, queryParams, body) {
     return sendJsonResponse(res, 200, { success: true, order: order });
   }
 
+  // 6.1 PEDIDOS: VACIAR TODO EL HISTORIAL (DELETE /api/orders O POST /api/orders/clear)
+  if ((req.method === 'DELETE' && pathname === '/api/orders') || (req.method === 'POST' && pathname === '/api/orders/clear')) {
+    ordersDb = [];
+    saveJsonFile(ORDERS_FILE, []);
+    console.log('[PEDIDOS] Historial de pedidos vaciado completamente por administrador.');
+    return sendJsonResponse(res, 200, { success: true, message: 'Historial de pedidos vaciado exitosamente.', count: 0 });
+  }
+
+  // 6.2 PEDIDOS: ELIMINAR PEDIDO ESPECÍFICO (DELETE /api/orders/:id)
+  if (req.method === 'DELETE' && pathname.startsWith('/api/orders/')) {
+    const rawParam = decodeURIComponent(pathname.replace('/api/orders/', '')).trim();
+    ordersDb = loadJsonFile(ORDERS_FILE, []);
+    const qLower = rawParam.toLowerCase();
+    const qDigits = rawParam.replace(/[^0-9]/g, '');
+
+    const initialLength = ordersDb.length;
+    ordersDb = ordersDb.filter(o => {
+      const matchExact = (o.id || '').toLowerCase() === qLower;
+      const matchDigits = qDigits.length >= 5 && (o.id || '').replace(/[^0-9]/g, '') === qDigits;
+      return !matchExact && !matchDigits;
+    });
+
+    saveJsonFile(ORDERS_FILE, ordersDb);
+    const deleted = initialLength > ordersDb.length;
+    console.log(`[PEDIDOS] Eliminación de orden "${rawParam}". Resultado: ${deleted ? 'Eliminada' : 'No encontrada'}. Total restantes: ${ordersDb.length}`);
+    return sendJsonResponse(res, 200, { success: true, deleted, count: ordersDb.length });
+  }
+
   // 7. WEBHOOK PRINCIPAL: RECEPCIÓN DE SMS BANCARIO (POST /api/webhook/sms)
   if (req.method === 'POST' && (pathname === '/api/webhook/sms' || pathname === '/webhook/sms')) {
     // Validar token de seguridad (opcional pero recomendado)
