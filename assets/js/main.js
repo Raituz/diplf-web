@@ -668,13 +668,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  updateAdminHeaderButton();
+  // Actualizar contador del botón Órdenes
+  function updateOrdersHeaderBadge() {
+    const badge = document.getElementById('headerOrdersBadge');
+    if (!badge) return;
+    try {
+      const raw = localStorage.getItem('diplf_orders');
+      if (raw) {
+        const orders = JSON.parse(raw);
+        if (Array.isArray(orders) && orders.length > 0) {
+          badge.textContent = orders.length;
+          badge.style.display = 'inline-flex';
+          return;
+        }
+      }
+    } catch (_) {}
+    badge.style.display = 'none';
+  }
 
-  // Escuchar si cambia la sesión o el catálogo
+  updateAdminHeaderButton();
+  updateOrdersHeaderBadge();
+
+  // Escuchar si cambia la sesión, órdenes o el catálogo
   window.addEventListener('diplf_auth_changed', updateAdminHeaderButton);
+  window.addEventListener('diplf_new_order', updateOrdersHeaderBadge);
+  window.addEventListener('diplf_orders_updated', updateOrdersHeaderBadge);
   window.addEventListener('diplf_catalog_updated', () => renderFlavorsGrid());
   window.addEventListener('storage', (e) => {
     if (e.key === 'diplf_auth_user') updateAdminHeaderButton();
+    if (e.key === 'diplf_orders') updateOrdersHeaderBadge();
     if (e.key === 'diplf_custom_catalog') renderFlavorsGrid();
   });
 });

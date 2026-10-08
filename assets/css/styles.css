@@ -274,6 +274,63 @@ button {
   box-shadow: var(--shadow-glow);
 }
 
+/* Botón Órdenes en la cabecera (a la izquierda de Mi Pedido) */
+.btn-orders-header {
+  background: #1c132b;
+  border: 1.5px solid #8b5cf6;
+  color: #f1f5f9;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.78rem;
+  letter-spacing: 0.8px;
+  padding: 7px 14px;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.25);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.btn-orders-header:hover {
+  background: #8b5cf6;
+  border-color: #a78bfa;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+}
+
+.btn-orders-header svg {
+  color: #c084fc;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-orders-header:hover svg {
+  color: #ffffff;
+  transform: scale(1.08);
+}
+
+.orders-count-badge {
+  background: #8b5cf6;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 900;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  min-width: 18px;
+  text-align: center;
+  line-height: 1.2;
+  transition: background-color 0.2s ease;
+}
+
+.btn-orders-header:hover .orders-count-badge {
+  background: #000000;
+  color: #ffffff;
+}
+
 .btn-admin-header {
   display: none; /* Invisible para rol cliente, se activa con JS si isAdmin() */
   background: #181920;
@@ -1923,7 +1980,7 @@ button {
   .header-actions {
     gap: 8px;
   }
-  .btn-whatsapp-header, .btn-cart-header {
+  .btn-whatsapp-header, .btn-cart-header, .btn-orders-header {
     padding: 7px 13px;
     font-size: 0.75rem;
   }
@@ -2072,6 +2129,14 @@ button {
     display: none;
   }
 
+  .btn-orders-header {
+    padding: 8px 11px;
+    gap: 6px;
+  }
+  .btn-orders-header span:not(.orders-count-badge) {
+    display: none;
+  }
+
   .menu-toggle {
     width: 38px;
     height: 38px;
@@ -2173,13 +2238,21 @@ button {
   .header-actions {
     gap: 5px;
   }
-  .btn-whatsapp-header, .btn-admin-header, .menu-toggle {
+  .btn-whatsapp-header, .btn-admin-header, .btn-orders-header, .menu-toggle {
     width: 34px;
     height: 34px;
     padding: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+  }
+  .btn-orders-header .orders-count-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    font-size: 0.62rem;
+    padding: 1px 4px;
   }
   .btn-cart-header {
     padding: 6px 9px;
