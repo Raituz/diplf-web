@@ -1036,7 +1036,9 @@ function showAdminToast(msg) {
   }
 
   toast.innerHTML = `
-    <div class="toast-notif-icon">✨</div>
+    <div class="toast-notif-icon toast-logo-avatar">
+      <img src="assets/images/Logo.jpeg" alt="Logo DIP LF">
+    </div>
     <div class="toast-notif-info">
       <h4>Panel DIP LF</h4>
       <p>${escapeHtml(msg)}</p>
