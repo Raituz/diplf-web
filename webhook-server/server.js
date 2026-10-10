@@ -939,7 +939,7 @@ function handleRoute(req, res, pathname, queryParams, body) {
   }
 
   // 13. SERVICIO DE ARCHIVOS ESTÁTICOS PARA EL FRONTEND (index.html, ordenes.html, etc.)
-  if (req.method === 'GET') {
+  if (req.method === 'GET' || req.method === 'HEAD') {
     try {
       let staticBase = path.resolve(__dirname, '..');
       if (fs.existsSync(path.join(__dirname, 'diplf-web', 'index.html'))) {
@@ -954,6 +954,7 @@ function handleRoute(req, res, pathname, queryParams, body) {
       // Proteger que no se salga de la raíz del proyecto ni acceda a .git
       if (targetFilePath.startsWith(staticBase) && !targetFilePath.includes('.git') && fs.existsSync(targetFilePath) && fs.statSync(targetFilePath).isFile()) {
         const ext = path.extname(targetFilePath).toLowerCase();
+        const stat = fs.statSync(targetFilePath);
         const mimeMap = {
           '.html': 'text/html; charset=utf-8',
           '.css': 'text/css; charset=utf-8',
@@ -972,6 +973,7 @@ function handleRoute(req, res, pathname, queryParams, body) {
         const isDynamicAsset = ['.html', '.css', '.js', '.json'].includes(ext);
         const headers = {
           'Content-Type': mimeType,
+          'Content-Length': stat.size,
           'Access-Control-Allow-Origin': '*'
         };
         if (isDynamicAsset) {
@@ -980,6 +982,10 @@ function handleRoute(req, res, pathname, queryParams, body) {
           headers['Expires'] = '0';
         }
         res.writeHead(200, headers);
+        if (req.method === 'HEAD') {
+          res.end();
+          return;
+        }
         fs.createReadStream(targetFilePath).pipe(res);
         return;
       }
