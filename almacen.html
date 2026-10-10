@@ -455,8 +455,8 @@
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.8rem;">
               <div style="background: rgba(255,255,255,0.03); padding: 8px 10px; border-radius: 6px;">
-                <span style="color: var(--text-dim); font-size: 0.7rem; display: block;">Teléfono Emisor SMS:</span>
-                <strong style="color: #fff;">04143572462</strong>
+                <span style="color: var(--text-dim); font-size: 0.7rem; display: block;">Teléfonos Emisores:</span>
+                <strong style="color: #fff; font-size: 0.76rem;">04143572462 / 04122694517</strong>
               </div>
               <div style="background: rgba(255,255,255,0.03); padding: 8px 10px; border-radius: 6px;">
                 <span style="color: var(--text-dim); font-size: 0.7rem; display: block;">Token Secreto:</span>
@@ -474,8 +474,8 @@
           <!-- Tarjeta 2: Configuración de Cuenta y Tasa BCV -->
           <div class="pm-card">
             <div class="pm-card-title">
-              <h3>💵 Datos Receptores y Tasa Oficial</h3>
-              <span style="font-size: 0.75rem; color: var(--gold-primary); font-weight: 700;">TASA ACTIVA</span>
+              <h3>💵 Cuentas Pago Móvil & Tasa Oficial</h3>
+              <span style="font-size: 0.75rem; color: var(--gold-primary); font-weight: 700;">3 CUENTAS ACTIVAS</span>
             </div>
 
             <form id="formConfigPagoMovil">
@@ -492,25 +492,41 @@
                 </small>
               </div>
 
-              <div class="form-group" style="margin-bottom: 12px;">
-                <label for="cfgReceiverBank">Banco Receptor DIP LF</label>
-                <input type="text" id="cfgReceiverBank" class="form-control" value="Banco Nacional de Crédito (BNC) (0191)" required>
-              </div>
-
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div class="form-group">
-                  <label for="cfgReceiverPhone">Teléfono Receptor</label>
-                  <input type="text" id="cfgReceiverPhone" class="form-control" value="04143572462" required>
+              <!-- Lista de 3 Cuentas Activas -->
+              <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 10px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                    <strong style="color: var(--gold-primary); font-size: 0.8rem;">🏦 Banco Nacional de Crédito (BNC) (0191)</strong>
+                    <span style="font-size: 0.68rem; color: #22c55e; font-weight: 700;">● ACTIVO</span>
+                  </div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 0.75rem; color: var(--text-dim);">
+                    <div>📱 Tel: <strong style="color: #fff;">0414-3572462</strong></div>
+                    <div>🪪 Cédula: <strong style="color: #fff;">V-7350863</strong></div>
+                  </div>
                 </div>
-                <div class="form-group">
-                  <label for="cfgReceiverId">Cédula / RIF</label>
-                  <input type="text" id="cfgReceiverId" class="form-control" value="V-21726495" required>
+
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 10px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                    <strong style="color: #60a5fa; font-size: 0.8rem;">🏛️ Banco de Venezuela (BDV) (0102)</strong>
+                    <span style="font-size: 0.68rem; color: #22c55e; font-weight: 700;">● ACTIVO</span>
+                  </div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 0.75rem; color: var(--text-dim);">
+                    <div>📱 Tel: <strong style="color: #fff;">0412-2694517</strong></div>
+                    <div>🪪 Cédula: <strong style="color: #fff;">V-21726495</strong></div>
+                  </div>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 10px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                    <strong style="color: #a78bfa; font-size: 0.8rem;">💳 Bancamiga (0172)</strong>
+                    <span style="font-size: 0.68rem; color: #22c55e; font-weight: 700;">● ACTIVO</span>
+                  </div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 0.75rem; color: var(--text-dim);">
+                    <div>📱 Tel: <strong style="color: #fff;">0412-2694517</strong></div>
+                    <div>🪪 Cédula: <strong style="color: #fff;">V-21726495</strong></div>
+                  </div>
                 </div>
               </div>
-
-              <button type="submit" class="btn-save-prod" style="width: 100%; margin-top: 14px;">
-                <span>✨ Actualizar Datos de Pago Móvil</span>
-              </button>
             </form>
           </div>
 

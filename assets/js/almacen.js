@@ -1151,23 +1151,18 @@ function renderPagoMovilDashboard() {
 // Guardar configuración desde el formulario
 function savePagoMovilConfigFromForm() {
   const rateVal = parseFloat(document.getElementById('cfgBcvRate')?.value) || 395.00;
-  const bankVal = (document.getElementById('cfgReceiverBank')?.value || '').trim();
-  const phoneVal = (document.getElementById('cfgReceiverPhone')?.value || '').trim();
-  const idVal = (document.getElementById('cfgReceiverId')?.value || '').trim();
+  const currentCfg = (typeof getPagoMovilConfig === 'function') ? getPagoMovilConfig() : {};
 
   const newConfig = {
-    receiverBank: bankVal || 'Banco Nacional de Crédito (BNC) (0191)',
-    receiverPhone: phoneVal || '04143572462',
-    receiverId: idVal || 'V-21726495',
-    receiverName: 'DIP LF Salsas Artesanales',
+    ...currentCfg,
     defaultRate: rateVal
   };
 
   if (typeof savePagoMovilConfig === 'function') savePagoMovilConfig(newConfig);
   if (typeof setBcvRate === 'function') setBcvRate(rateVal);
 
-  showAdminToast('¡Configuración de Pago Móvil guardada con éxito!');
-  syncConfigWithServer(newConfig);
+  showAdminToast('¡Tasa oficial BCV actualizada con éxito!');
+  syncConfigWithServer({ bcvRate: rateVal });
   renderPagoMovilDashboard();
 }
 
@@ -1256,8 +1251,8 @@ window.loadSmsTemplate = function(bankKey) {
       if (inputText) inputText.value = `BBVA Provincial informa: Abono de Dinero Rapido recibido por Bs. ${sampleBs} de 04149876543. Ref: 334190.`;
       break;
     case 'bancamiga':
-      if (inputSender) inputSender.value = 'Bancamiga';
-      if (inputText) inputText.value = `Bancamiga: Pago Movil recibido por Bs. ${sampleBs} de 04122694517. Ref: 991204.`;
+      if (inputSender) inputSender.value = '26448';
+      if (inputText) inputText.value = `Bancamiga: Pago Movil recibido por Bs. ${sampleBs} de 04149876543. Ref: 991204.`;
       break;
   }
   showAdminToast(`Plantilla de ${bankKey.toUpperCase()} cargada.`);

@@ -35,11 +35,67 @@ const PAGO_MOVIL_CONFIG_KEY = 'diplf_pm_config';
 const PAGO_MOVIL_RATE_KEY = 'diplf_bcv_rate';
 const WEBHOOK_SERVER_URL_KEY = 'diplf_webhook_url';
 
+// Cuentas oficiales de Pago Móvil receptoras activas en DIP LF
+const OFFICIAL_PM_ACCOUNTS = [
+  {
+    id: 'bnc',
+    badge: 'BNC (0191)',
+    bankName: 'Banco Nacional de Crédito (BNC)',
+    bankCode: '0191',
+    phone: '0414-3572462',
+    phoneRaw: '04143572462',
+    idCard: 'V-7350863',
+    idCardRaw: '7350863',
+    icon: '🏦'
+  },
+  {
+    id: 'bdv',
+    badge: 'Venezuela (0102)',
+    bankName: 'Banco de Venezuela (BDV)',
+    bankCode: '0102',
+    phone: '0412-2694517',
+    phoneRaw: '04122694517',
+    idCard: 'V-21726495',
+    idCardRaw: '21726495',
+    icon: '🏛️'
+  },
+  {
+    id: 'bancamiga',
+    badge: 'Bancamiga (0172)',
+    bankName: 'Bancamiga',
+    bankCode: '0172',
+    phone: '0412-2694517',
+    phoneRaw: '04122694517',
+    idCard: 'V-21726495',
+    idCardRaw: '21726495',
+    icon: '💳'
+  }
+];
+
+let selectedPmAccountId = 'bnc';
+
+function getSelectedPmAccount() {
+  return OFFICIAL_PM_ACCOUNTS.find(a => a.id === selectedPmAccountId) || OFFICIAL_PM_ACCOUNTS[0];
+}
+
+window.selectPmAccount = function(accountId) {
+  const target = OFFICIAL_PM_ACCOUNTS.find(a => a.id === accountId);
+  if (!target) return;
+  selectedPmAccountId = accountId;
+
+  const chips = document.querySelectorAll('.pm-account-chip');
+  chips.forEach(chip => {
+    chip.classList.toggle('active', chip.getAttribute('data-account') === accountId);
+  });
+
+  updatePagoMovilDetailsView();
+};
+
 const DEFAULT_PM_CONFIG = {
   receiverPhone: '04143572462',
   receiverBank: 'Banco Nacional de Crédito (BNC) (0191)',
   receiverBankCode: '0191',
-  receiverId: 'V-21726495',
+  receiverId: 'V-7350863',
   receiverName: 'DIP LF Salsas Artesanales',
   defaultRate: 395.00
 };
@@ -50,19 +106,6 @@ function getPagoMovilConfig() {
     const saved = localStorage.getItem(PAGO_MOVIL_CONFIG_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      // Migración automática si tenía valores anteriores de prueba o el teléfono/banco anterior
-      if (
-        parsed.receiverPhone === '04122694517' ||
-        !parsed.receiverPhone ||
-        parsed.receiverBank?.includes('Bancamiga') ||
-        parsed.receiverBank?.includes('Venezuela') ||
-        !parsed.receiverBank
-      ) {
-        parsed.receiverPhone = '04143572462';
-        parsed.receiverBank = 'Banco Nacional de Crédito (BNC) (0191)';
-        parsed.receiverBankCode = '0191';
-        savePagoMovilConfig(parsed);
-      }
       return { ...DEFAULT_PM_CONFIG, ...parsed };
     }
   } catch (e) {}
@@ -114,18 +157,9 @@ async function syncPagoMovilConfigFromServer() {
     const res = await fetch(`${serverUrl}/api/config`);
     if (res.ok) {
       const data = await res.json();
-      if (data && data.success && data.config) {
-        const current = getPagoMovilConfig();
-        const updated = {
-          ...current,
-          receiverPhone: data.config.receiverPhone || current.receiverPhone,
-          receiverBank: data.config.receiverBank || current.receiverBank,
-          receiverId: data.config.receiverId || current.receiverId,
-          receiverName: data.config.receiverName || current.receiverName,
-          defaultRate: data.config.bcvRate || current.defaultRate
-        };
-        savePagoMovilConfig(updated);
-        if (data.config.bcvRate) setBcvRate(data.config.bcvRate);
+      const cfgData = (data && data.config) ? data.config : data;
+      if (cfgData) {
+        if (cfgData.bcvRate) setBcvRate(cfgData.bcvRate);
         if (typeof updatePagoMovilDetailsView === 'function') {
           updatePagoMovilDetailsView();
         }
@@ -219,24 +253,44 @@ function initPagoMovilCheckoutUI() {
         <div class="pm-receiver-header">
           <div class="pm-receiver-title-badge">
             <span class="pm-badge-dot"></span>
-            <span>Datos Pago Móvil DIP LF</span>
+            <span>Cuentas Pago Móvil DIP LF</span>
           </div>
           <button type="button" class="btn-copy-pm" onclick="copyPagoMovilData()" title="Copiar datos al portapapeles">
             📋 Copiar Datos
           </button>
         </div>
+
+        <!-- Selector de Cuenta Bancaria Destino (BNC, Venezuela, Bancamiga) -->
+        <div class="pm-account-selector-container">
+          <span class="pm-account-selector-title">Selecciona la cuenta destino a transferir:</span>
+          <div class="pm-account-chips">
+            <button type="button" class="pm-account-chip ${selectedPmAccountId === 'bnc' ? 'active' : ''}" data-account="bnc" onclick="selectPmAccount('bnc')" title="Transferir a Banco Nacional de Crédito">
+              <span class="chip-icon">🏦</span>
+              <span class="chip-text">BNC (0191)</span>
+            </button>
+            <button type="button" class="pm-account-chip ${selectedPmAccountId === 'bdv' ? 'active' : ''}" data-account="bdv" onclick="selectPmAccount('bdv')" title="Transferir a Banco de Venezuela">
+              <span class="chip-icon">🏛️</span>
+              <span class="chip-text">BDV (0102)</span>
+            </button>
+            <button type="button" class="pm-account-chip ${selectedPmAccountId === 'bancamiga' ? 'active' : ''}" data-account="bancamiga" onclick="selectPmAccount('bancamiga')" title="Transferir a Bancamiga">
+              <span class="chip-icon">💳</span>
+              <span class="chip-text">Bancamiga (0172)</span>
+            </button>
+          </div>
+        </div>
+
         <div class="pm-receiver-grid">
           <div class="pm-data-pill">
             <span class="pm-pill-label">📱 Teléfono</span>
-            <strong id="pmViewPhone" class="pm-pill-val">0412-2694517</strong>
+            <strong id="pmViewPhone" class="pm-pill-val">0414-3572462</strong>
           </div>
           <div class="pm-data-pill">
             <span class="pm-pill-label">🪪 Cédula / RIF</span>
-            <strong id="pmViewId" class="pm-pill-val">V-21726495</strong>
+            <strong id="pmViewId" class="pm-pill-val">V-7350863</strong>
           </div>
           <div class="pm-data-pill pm-pill-full">
-            <span class="pm-pill-label">🏦 Bancos Destino</span>
-            <strong id="pmViewBank" class="pm-pill-val pm-pill-banks">0102 - BDV / 0172 - Bancamiga</strong>
+            <span class="pm-pill-label">🏦 Banco Destino</span>
+            <strong id="pmViewBank" class="pm-pill-val pm-pill-banks">Banco Nacional de Crédito (BNC) (0191)</strong>
           </div>
           <div class="pm-data-pill pm-pill-full pm-pill-rate">
             <span class="pm-pill-label">📈 Tasa Oficial BCV</span>
@@ -453,7 +507,7 @@ window.switchCheckoutMethod = function(method) {
 
 // Actualizar textos de datos receptores
 function updatePagoMovilDetailsView() {
-  const cfg = getPagoMovilConfig();
+  const account = getSelectedPmAccount();
   const rate = getBcvRate();
 
   const elBank = document.getElementById('pmViewBank');
@@ -461,9 +515,9 @@ function updatePagoMovilDetailsView() {
   const elId = document.getElementById('pmViewId');
   const elRate = document.getElementById('pmViewRate');
 
-  if (elBank) elBank.textContent = cfg.receiverBank;
-  if (elPhone) elPhone.textContent = cfg.receiverPhone;
-  if (elId) elId.textContent = cfg.receiverId;
+  if (elBank) elBank.textContent = `${account.bankName} (${account.bankCode})`;
+  if (elPhone) elPhone.textContent = account.phone;
+  if (elId) elId.textContent = account.idCard;
   if (elRate) elRate.textContent = `Bs. ${rate.toFixed(2)} / $`;
 
   updatePagoMovilAmounts();
@@ -514,15 +568,15 @@ if (typeof originalRenderDrawerItems === 'function') {
 
 // Copiar datos de Pago Móvil al portapapeles
 window.copyPagoMovilData = function() {
-  const cfg = getPagoMovilConfig();
+  const account = getSelectedPmAccount();
   const rate = getBcvRate();
   const { totalPrice } = typeof getCartTotals === 'function' ? getCartTotals() : { totalPrice: 0 };
   const totalBs = (totalPrice * rate).toFixed(2);
 
-  const textToCopy = `DIP LF - Datos Pago Móvil:\nBanco: ${cfg.receiverBank}\nTeléfono: ${cfg.receiverPhone}\nCédula: ${cfg.receiverId}\nMonto a transferir: Bs. ${totalBs} ($${totalPrice.toFixed(2)} USD)`;
+  const textToCopy = `DIP LF - Datos Pago Móvil:\nBanco: ${account.bankName} (${account.bankCode})\nTeléfono: ${account.phone}\nCédula: ${account.idCard}\nMonto a transferir: Bs. ${totalBs} ($${totalPrice.toFixed(2)} USD)`;
 
   navigator.clipboard.writeText(textToCopy).then(() => {
-    alert('✅ Datos de Pago Móvil copiados al portapapeles.\nPégalos en la app de tu banco.');
+    alert(`✅ Datos de ${account.bankName} copiados al portapapeles.\nPégalos en la app de tu banco.`);
   }).catch(() => {
     prompt('Copia los datos de Pago Móvil:', textToCopy);
   });
@@ -730,6 +784,7 @@ window.handlePagoMovilSubmit = async function(event) {
   }
 
   // SI SE VERIFICA CON ÉXITO: CONSTRUIR Y REGISTRAR PEDIDO PAGADO
+  const selectedAccount = getSelectedPmAccount();
   const orderData = {
     customerName: customerName,
     customerId: customerId,
@@ -752,9 +807,12 @@ window.handlePagoMovilSubmit = async function(event) {
       amountBs: totalBs,
       reference: reference,
       rate: rate,
-      receiverPhone: getPagoMovilConfig().receiverPhone
+      receiverPhone: selectedAccount.phoneRaw,
+      receiverBank: selectedAccount.bankName,
+      receiverBankCode: selectedAccount.bankCode,
+      receiverId: selectedAccount.idCard
     },
-    customerNote: `Pago Móvil Ref: ${reference} (${senderBank}) - Verificado por SMS`,
+    customerNote: `Pago Móvil Ref: ${reference} (${senderBank}) a ${selectedAccount.bankName} - Verificado por SMS`,
     status: 'pagado', // ESTADO PAGADO DIRECTO
     verifiedBySms: true,
     verifiedAt: new Date().toISOString(),
@@ -858,7 +916,13 @@ function showOrderSuccessState(order, verifiedData) {
     if (elTitle) elTitle.textContent = '¡Pago Móvil Verificado y Aprobado!';
     if (elIcon) elIcon.textContent = '✅';
     if (elInfo) {
-      elInfo.innerHTML = `Confirmamos con éxito la recepción de tu transferencia bancaria en nuestro teléfono <strong>${getPagoMovilConfig().receiverPhone}</strong>. Tu pedido ya está marcado como <strong>PAGADO</strong> y entra en preparación de inmediato.`;
+      const targetAccount = OFFICIAL_PM_ACCOUNTS.find(a => 
+        a.phoneRaw === order.paymentDetails?.receiverPhone || 
+        a.bankCode === order.paymentDetails?.receiverBankCode
+      ) || getSelectedPmAccount();
+      const bankLabel = order.paymentDetails?.receiverBank || targetAccount.bankName;
+      const phoneLabel = order.paymentDetails?.receiverPhone || targetAccount.phone;
+      elInfo.innerHTML = `Confirmamos con éxito la recepción de tu transferencia bancaria en nuestra cuenta <strong>${bankLabel}</strong> (${phoneLabel}). Tu pedido ya está marcado como <strong>PAGADO</strong> y entra en preparación de inmediato.`;
     }
 
     // Scroll al inicio del drawer suavemente

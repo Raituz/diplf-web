@@ -35,9 +35,38 @@ if (!fs.existsSync(DATA_DIR)) {
 
 // Configuración por defecto de Pago Móvil
 const DEFAULT_CONFIG = {
-  receiverPhone: '04143572462',
-  receiverBank: 'Banco Nacional de Crédito (BNC) (0191)',
-  receiverId: 'V-21726495',
+  accounts: [
+    {
+      id: 'bnc',
+      bankName: 'Banco Nacional de Crédito (BNC)',
+      bankCode: '0191',
+      phone: '0414-3572462',
+      phoneRaw: '04143572462',
+      idCard: 'V-7350863',
+      name: 'DIP LF Salsas Artesanales'
+    },
+    {
+      id: 'bdv',
+      bankName: 'Banco de Venezuela (BDV)',
+      bankCode: '0102',
+      phone: '0412-2694517',
+      phoneRaw: '04122694517',
+      idCard: 'V-21726495',
+      name: 'DIP LF Salsas Artesanales'
+    },
+    {
+      id: 'bancamiga',
+      bankName: 'Bancamiga',
+      bankCode: '0172',
+      phone: '0412-2694517',
+      phoneRaw: '04122694517',
+      idCard: 'V-21726495',
+      name: 'DIP LF Salsas Artesanales'
+    }
+  ],
+  receiverPhone: '04143572462 / 04122694517',
+  receiverBank: 'BNC (0191) / Venezuela (0102) / Bancamiga (0172)',
+  receiverId: 'V-7350863 / V-21726495',
   receiverName: 'DIP LF Salsas Artesanales',
   bcvRate: 395.00,
   webhookSecret: WEBHOOK_SECRET,

@@ -9,27 +9,31 @@ Esta guía explica en detalle cómo funciona el módulo de **Pago Móvil (Venezu
 
 ```
 [1. Cliente en la Web] 
-       │ Añade salsas al carrito, abre el Drawer de pedido y elige "📱 Pago Móvil".
-       │ Ve los datos de DIP LF (Banco Nacional de Crédito - BNC 0191, Cédula V-21726495, Teléfono 0414-3572462, Tasa BCV).
-       │ Realiza el pago en su banco e ingresa: Teléfono emisor, Banco de origen y Referencia.
+       │ Añade salsas al carrito, abre el Drawer de pedido y elige "⚡ Pago Móvil".
+       │ Elige entre las 3 cuentas destino activas:
+       │  • BNC (0191): 0414-3572462 | Cédula V-7350863
+       │  • Banco de Venezuela (0102): 0412-2694517 | Cédula V-21726495
+       │  • Bancamiga (0172): 0412-2694517 | Cédula V-21726495
+       │ Realiza el pago en su banco e ingresa su banco emisor y número de referencia.
        ▼
-[2. Pedido Registrado como "PENDIENTE"]
-       │ El pedido se guarda con estado "⏳ PENDIENTE DE PAGO".
-       │ El carrito se vacía y el cliente ve su comprobante con código de pedido #ORD-XXXXXX.
+[2. Verificación Instantánea en Tiempo Real]
+       │ El cliente pulsa "⚡ Confirmar y Enviar Pago Móvil".
+       │ El sistema consulta el servidor Webhook para comprobar si el banco ya confirmó el abono.
        ▼
-[3. Tu Teléfono Android (04143572462)]
-       │ Tu banco BNC (al 262) te envía el SMS o notificación de confirmación.
-       │ La app "DIP LF Webhooks" en tu teléfono lee el SMS y lo envía de inmediato por HTTP POST al Webhook.
+[3. Tu Teléfono Android (04143572462 o 04122694517)]
+       │ El banco (BNC al 262, BDV al 2661, o Bancamiga al 26448) envía el SMS o notificación.
+       │ La app "DIP LF Webhooks" en tu teléfono lee el SMS y lo envía de inmediato a:
+       │ 👉 https://diplf.alwaysdata.net/api/webhook/sms
        ▼
-[4. Microservidor Webhook DIP LF]
+[4. Servidor Webhook DIP LF en la Nube]
        │ Recibe el JSON con el texto del SMS bancario.
-       │ El motor de Expresiones Regulares extrae el Monto en Bs y la Referencia.
-       │ Busca el pedido que coincida con esa referencia y monto.
+       │ Extrae Monto en Bs y Referencia bancaria.
+       │ Valida y marca la orden directamente como "✅ PAGADO".
        ▼
-[5. Verificación Automática: Pedido "PAGADO"]
-       │ El pedido cambia automáticamente de "PENDIENTE" a "✅ PAGADO".
+[5. Confirmación al Cliente y Almacén]
+       │ En la pantalla del cliente aparece de inmediato: "¡Pago Móvil Verificado y Aprobado!".
        │ En el panel de Almacén suena el timbre sonoro de caja registradora 🔔.
-       │ Queda registrado en el historial: "Verificado automáticamente vía SMS bancario de BNC".
+       │ La orden entra en preparación automáticamente.
 ```
 
 ---
