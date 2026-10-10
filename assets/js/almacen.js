@@ -1156,9 +1156,9 @@ function savePagoMovilConfigFromForm() {
   const idVal = (document.getElementById('cfgReceiverId')?.value || '').trim();
 
   const newConfig = {
-    receiverBank: bankVal || '0102 - Banco de Venezuela',
-    receiverPhone: phoneVal || '04122694517',
-    receiverId: idVal || 'V-27123456',
+    receiverBank: bankVal || 'Banco Nacional de Crédito (BNC) (0191)',
+    receiverPhone: phoneVal || '04143572462',
+    receiverId: idVal || 'V-21726495',
     receiverName: 'DIP LF Salsas Artesanales',
     defaultRate: rateVal
   };
@@ -1235,6 +1235,10 @@ window.loadSmsTemplate = function(bankKey) {
   const sampleBs = (4 * rate).toFixed(2); // Salsa de $4 en Bs
 
   switch (bankKey) {
+    case 'bnc':
+      if (inputSender) inputSender.value = '262';
+      if (inputText) inputText.value = `BNC: Ha recibido un Pago Movil por Bs. ${sampleBs} de 04141234567. Referencia: 884102. Fecha: ${new Date().toLocaleDateString('es-VE')}.`;
+      break;
     case 'bdv':
       if (inputSender) inputSender.value = '2661';
       if (inputText) inputText.value = `BDV: PagoMovil recibido por Bs. ${sampleBs} de 04121234567 en cta *1234. Ref: 894102. Fecha: ${new Date().toLocaleDateString('es-VE')}.`;

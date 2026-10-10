@@ -3,7 +3,7 @@
  * =========================================================================
  * Este módulo gestiona:
  * 1. Formulario de Pago Móvil en el Drawer de Checkout.
- * 2. Datos receptores del comercio (Teléfono 04122694517, Banco, Cédula).
+ * 2. Datos receptores del comercio (Teléfono 04143572462, Banco Nacional de Crédito BNC, Cédula).
  * 3. Conversión de divisas USD -> Bolívares (Bs) según tasa BCV.
  * 4. Validación de campos: Teléfono emisor, Banco emisor, Monto Bs, Referencia.
  * 5. Registro del pedido como "pendiente" y sincronización con el servidor Webhook.
@@ -36,9 +36,9 @@ const PAGO_MOVIL_RATE_KEY = 'diplf_bcv_rate';
 const WEBHOOK_SERVER_URL_KEY = 'diplf_webhook_url';
 
 const DEFAULT_PM_CONFIG = {
-  receiverPhone: '04122694517',
-  receiverBank: 'Banco de Venezuela (0102) / Bancamiga (0172)',
-  receiverBankCode: '0102 / 0172',
+  receiverPhone: '04143572462',
+  receiverBank: 'Banco Nacional de Crédito (BNC) (0191)',
+  receiverBankCode: '0191',
   receiverId: 'V-21726495',
   receiverName: 'DIP LF Salsas Artesanales',
   defaultRate: 395.00
@@ -50,10 +50,17 @@ function getPagoMovilConfig() {
     const saved = localStorage.getItem(PAGO_MOVIL_CONFIG_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      // Actualizar automáticamente si tenía valores de prueba anteriores
-      if (parsed.receiverId === 'V-27123456' || !parsed.receiverId) {
-        parsed.receiverId = 'V-21726495';
-        parsed.receiverBank = 'Banco de Venezuela (0102) / Bancamiga (0172)';
+      // Migración automática si tenía valores anteriores de prueba o el teléfono/banco anterior
+      if (
+        parsed.receiverPhone === '04122694517' ||
+        !parsed.receiverPhone ||
+        parsed.receiverBank?.includes('Bancamiga') ||
+        parsed.receiverBank?.includes('Venezuela') ||
+        !parsed.receiverBank
+      ) {
+        parsed.receiverPhone = '04143572462';
+        parsed.receiverBank = 'Banco Nacional de Crédito (BNC) (0191)';
+        parsed.receiverBankCode = '0191';
         savePagoMovilConfig(parsed);
       }
       return { ...DEFAULT_PM_CONFIG, ...parsed };
@@ -100,6 +107,33 @@ function setWebhookServerUrl(url) {
   } catch (e) {}
 }
 
+// Sincronizar datos del comercio en vivo desde el servidor Alwaysdata
+async function syncPagoMovilConfigFromServer() {
+  try {
+    const serverUrl = getWebhookServerUrl();
+    const res = await fetch(`${serverUrl}/api/config`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.success && data.config) {
+        const current = getPagoMovilConfig();
+        const updated = {
+          ...current,
+          receiverPhone: data.config.receiverPhone || current.receiverPhone,
+          receiverBank: data.config.receiverBank || current.receiverBank,
+          receiverId: data.config.receiverId || current.receiverId,
+          receiverName: data.config.receiverName || current.receiverName,
+          defaultRate: data.config.bcvRate || current.defaultRate
+        };
+        savePagoMovilConfig(updated);
+        if (data.config.bcvRate) setBcvRate(data.config.bcvRate);
+        if (typeof updatePagoMovilDetailsView === 'function') {
+          updatePagoMovilDetailsView();
+        }
+      }
+    }
+  } catch (_) {}
+}
+
 // Estado del método de pago activo en el drawer: 'pagomovil' o 'whatsapp'
 let currentCheckoutMethod = 'pagomovil';
 
@@ -111,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initPagoMovilCheckoutUI() {
+  syncPagoMovilConfigFromServer();
   const drawerBody = document.querySelector('.drawer-body');
   const drawerCartList = document.getElementById('drawerCartList');
   const drawerFooter = document.querySelector('.drawer-footer');
@@ -823,7 +858,7 @@ function showOrderSuccessState(order, verifiedData) {
     if (elTitle) elTitle.textContent = '¡Pago Móvil Verificado y Aprobado!';
     if (elIcon) elIcon.textContent = '✅';
     if (elInfo) {
-      elInfo.innerHTML = `Confirmamos con éxito la recepción de tu transferencia bancaria en nuestro teléfono <strong>04122694517</strong>. Tu pedido ya está marcado como <strong>PAGADO</strong> y entra en preparación de inmediato.`;
+      elInfo.innerHTML = `Confirmamos con éxito la recepción de tu transferencia bancaria en nuestro teléfono <strong>${getPagoMovilConfig().receiverPhone}</strong>. Tu pedido ya está marcado como <strong>PAGADO</strong> y entra en preparación de inmediato.`;
     }
 
     // Scroll al inicio del drawer suavemente

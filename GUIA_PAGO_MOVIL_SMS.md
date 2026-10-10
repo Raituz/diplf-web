@@ -1,7 +1,7 @@
 # 📱 GUÍA DE PAGO MÓVIL CON VERIFICACIÓN AUTOMÁTICA POR SMS
 ### DIP LF Salsas Artesanales Gourmet • Hand Made
 
-Esta guía explica en detalle cómo funciona el módulo de **Pago Móvil (Venezuela)** con lectura de SMS bancarios para cuentas de persona natural en tu tienda web DIP LF, y cómo dejarlo funcionando al 100% en tu teléfono Android **04122694517**.
+Esta guía explica en detalle cómo funciona el módulo de **Pago Móvil (Venezuela)** con lectura de SMS bancarios para cuentas de persona natural en tu tienda web DIP LF, y cómo dejarlo funcionando al 100% en tu teléfono Android **04143572462**.
 
 ---
 
@@ -10,16 +10,16 @@ Esta guía explica en detalle cómo funciona el módulo de **Pago Móvil (Venezu
 ```
 [1. Cliente en la Web] 
        │ Añade salsas al carrito, abre el Drawer de pedido y elige "📱 Pago Móvil".
-       │ Ve los datos de DIP LF (Banco de Venezuela / Bancamiga, Cédula V-21726495, Teléfono 0412-2694517, Tasa BCV).
+       │ Ve los datos de DIP LF (Banco Nacional de Crédito - BNC 0191, Cédula V-21726495, Teléfono 0414-3572462, Tasa BCV).
        │ Realiza el pago en su banco e ingresa: Teléfono emisor, Banco de origen y Referencia.
        ▼
 [2. Pedido Registrado como "PENDIENTE"]
        │ El pedido se guarda con estado "⏳ PENDIENTE DE PAGO".
        │ El carrito se vacía y el cliente ve su comprobante con código de pedido #ORD-XXXXXX.
        ▼
-[3. Tu Teléfono Android (04122694517)]
-       │ Tu banco (ej. BDV al 2661, Banesco al 2846, etc.) te envía el SMS de confirmación.
-       │ La app "SMS Forwarder" en tu teléfono lee el SMS y lo envía de inmediato por HTTP POST al Webhook.
+[3. Tu Teléfono Android (04143572462)]
+       │ Tu banco BNC (al 262) te envía el SMS o notificación de confirmación.
+       │ La app "DIP LF Webhooks" en tu teléfono lee el SMS y lo envía de inmediato por HTTP POST al Webhook.
        ▼
 [4. Microservidor Webhook DIP LF]
        │ Recibe el JSON con el texto del SMS bancario.
@@ -29,7 +29,7 @@ Esta guía explica en detalle cómo funciona el módulo de **Pago Móvil (Venezu
 [5. Verificación Automática: Pedido "PAGADO"]
        │ El pedido cambia automáticamente de "PENDIENTE" a "✅ PAGADO".
        │ En el panel de Almacén suena el timbre sonoro de caja registradora 🔔.
-       │ Queda registrado en el historial: "Verificado automáticamente vía SMS bancario".
+       │ Queda registrado en el historial: "Verificado automáticamente vía SMS bancario de BNC".
 ```
 
 ---
@@ -44,18 +44,18 @@ En la carpeta principal de tu proyecto (`D:\DIP LF WEB`), hemos creado un lanzad
    ======================================================
    🚀 [DIP LF] Servidor Webhook Pago Móvil SMS Activo
    📡 Puerto: 3000
-   📱 Teléfono Receptor Autorizado: 04122694517
+   📱 Teléfono Receptor Autorizado: 04143572462
    🔑 Webhook Secret Token: diplf_secret_2026
    ------------------------------------------------------
-   📲 Dirección para configurar en tu teléfono Android (misma red WiFi):
-      👉 http://192.168.x.x:3000/api/webhook/sms
+   📲 Dirección para configurar en tu teléfono Android:
+      👉 https://diplf.alwaysdata.net/api/webhook/sms
    ======================================================
    ```
 3. ¡Listo! Mientras esta ventana esté abierta, tu servidor estará escuchando y conciliando SMS las 24 horas.
 
 ---
 
-## 📲 3. Configurar tu Teléfono Android (04122694517)
+## 📲 3. Configurar tu Teléfono Android (04143572462)
 
 Para que tu teléfono reenvíe los SMS bancarios automáticamente al servidor Webhook, instalaremos una aplicación ligera y de código abierto.
 

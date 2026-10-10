@@ -18,7 +18,7 @@ const os = require('os');
 const PORT = parseInt(process.env.PORT, 10) || 3000;
 const HOST = process.env.IP || null;
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || 'diplf_secret_2026';
-const AUTHORIZED_PHONE = process.env.AUTHORIZED_PHONE || '04122694517';
+const AUTHORIZED_PHONE = process.env.AUTHORIZED_PHONE || '04143572462';
 
 // Rutas de almacenamiento local en JSON
 const DATA_DIR = path.join(__dirname, 'data');
@@ -35,8 +35,8 @@ if (!fs.existsSync(DATA_DIR)) {
 
 // Configuración por defecto de Pago Móvil
 const DEFAULT_CONFIG = {
-  receiverPhone: '04122694517',
-  receiverBank: 'Banco de Venezuela (0102) / Bancamiga (0172)',
+  receiverPhone: '04143572462',
+  receiverBank: 'Banco Nacional de Crédito (BNC) (0191)',
   receiverId: 'V-21726495',
   receiverName: 'DIP LF Salsas Artesanales',
   bcvRate: 395.00,

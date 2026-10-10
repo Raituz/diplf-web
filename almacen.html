@@ -416,7 +416,7 @@
         <div class="section-header-title">
           <div>
             <h2>📱 Sistema de Pago Móvil & Webhook SMS</h2>
-            <p>Configuración de verificación bancaria automática desde tu teléfono Android (04122694517), tasa BCV y simulador de pruebas en vivo.</p>
+            <p>Configuración de verificación bancaria automática desde tu teléfono Android (04143572462), tasa BCV y simulador de pruebas en vivo.</p>
           </div>
         </div>
 
@@ -456,7 +456,7 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.8rem;">
               <div style="background: rgba(255,255,255,0.03); padding: 8px 10px; border-radius: 6px;">
                 <span style="color: var(--text-dim); font-size: 0.7rem; display: block;">Teléfono Emisor SMS:</span>
-                <strong style="color: #fff;">04122694517</strong>
+                <strong style="color: #fff;">04143572462</strong>
               </div>
               <div style="background: rgba(255,255,255,0.03); padding: 8px 10px; border-radius: 6px;">
                 <span style="color: var(--text-dim); font-size: 0.7rem; display: block;">Token Secreto:</span>
@@ -494,13 +494,13 @@
 
               <div class="form-group" style="margin-bottom: 12px;">
                 <label for="cfgReceiverBank">Banco Receptor DIP LF</label>
-                <input type="text" id="cfgReceiverBank" class="form-control" value="Banco de Venezuela (0102) / Bancamiga (0172)" required>
+                <input type="text" id="cfgReceiverBank" class="form-control" value="Banco Nacional de Crédito (BNC) (0191)" required>
               </div>
 
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div class="form-group">
                   <label for="cfgReceiverPhone">Teléfono Receptor</label>
-                  <input type="text" id="cfgReceiverPhone" class="form-control" value="04122694517" required>
+                  <input type="text" id="cfgReceiverPhone" class="form-control" value="04143572462" required>
                 </div>
                 <div class="form-group">
                   <label for="cfgReceiverId">Cédula / RIF</label>
@@ -530,6 +530,7 @@
                 Plantillas Rápidas de Bancos:
               </span>
               <div class="simulator-quick-templates">
+                <button type="button" class="btn-template-sms" onclick="loadSmsTemplate('bnc')">🏦 BNC (262)</button>
                 <button type="button" class="btn-template-sms" onclick="loadSmsTemplate('bdv')">🏛️ Banco de Venezuela (2661)</button>
                 <button type="button" class="btn-template-sms" onclick="loadSmsTemplate('banesco')">🟢 Banesco (2846)</button>
                 <button type="button" class="btn-template-sms" onclick="loadSmsTemplate('mercantil')">🔵 Mercantil (24024)</button>
