@@ -3,7 +3,7 @@
  * =========================================================================
  * Este módulo gestiona:
  * 1. Formulario de Pago Móvil en el Drawer de Checkout.
- * 2. Datos receptores del comercio (Teléfono 04143572462, Banco Nacional de Crédito BNC, Cédula).
+ * 2. Datos receptores del comercio (Teléfono 04122694517, Banco de Venezuela y Bancamiga, Cédula V-21726495).
  * 3. Conversión de divisas USD -> Bolívares (Bs) según tasa BCV.
  * 4. Validación de campos: Teléfono emisor, Banco emisor, Monto Bs, Referencia.
  * 5. Registro del pedido como "pendiente" y sincronización con el servidor Webhook.
@@ -38,17 +38,6 @@ const WEBHOOK_SERVER_URL_KEY = 'diplf_webhook_url';
 // Cuentas oficiales de Pago Móvil receptoras activas en DIP LF
 const OFFICIAL_PM_ACCOUNTS = [
   {
-    id: 'bnc',
-    badge: 'BNC (0191)',
-    bankName: 'Banco Nacional de Crédito (BNC)',
-    bankCode: '0191',
-    phone: '0414-3572462',
-    phoneRaw: '04143572462',
-    idCard: 'V-7350863',
-    idCardRaw: '7350863',
-    icon: '🏦'
-  },
-  {
     id: 'bdv',
     badge: 'Venezuela (0102)',
     bankName: 'Banco de Venezuela (BDV)',
@@ -72,7 +61,7 @@ const OFFICIAL_PM_ACCOUNTS = [
   }
 ];
 
-let selectedPmAccountId = 'bnc';
+let selectedPmAccountId = 'bdv';
 
 function getSelectedPmAccount() {
   return OFFICIAL_PM_ACCOUNTS.find(a => a.id === selectedPmAccountId) || OFFICIAL_PM_ACCOUNTS[0];
@@ -92,10 +81,10 @@ window.selectPmAccount = function(accountId) {
 };
 
 const DEFAULT_PM_CONFIG = {
-  receiverPhone: '04143572462',
-  receiverBank: 'Banco Nacional de Crédito (BNC) (0191)',
-  receiverBankCode: '0191',
-  receiverId: 'V-7350863',
+  receiverPhone: '04122694517',
+  receiverBank: 'Banco de Venezuela (0102) / Bancamiga (0172)',
+  receiverBankCode: '0102 / 0172',
+  receiverId: 'V-21726495',
   receiverName: 'DIP LF Salsas Artesanales',
   defaultRate: 395.00
 };
@@ -260,17 +249,13 @@ function initPagoMovilCheckoutUI() {
           </button>
         </div>
 
-        <!-- Selector de Cuenta Bancaria Destino (BNC, Venezuela, Bancamiga) -->
+        <!-- Selector de Cuenta Bancaria Destino (Venezuela, Bancamiga) -->
         <div class="pm-account-selector-container">
           <span class="pm-account-selector-title">Selecciona la cuenta destino a transferir:</span>
           <div class="pm-account-chips">
-            <button type="button" class="pm-account-chip ${selectedPmAccountId === 'bnc' ? 'active' : ''}" data-account="bnc" onclick="selectPmAccount('bnc')" title="Transferir a Banco Nacional de Crédito">
-              <span class="chip-icon">🏦</span>
-              <span class="chip-text">BNC (0191)</span>
-            </button>
             <button type="button" class="pm-account-chip ${selectedPmAccountId === 'bdv' ? 'active' : ''}" data-account="bdv" onclick="selectPmAccount('bdv')" title="Transferir a Banco de Venezuela">
               <span class="chip-icon">🏛️</span>
-              <span class="chip-text">BDV (0102)</span>
+              <span class="chip-text">Venezuela (0102)</span>
             </button>
             <button type="button" class="pm-account-chip ${selectedPmAccountId === 'bancamiga' ? 'active' : ''}" data-account="bancamiga" onclick="selectPmAccount('bancamiga')" title="Transferir a Bancamiga">
               <span class="chip-icon">💳</span>
@@ -282,15 +267,15 @@ function initPagoMovilCheckoutUI() {
         <div class="pm-receiver-grid">
           <div class="pm-data-pill">
             <span class="pm-pill-label">📱 Teléfono</span>
-            <strong id="pmViewPhone" class="pm-pill-val">0414-3572462</strong>
+            <strong id="pmViewPhone" class="pm-pill-val">0412-2694517</strong>
           </div>
           <div class="pm-data-pill">
             <span class="pm-pill-label">🪪 Cédula / RIF</span>
-            <strong id="pmViewId" class="pm-pill-val">V-7350863</strong>
+            <strong id="pmViewId" class="pm-pill-val">V-21726495</strong>
           </div>
           <div class="pm-data-pill pm-pill-full">
             <span class="pm-pill-label">🏦 Banco Destino</span>
-            <strong id="pmViewBank" class="pm-pill-val pm-pill-banks">Banco Nacional de Crédito (BNC) (0191)</strong>
+            <strong id="pmViewBank" class="pm-pill-val pm-pill-banks">Banco de Venezuela (BDV) (0102)</strong>
           </div>
           <div class="pm-data-pill pm-pill-full pm-pill-rate">
             <span class="pm-pill-label">📈 Tasa Oficial BCV</span>

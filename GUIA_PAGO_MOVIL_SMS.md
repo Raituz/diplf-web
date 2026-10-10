@@ -1,7 +1,7 @@
 # 📱 GUÍA DE PAGO MÓVIL CON VERIFICACIÓN AUTOMÁTICA POR SMS
 ### DIP LF Salsas Artesanales Gourmet • Hand Made
 
-Esta guía explica en detalle cómo funciona el módulo de **Pago Móvil (Venezuela)** con lectura de SMS bancarios para cuentas de persona natural en tu tienda web DIP LF, y cómo dejarlo funcionando al 100% en tu teléfono Android **04143572462**.
+Esta guía explica en detalle cómo funciona el módulo de **Pago Móvil (Venezuela)** con lectura de SMS bancarios para cuentas de persona natural en tu tienda web DIP LF, y cómo dejarlo funcionando al 100% en tu teléfono Android **04122694517**.
 
 ---
 
@@ -10,8 +10,7 @@ Esta guía explica en detalle cómo funciona el módulo de **Pago Móvil (Venezu
 ```
 [1. Cliente en la Web] 
        │ Añade salsas al carrito, abre el Drawer de pedido y elige "⚡ Pago Móvil".
-       │ Elige entre las 3 cuentas destino activas:
-       │  • BNC (0191): 0414-3572462 | Cédula V-7350863
+       │ Elige entre las 2 cuentas destino activas:
        │  • Banco de Venezuela (0102): 0412-2694517 | Cédula V-21726495
        │  • Bancamiga (0172): 0412-2694517 | Cédula V-21726495
        │ Realiza el pago en su banco e ingresa su banco emisor y número de referencia.
@@ -20,8 +19,8 @@ Esta guía explica en detalle cómo funciona el módulo de **Pago Móvil (Venezu
        │ El cliente pulsa "⚡ Confirmar y Enviar Pago Móvil".
        │ El sistema consulta el servidor Webhook para comprobar si el banco ya confirmó el abono.
        ▼
-[3. Tu Teléfono Android (04143572462 o 04122694517)]
-       │ El banco (BNC al 262, BDV al 2661, o Bancamiga al 26448) envía el SMS o notificación.
+[3. Tu Teléfono Android (04122694517)]
+       │ El banco (BDV al 2661 o Bancamiga al 26448) envía el SMS o notificación.
        │ La app "DIP LF Webhooks" en tu teléfono lee el SMS y lo envía de inmediato a:
        │ 👉 https://diplf.alwaysdata.net/api/webhook/sms
        ▼

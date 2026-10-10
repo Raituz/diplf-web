@@ -1,15 +1,6 @@
 {
   "accounts": [
     {
-      "id": "bnc",
-      "bankName": "Banco Nacional de Crédito (BNC)",
-      "bankCode": "0191",
-      "phone": "0414-3572462",
-      "phoneRaw": "04143572462",
-      "idCard": "V-7350863",
-      "name": "DIP LF Salsas Artesanales"
-    },
-    {
       "id": "bdv",
       "bankName": "Banco de Venezuela (BDV)",
       "bankCode": "0102",
@@ -28,9 +19,9 @@
       "name": "DIP LF Salsas Artesanales"
     }
   ],
-  "receiverPhone": "04143572462 / 04122694517",
-  "receiverBank": "BNC (0191) / Venezuela (0102) / Bancamiga (0172)",
-  "receiverId": "V-7350863 / V-21726495",
+  "receiverPhone": "04122694517",
+  "receiverBank": "Banco de Venezuela (0102) / Bancamiga (0172)",
+  "receiverId": "V-21726495",
   "receiverName": "DIP LF Salsas Artesanales",
   "bcvRate": 395,
   "webhookSecret": "diplf_secret_2026",
