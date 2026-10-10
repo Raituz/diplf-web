@@ -351,8 +351,11 @@ const server = http.createServer((req, res) => {
 });
 
 function handleRoute(req, res, pathname, queryParams, body) {
-  // 1. ESTADO DEL SERVIDOR (Healthcheck)
-  if (req.method === 'GET' && (pathname === '/' || pathname === '/api/status')) {
+  // 1. ESTADO DEL SERVIDOR (Healthcheck: /api/status o GET / con Accept: application/json)
+  const isStatusEndpoint = pathname === '/api/status' || pathname === '/status';
+  const isJsonRoot = pathname === '/' && req.headers['accept'] && req.headers['accept'].includes('application/json') && !req.headers['accept'].includes('text/html');
+
+  if (req.method === 'GET' && (isStatusEndpoint || isJsonRoot)) {
     ordersDb = loadJsonFile(ORDERS_FILE, []);
     smsLogsDb = loadJsonFile(SMS_LOGS_FILE, []);
     const pendingCount = ordersDb.filter(o => o.status === 'pendiente').length;

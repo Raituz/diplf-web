@@ -1131,7 +1131,7 @@ function initPagoMovilView() {
 function renderPagoMovilDashboard() {
   const cfg = (typeof getPagoMovilConfig === 'function') ? getPagoMovilConfig() : {};
   const rate = (typeof getBcvRate === 'function') ? getBcvRate() : 395.00;
-  const webhookUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'https://diplf.alwaysdata.net';
+  const webhookUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'https://diplf.com';
 
   const inputRate = document.getElementById('cfgBcvRate');
   const inputBank = document.getElementById('cfgReceiverBank');

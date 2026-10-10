@@ -703,7 +703,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Sincronizar en tiempo real con el servidor Alwaysdata para reflejar de inmediato si el gerente marcó "entregado"
   async function syncOrdersWithServer() {
     try {
-      const webhookUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'https://diplf.alwaysdata.net';
+      const webhookUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'https://diplf.com';
       const res = await fetch(`${webhookUrl}/api/orders`, { signal: AbortSignal.timeout(4500) });
       if (res.ok) {
         const data = await res.json();

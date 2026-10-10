@@ -24,9 +24,15 @@
     }
     try {
       const saved = localStorage.getItem('diplf_webhook_server_url');
-      if (saved) return saved.trim();
+      if (saved && saved.trim()) return saved.trim();
     } catch (_) {}
-    return 'https://diplf.alwaysdata.net';
+    if (typeof window !== 'undefined' && window.location) {
+      const host = window.location.hostname;
+      if (host === 'diplf.com' || host === 'www.diplf.com' || host === 'diplf.alwaysdata.net' || host.includes('alwaysdata.net') || host === 'localhost' || host === '127.0.0.1') {
+        return window.location.origin;
+      }
+    }
+    return 'https://diplf.com';
   }
 
   // Helper para tasa BCV
