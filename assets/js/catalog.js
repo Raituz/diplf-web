@@ -196,11 +196,11 @@ function getCatalogApiUrl() {
   } catch (e) {}
   if (typeof window !== 'undefined' && window.location) {
     const host = window.location.hostname;
-    if (host === 'diplf.com' || host === 'www.diplf.com' || host === 'diplf.alwaysdata.net' || host.includes('alwaysdata.net') || host === 'localhost' || host === '127.0.0.1') {
+    if (host === 'localhost' || host === '127.0.0.1') {
       return window.location.origin;
     }
   }
-  return 'https://diplf.com';
+  return 'https://diplf.alwaysdata.net';
 }
 
 // Sincronizar catálogo desde el servidor en la nube (Alwaysdata)
@@ -424,7 +424,7 @@ function recordNewOrder(orderData) {
 
     // Sincronizar en la nube Alwaysdata
     try {
-      const webhookUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'https://diplf.com';
+      const webhookUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'https://diplf.alwaysdata.net';
       fetch(`${webhookUrl}/api/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -457,7 +457,7 @@ function updateOrderStatus(orderId, newStatus, additionalData = {}) {
 
   // Sincronizar en tiempo real con servidor Alwaysdata
   try {
-    const webhookUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'https://diplf.com';
+    const webhookUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'https://diplf.alwaysdata.net';
     fetch(`${webhookUrl}/api/orders/${encodeURIComponent(orderId)}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -481,7 +481,7 @@ async function clearAllOrders() {
   try {
     const webhookUrl = (typeof getWebhookServerUrl === 'function') 
       ? getWebhookServerUrl() 
-      : 'https://diplf.com';
+      : 'https://diplf.alwaysdata.net';
 
     // 1. Enviar DELETE a /api/orders
     await fetch(`${webhookUrl}/api/orders`, {
@@ -510,7 +510,7 @@ async function deleteOrderById(orderId) {
 
     const webhookUrl = (typeof getWebhookServerUrl === 'function') 
       ? getWebhookServerUrl() 
-      : 'https://diplf.com';
+      : 'https://diplf.alwaysdata.net';
 
     await fetch(`${webhookUrl}/api/orders/${encodeURIComponent(cleanId)}`, {
       method: 'DELETE'

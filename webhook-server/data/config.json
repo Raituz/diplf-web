@@ -26,6 +26,6 @@
   "bcvRate": 395,
   "webhookSecret": "diplf_secret_2026",
   "autoVerifyToleranceBs": 2,
-  "publicWebhookUrl": "https://diplf.com/api/webhook/sms",
-  "lastTunnelUrl": "https://diplf.com"
+  "publicWebhookUrl": "https://diplf.alwaysdata.net/api/webhook/sms",
+  "lastTunnelUrl": "https://diplf.alwaysdata.net"
 }

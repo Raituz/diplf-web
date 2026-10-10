@@ -90,7 +90,7 @@
 
     // 1. Intentar consultar servidor Alwaysdata
     try {
-      const apiUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'https://diplf.com';
+      const apiUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'https://diplf.alwaysdata.net';
       
       // Probar GET /api/orders/:id primero
       const res = await fetch(`${apiUrl}/api/orders/${encodeURIComponent(cleanQuery)}`, {
@@ -477,7 +477,7 @@
       }
 
       try {
-        const apiUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'https://diplf.com';
+        const apiUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'https://diplf.alwaysdata.net';
         const res = await fetch(`${apiUrl}/api/orders/${encodeURIComponent(orderId)}`, {
           headers: { 'Accept': 'application/json' },
           signal: AbortSignal.timeout(3500)

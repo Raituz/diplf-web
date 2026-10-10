@@ -28,11 +28,11 @@
     } catch (_) {}
     if (typeof window !== 'undefined' && window.location) {
       const host = window.location.hostname;
-      if (host === 'diplf.com' || host === 'www.diplf.com' || host === 'diplf.alwaysdata.net' || host.includes('alwaysdata.net') || host === 'localhost' || host === '127.0.0.1') {
+      if (host === 'localhost' || host === '127.0.0.1') {
         return window.location.origin;
       }
     }
-    return 'https://diplf.com';
+    return 'https://diplf.alwaysdata.net';
   }
 
   // Helper para tasa BCV
