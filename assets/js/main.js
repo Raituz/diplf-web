@@ -3,6 +3,16 @@
  * Lógica Interactiva, Carrito de Consulta y WhatsApp integration
  */
 
+// Limpieza automática de la URL para que siempre luzca limpia como "diplf.com" sin "/index.html"
+(function cleanCanonicalUrl() {
+  if (typeof window !== 'undefined' && window.location && window.history && window.history.replaceState) {
+    if (window.location.pathname.endsWith('/index.html')) {
+      const cleanPath = window.location.pathname.replace(/\/index\.html$/, '') || '/';
+      window.history.replaceState(null, '', cleanPath + window.location.search + window.location.hash);
+    }
+  }
+})();
+
 // Configuración de Precios y Tamaños Oficiales
 const SIZES = {
   '7oz': { name: '7 oz', ounces: 7, price: 2 },

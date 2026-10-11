@@ -376,7 +376,7 @@
           <span class="orders-empty-icon">📦</span>
           <h3>No se encontraron órdenes</h3>
           <p>No hay pedidos que coincidan con los filtros actuales o aún no has realizado ninguna compra desde este navegador.</p>
-          <a href="index.html" class="btn-order-action" style="display: inline-block; padding: 12px 24px; text-decoration: none;">
+          <a href="./" class="btn-order-action" style="display: inline-block; padding: 12px 24px; text-decoration: none;">
             🥣 Ir a la Tienda de Salsas
           </a>
         </div>
