@@ -46,7 +46,7 @@
         return parseFloat(savedRate);
       }
     } catch (_) {}
-    return 395.00;
+    return 875.65;
   }
 
   // =============================================================================
@@ -90,13 +90,30 @@
     } catch (_) {}
   }
 
-  // Mostrar tasa oficial BCV
-  function initBcvDisplay() {
+  // Mostrar tasa oficial BCV y sincronizar con Alwaysdata
+  async function initBcvDisplay() {
     const rateEl = document.getElementById('bcvRateDisplay');
+    const localRate = getCurrentBcvRate();
     if (rateEl) {
-      const rate = getCurrentBcvRate();
-      rateEl.textContent = `Bs. ${rate.toFixed(2)}`;
+      rateEl.textContent = `Bs. ${localRate.toFixed(2)}`;
     }
+
+    try {
+      const serverUrl = getWebhookServerUrl();
+      const res = await fetch(`${serverUrl}/api/bcv`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.rate) {
+          const liveRate = parseFloat(data.rate);
+          if (!isNaN(liveRate) && liveRate > 0) {
+            localStorage.setItem('diplf_bcv_rate', String(liveRate));
+            if (rateEl) {
+              rateEl.textContent = `Bs. ${liveRate.toFixed(2)}`;
+            }
+          }
+        }
+      }
+    } catch (_) {}
   }
 
   // Verificar si hay sesión admin activa para mostrar acceso a Almacén

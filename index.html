@@ -13,7 +13,7 @@
   <link rel="icon" type="image/jpeg" href="assets/images/Logo.jpeg">
   
   <!-- Estilos CSS con Cache Buster -->
-  <link rel="stylesheet" href="assets/css/styles.css?v=10.1">
+  <link rel="stylesheet" href="assets/css/styles.css?v=10.3">
   <style>
     /* Estilo garantizado inmediato para el botón Órdenes */
     .btn-orders-header {
@@ -95,6 +95,13 @@
 
       <!-- Acciones a la derecha: WhatsApp y Mi Pedido -->
       <div class="header-actions">
+        <!-- Pill Tasa Oficial BCV en vivo -->
+        <div class="header-bcv-pill" title="Tasa oficial BCV en vivo (Actualizada automáticamente)">
+          <span class="bcv-live-dot"></span>
+          <span class="bcv-pill-tag">BCV</span>
+          <strong id="headerBcvRate">Bs. 875.65</strong>
+        </div>
+
         <a href="https://wa.me/584143572462?text=Hola%20DIP%20LF,%20quisiera%20hacer%20un%20pedido%20de%20salsas." 
            target="_blank" rel="noopener noreferrer" class="btn-whatsapp-header">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -236,7 +243,10 @@
               </div>
 
               <div class="card-footer-row">
-                <span id="heroCardPrice" class="hero-card-price">$4</span>
+                <div style="display: flex; flex-direction: column;">
+                  <span id="heroCardPrice" class="hero-card-price">$4</span>
+                  <span id="heroCardPriceBs" class="hero-card-price-bs">~Bs. 3.502,60</span>
+                </div>
                 <button class="hero-quick-add" onclick="addHeroCardToCart()">
                   <span>+ Añadir</span>
                 </button>
@@ -1057,7 +1067,7 @@
   <!-- Scripts JavaScript con Cache Buster -->
   <script src="assets/js/auth.js?v=10.1"></script>
   <script src="assets/js/catalog.js?v=10.1"></script>
-  <script src="assets/js/main.js?v=10.2"></script>
-  <script src="assets/js/pago-movil.js?v=10.1"></script>
+  <script src="assets/js/main.js?v=10.3"></script>
+  <script src="assets/js/pago-movil.js?v=10.3"></script>
 </body>
 </html>

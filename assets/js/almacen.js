@@ -1124,13 +1124,45 @@ function initPagoMovilView() {
   }
 
   renderPagoMovilDashboard();
+  syncPagoMovilConfigFromCloud();
   checkServerHealth();
+}
+
+// Consultar la tasa oficial directamente desde Alwaysdata y prellenar el formulario
+async function syncPagoMovilConfigFromCloud() {
+  const syncStatus = document.getElementById('bcvCloudSyncStatus');
+  if (syncStatus) {
+    syncStatus.innerHTML = `<span style="color: #38bdf8;">🔄 Consultando tasa oficial en Alwaysdata...</span>`;
+  }
+  try {
+    const webhookUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'https://diplf.alwaysdata.net';
+    const res = await fetch(`${webhookUrl}/api/bcv`);
+    if (res.ok) {
+      const data = await res.json();
+      const rateVal = parseFloat(data.rate);
+      if (!isNaN(rateVal) && rateVal > 0) {
+        if (typeof setBcvRate === 'function') setBcvRate(rateVal);
+        const inputRate = document.getElementById('cfgBcvRate');
+        if (inputRate) inputRate.value = rateVal.toFixed(2);
+        if (syncStatus) {
+          syncStatus.innerHTML = `<span style="color: #22c55e;">● En vivo desde la nube (Alwaysdata): <strong>Bs. ${rateVal.toFixed(2)}</strong></span>`;
+        }
+        return;
+      }
+    }
+  } catch (err) {
+    console.warn('Sync cloud error:', err);
+  }
+  if (syncStatus) {
+    const currentRate = (typeof getBcvRate === 'function') ? getBcvRate() : 875.65;
+    syncStatus.innerHTML = `<span style="color: #22c55e;">● Tasa activa: <strong>Bs. ${currentRate.toFixed(2)}</strong></span>`;
+  }
 }
 
 // Renderizar valores en el formulario del panel
 function renderPagoMovilDashboard() {
   const cfg = (typeof getPagoMovilConfig === 'function') ? getPagoMovilConfig() : {};
-  const rate = (typeof getBcvRate === 'function') ? getBcvRate() : 395.00;
+  const rate = (typeof getBcvRate === 'function') ? getBcvRate() : 875.65;
   const webhookUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'https://diplf.alwaysdata.net';
 
   const inputRate = document.getElementById('cfgBcvRate');
@@ -1148,9 +1180,10 @@ function renderPagoMovilDashboard() {
   if (inputCustom) inputCustom.value = webhookUrl;
 }
 
-// Guardar configuración desde el formulario
-function savePagoMovilConfigFromForm() {
-  const rateVal = parseFloat(document.getElementById('cfgBcvRate')?.value) || 395.00;
+// Guardar configuración desde el formulario y persistir inmediatamente en la nube
+async function savePagoMovilConfigFromForm() {
+  const inputRate = document.getElementById('cfgBcvRate');
+  const rateVal = parseFloat(inputRate?.value) || 875.65;
   const currentCfg = (typeof getPagoMovilConfig === 'function') ? getPagoMovilConfig() : {};
 
   const newConfig = {
@@ -1160,22 +1193,54 @@ function savePagoMovilConfigFromForm() {
 
   if (typeof savePagoMovilConfig === 'function') savePagoMovilConfig(newConfig);
   if (typeof setBcvRate === 'function') setBcvRate(rateVal);
+  if (typeof updateAllBcvDisplays === 'function') updateAllBcvDisplays(rateVal);
 
-  showAdminToast('¡Tasa oficial BCV actualizada con éxito!');
-  syncConfigWithServer({ bcvRate: rateVal });
-  renderPagoMovilDashboard();
+  const btn = document.getElementById('btnUpdateBcvRate');
+  const origHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳ Guardando...</span>';
+  }
+
+  const syncStatus = document.getElementById('bcvCloudSyncStatus');
+  if (syncStatus) {
+    syncStatus.innerHTML = `<span style="color: #38bdf8;">⏳ Guardando en la nube de Alwaysdata...</span>`;
+  }
+
+  try {
+    await syncConfigWithServer({ bcvRate: rateVal });
+    showAdminToast(`¡Tasa oficial BCV actualizada en la nube a Bs. ${rateVal.toFixed(2)}! Todos los clientes verán este cambio.`);
+    if (syncStatus) {
+      syncStatus.innerHTML = `<span style="color: #22c55e;">● Guardado en la nube: <strong>Bs. ${rateVal.toFixed(2)}</strong> (Sincronizado)</span>`;
+    }
+  } catch (err) {
+    showAdminToast('Tasa guardada localmente.');
+    if (syncStatus) {
+      syncStatus.innerHTML = `<span style="color: #f59e0b;">● Guardado local: Bs. ${rateVal.toFixed(2)}</span>`;
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
+    }
+    renderPagoMovilDashboard();
+  }
 }
 
 // Sincronizar configuración con el servidor Webhook
 async function syncConfigWithServer(partial) {
   try {
-    const webhookUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'http://localhost:3000';
-    await fetch(`${webhookUrl}/api/config`, {
+    const webhookUrl = (typeof getWebhookServerUrl === 'function') ? getWebhookServerUrl() : 'https://diplf.alwaysdata.net';
+    const res = await fetch(`${webhookUrl}/api/config`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(partial)
     });
-  } catch (_) {}
+    return res.ok;
+  } catch (err) {
+    console.error('Error al sincronizar con Alwaysdata:', err);
+    throw err;
+  }
 }
 
 // Verificar conexión del servidor Webhook

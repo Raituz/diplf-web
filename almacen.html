@@ -482,13 +482,16 @@
               <div class="form-group" style="margin-bottom: 12px;">
                 <label for="cfgBcvRate" style="font-weight: 800; color: #38bdf8;">Tasa de Cambio Oficial (Bs por 1 USD) *</label>
                 <div style="display: flex; gap: 8px;">
-                  <input type="number" step="0.01" id="cfgBcvRate" class="form-control" style="font-weight: 800; font-size: 1.1rem; color: var(--gold-primary);" value="395.00" required>
+                  <input type="number" step="0.01" id="cfgBcvRate" class="form-control" style="font-weight: 800; font-size: 1.1rem; color: var(--gold-primary);" value="875.65" required>
                   <button type="button" id="btnUpdateBcvRate" class="btn-save-prod" style="flex: 0 0 110px;">
                     <span>💾 Guardar</span>
                   </button>
                 </div>
-                <small style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; display: block;">
-                  Esta tasa convierte automáticamente el precio de las salsas a Bolívares en el checkout del cliente.
+                <div id="bcvCloudSyncStatus" style="font-size: 0.74rem; margin-top: 5px; color: var(--text-dim);">
+                  <span style="color: #22c55e;">● Sincronizado en la nube (Alwaysdata)</span>
+                </div>
+                <small style="font-size: 0.72rem; color: var(--text-dim); margin-top: 4px; display: block;">
+                  Esta tasa se sincroniza en tiempo real con el servidor Alwaysdata y actualiza automáticamente los precios en Bolívares para todos los clientes en la web.
                 </small>
               </div>
 
@@ -585,9 +588,9 @@
   </div>
 
   <!-- Scripts -->
-  <script src="assets/js/auth.js?v=9.7"></script>
-  <script src="assets/js/catalog.js?v=9.7"></script>
-  <script src="assets/js/pago-movil.js?v=9.7"></script>
-  <script src="assets/js/almacen.js?v=9.7"></script>
+  <script src="assets/js/auth.js?v=10.3"></script>
+  <script src="assets/js/catalog.js?v=10.3"></script>
+  <script src="assets/js/pago-movil.js?v=10.3"></script>
+  <script src="assets/js/almacen.js?v=10.3"></script>
 </body>
 </html>

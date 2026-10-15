@@ -86,7 +86,7 @@ const DEFAULT_PM_CONFIG = {
   receiverBankCode: '0102 / 0172',
   receiverId: 'V-21726495',
   receiverName: 'DIP LF Salsas Artesanales',
-  defaultRate: 395.00
+  defaultRate: 875.65
 };
 
 // Obtener datos del comercio
@@ -115,7 +115,7 @@ function getBcvRate() {
       return parseFloat(savedRate);
     }
   } catch (e) {}
-  return getPagoMovilConfig().defaultRate || 395.00;
+  return getPagoMovilConfig().defaultRate || 875.65;
 }
 
 function setBcvRate(rate) {
@@ -124,7 +124,37 @@ function setBcvRate(rate) {
   } catch (e) {}
 }
 
-// Obtener URL del servidor webhook (local o producción)
+// Actualizar todos los indicadores visuales de tasa BCV en la pantalla
+function updateAllBcvDisplays(rate) {
+  const currentRate = (typeof rate === 'number' && !isNaN(rate) && rate > 0) ? rate : getBcvRate();
+  const formatted = `Bs. ${currentRate.toFixed(2)}`;
+
+  const displays = [
+    document.getElementById('bcvRateDisplay'),
+    document.getElementById('headerBcvRate'),
+    document.getElementById('pmViewRate')
+  ];
+
+  displays.forEach(el => {
+    if (el) {
+      if (el.id === 'pmViewRate') {
+        el.textContent = `${formatted} / $`;
+      } else {
+        el.textContent = formatted;
+      }
+    }
+  });
+
+  if (typeof updatePagoMovilDetailsView === 'function') {
+    updatePagoMovilDetailsView();
+  }
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('diplf_bcv_updated', { detail: { rate: currentRate } }));
+  }
+}
+
+// Obtener URL del servidor webhook (local o producción Alwaysdata)
 function getWebhookServerUrl() {
   try {
     const saved = localStorage.getItem(WEBHOOK_SERVER_URL_KEY);
@@ -145,23 +175,43 @@ function setWebhookServerUrl(url) {
   } catch (e) {}
 }
 
-// Sincronizar datos del comercio en vivo desde el servidor Alwaysdata
+// Sincronizar datos del comercio en vivo desde el servidor Alwaysdata (Cloud 24/7)
 async function syncPagoMovilConfigFromServer() {
   try {
     const serverUrl = getWebhookServerUrl();
-    const res = await fetch(`${serverUrl}/api/config`);
-    if (res.ok) {
-      const data = await res.json();
-      const cfgData = (data && data.config) ? data.config : data;
-      if (cfgData) {
-        if (cfgData.bcvRate) setBcvRate(cfgData.bcvRate);
-        if (typeof updatePagoMovilDetailsView === 'function') {
-          updatePagoMovilDetailsView();
-        }
-      }
+
+    // Consultamos /api/bcv y /api/config en paralelo
+    const bcvPromise = fetch(`${serverUrl}/api/bcv`).then(r => r.ok ? r.json() : null).catch(() => null);
+    const cfgPromise = fetch(`${serverUrl}/api/config`).then(r => r.ok ? r.json() : null).catch(() => null);
+
+    const [bcvData, cfgDataRaw] = await Promise.all([bcvPromise, cfgPromise]);
+
+    let newRate = null;
+    if (bcvData && bcvData.rate) {
+      newRate = parseFloat(bcvData.rate);
+    } else if (cfgDataRaw && (cfgDataRaw.bcvRate || (cfgDataRaw.config && cfgDataRaw.config.bcvRate))) {
+      newRate = parseFloat(cfgDataRaw.bcvRate || cfgDataRaw.config.bcvRate);
     }
-  } catch (_) {}
+
+    if (newRate && !isNaN(newRate) && newRate > 0) {
+      setBcvRate(newRate);
+      updateAllBcvDisplays(newRate);
+    }
+
+    const cfgData = (cfgDataRaw && cfgDataRaw.config) ? cfgDataRaw.config : cfgDataRaw;
+    if (cfgData) {
+      const current = getPagoMovilConfig();
+      const merged = { ...current, ...cfgData };
+      if (newRate) merged.defaultRate = newRate;
+      savePagoMovilConfig(merged);
+    }
+  } catch (err) {
+    console.warn('Sync BCV falló temporalmente, usando caché:', err);
+  }
 }
+
+// Iniciar sincronización de inmediato
+syncPagoMovilConfigFromServer();
 
 // Estado del método de pago activo en el drawer: 'pagomovil' o 'whatsapp'
 let currentCheckoutMethod = 'pagomovil';
@@ -285,7 +335,7 @@ function initPagoMovilCheckoutUI() {
           </div>
           <div class="pm-data-pill pm-pill-full pm-pill-rate">
             <span class="pm-pill-label">📈 Tasa Oficial BCV</span>
-            <strong id="pmViewRate" class="pm-pill-val rate-gold">Bs. 395.00 / $</strong>
+            <strong id="pmViewRate" class="pm-pill-val rate-gold">Bs. 875.65 / $</strong>
           </div>
         </div>
       </div>
@@ -1002,3 +1052,15 @@ window.resetOrderDrawer = function() {
 
   switchCheckoutMethod('pagomovil');
 };
+
+// Exponer helpers de Tasa BCV globalmente para uso en toda la aplicación
+if (typeof window !== 'undefined') {
+  window.getBcvRate = getBcvRate;
+  window.setBcvRate = setBcvRate;
+  window.getWebhookServerUrl = getWebhookServerUrl;
+  window.setWebhookServerUrl = setWebhookServerUrl;
+  window.syncPagoMovilConfigFromServer = syncPagoMovilConfigFromServer;
+  window.fetchLiveBcvRate = syncPagoMovilConfigFromServer;
+  window.updateAllBcvDisplays = updateAllBcvDisplays;
+}
+

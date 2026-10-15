@@ -492,11 +492,13 @@ function renderFlavorsGrid(categoryFilter = 'todos') {
     ? catalog 
     : catalog.filter(f => f.category === categoryFilter);
 
+  const currentRate = (typeof getBcvRate === 'function') ? getBcvRate() : 875.65;
   let html = '';
   filtered.forEach(flavor => {
     const price7 = (flavor.prices && flavor.prices['7oz'] !== undefined) ? flavor.prices['7oz'] : 2;
     const price16 = (flavor.prices && flavor.prices['16oz'] !== undefined) ? flavor.prices['16oz'] : 4;
     const price22 = (flavor.prices && flavor.prices['22oz'] !== undefined) ? flavor.prices['22oz'] : 6;
+    const priceBs16Formatted = (price16 * currentRate).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     const isUnavailable = Boolean(flavor.isComingSoon || flavor.stockStatus === 'proximamente' || flavor.stockStatus === 'agotado');
     let btnText = '+ Añadir';
@@ -543,7 +545,10 @@ function renderFlavorsGrid(categoryFilter = 'todos') {
           <div class="flavor-card-footer">
             <div class="price-display-block">
               <span class="price-label-small">Precio:</span>
-              <span class="price-amount" id="price_${flavor.id}">$${price16}</span>
+              <div class="price-combined">
+                <span class="price-amount" id="price_${flavor.id}">$${price16}</span>
+                <span class="price-bs-hint" id="price_bs_${flavor.id}">~Bs. ${priceBs16Formatted}</span>
+              </div>
             </div>
             <button class="btn-add-consult" onclick="handleAddFromCard('${flavor.id}')" ${isUnavailable ? 'disabled style="opacity: 0.55; cursor: not-allowed;"' : ''}>
               <span>${btnText}</span>
@@ -577,6 +582,7 @@ function selectCardSize(flavorId, sizeKey) {
 
   // Actualizar precio visible
   const priceElem = document.getElementById(`price_${flavorId}`);
+  const priceBsElem = document.getElementById(`price_bs_${flavorId}`);
   if (priceElem) {
     const catalog = getStoreCatalog();
     const flavor = catalog.find(f => f.id === flavorId);
@@ -584,6 +590,11 @@ function selectCardSize(flavorId, sizeKey) {
       ? flavor.prices[sizeKey]
       : (SIZES[sizeKey] ? SIZES[sizeKey].price : 4);
     priceElem.textContent = `$${itemPrice}`;
+
+    if (priceBsElem) {
+      const rate = (typeof getBcvRate === 'function') ? getBcvRate() : 875.65;
+      priceBsElem.textContent = `~Bs. ${(itemPrice * rate).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
   }
 }
 
@@ -610,8 +621,13 @@ function selectHeroSize(sizeKey) {
 
   // Actualizar precio
   const priceDisplay = document.getElementById('heroCardPrice');
+  const priceBsDisplay = document.getElementById('heroCardPriceBs');
   if (priceDisplay) {
     priceDisplay.textContent = `$${sizeObj.price}`;
+  }
+  if (priceBsDisplay) {
+    const rate = (typeof getBcvRate === 'function') ? getBcvRate() : 875.65;
+    priceBsDisplay.textContent = `~Bs. ${(sizeObj.price * rate).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 }
 
@@ -748,6 +764,9 @@ document.addEventListener('DOMContentLoaded', () => {
   syncOrdersWithServer();
   setInterval(syncOrdersWithServer, 15000);
 
+  // Inicializar precios en Bolívares con tasa BCV
+  updateStoreBcvPrices();
+
   // Escuchar si cambia la sesión, órdenes o el catálogo
   window.addEventListener('diplf_auth_changed', updateAdminHeaderButton);
   window.addEventListener('diplf_new_order', updateOrdersHeaderBadge);
@@ -757,5 +776,48 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'diplf_auth_user') updateAdminHeaderButton();
     if (e.key === 'diplf_orders') updateOrdersHeaderBadge();
     if (e.key === 'diplf_custom_catalog') renderFlavorsGrid();
+    if (e.key === 'diplf_bcv_rate') updateStoreBcvPrices();
   });
 });
+
+// Actualizar precios en Bs en toda la tienda cuando cambia o se recibe la tasa BCV desde la nube
+function updateStoreBcvPrices(rate) {
+  const currentRate = (typeof rate === 'number' && !isNaN(rate) && rate > 0)
+    ? rate
+    : ((typeof getBcvRate === 'function') ? getBcvRate() : 875.65);
+
+  // 1. Header BCV Pill
+  const headerPill = document.getElementById('headerBcvRate');
+  if (headerPill) {
+    headerPill.textContent = `Bs. ${currentRate.toFixed(2)}`;
+  }
+
+  // 2. Hero Card Bs
+  const heroCardPriceBs = document.getElementById('heroCardPriceBs');
+  if (heroCardPriceBs) {
+    const heroPrice = SIZES[currentHeroSize] ? SIZES[currentHeroSize].price : 4;
+    heroCardPriceBs.textContent = `~Bs. ${(heroPrice * currentRate).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+
+  // 3. Tarjetas del catálogo
+  const catalog = getStoreCatalog();
+  catalog.forEach(flavor => {
+    const chosenSize = cardSelectedSizes[flavor.id] || '16oz';
+    const itemPrice = (flavor.prices && flavor.prices[chosenSize] !== undefined)
+      ? flavor.prices[chosenSize]
+      : (SIZES[chosenSize] ? SIZES[chosenSize].price : 4);
+
+    const priceBsElem = document.getElementById(`price_bs_${flavor.id}`);
+    if (priceBsElem) {
+      priceBsElem.textContent = `~Bs. ${(itemPrice * currentRate).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+  });
+}
+window.updateStoreBcvPrices = updateStoreBcvPrices;
+
+// Escuchar evento de actualización de tasa BCV en vivo
+window.addEventListener('diplf_bcv_updated', (e) => {
+  const rate = e.detail?.rate;
+  updateStoreBcvPrices(rate);
+});
+
